@@ -25,6 +25,21 @@
 //using namespace DW::Render;
 //using namespace DW::IO;
 
+#include "./DicomEngine/api/studycontextmy.h"
+#include "./DicomEngine/main/controllers/dicommanager.h"
+#include "./DicomEngine/api/dicom/dicomdataset.h"
+#include "./DicomEngine/api/dicom/dcmdictionary.h"
+
+#include "dcmtk/config/osconfig.h"
+#include "dcmtk/dcmdata/dctk.h"
+#include "dcmtk/dcmimage/diargimg.h"
+#include "dcmtk/dcmdata/dcfilefo.h"
+#include "dcmtk/dcmdata/dcdeftag.h"
+#include "dcmtk/dcmdata/dcdict.h"
+
+#include <unistd.h>   // 创建文件夹 access 依赖的头文件
+#include <sys/stat.h> // 创建文件夹 mkdir  依赖的头文件
+
 // only once
 //static DW::IO::IDicomReader* reader = NULL;
 static bool is_create_mpr_render = false;
@@ -77,6 +92,34 @@ void ImageProcessBase::SetKey3_ImageOperationParas(std::string str_paras)
 
 bool ImageProcessBase::Excute(std::string& out_image_data)
 {
+	std::string::size_type sz;
+	double paras = std::stod(m_key3_str_paras, &sz);
+
+	printf("Dcm Loader....\n");
+	
+	printf("Operation : %s\n", m_key2_str_opertation.c_str());
+
+	printf("Save Image to ....\n");
+	std::string src_path_file("../10.dcm");
+	std::string dst_path_file("../build/");
+	dst_path_file += m_wnd_name;
+	
+	// 创建文件夹
+	if( 0 != access(dst_path_file.c_str(), 0))
+	{
+		printf("create folder\n");
+		// 如果文件夹不存在，创建
+		mkdir(dst_path_file.c_str(), 0755);
+	}
+	dst_path_file += "/";
+
+	dst_path_file += m_key2_str_opertation;
+	dst_path_file += "_";
+	dst_path_file += m_key3_str_paras;
+	dst_path_file += ".dcm";
+	printf("path : %s\n", dst_path_file.c_str());
+	SaveDicomFile(src_path_file, dst_path_file);
+
 	return true;
 }
 std::string ImageProcessBase::base64Decode(const char* Data, int DataByte) {
@@ -159,6 +202,35 @@ std::string ImageProcessBase::base64Encode(const unsigned char* Data, int DataBy
 
 
 	return strEncode;
+}
+
+bool ImageProcessBase::SaveDicomFile(
+	const std::string src_path_file, const std::string dst_path_file)
+{
+	printf("SaveDicomFile()\n");
+
+	GIL::DICOM::DicomDataset base;
+	GIL::DICOM::IDICOMManager*	pDICOMManager = new GIL::DICOM::DICOMManager();
+	if(pDICOMManager) 
+	{
+		pDICOMManager->CargarFichero(src_path_file, base);
+		std::string str_tag("");
+		base.getTag(GKDCM_PatientName , str_tag);
+		printf("patient name : %s(use DicomManager)\n", str_tag.c_str());
+
+		// modify one tag
+		GIL::DICOM::DicomDataset modify_base;		
+		modify_base.tags["0010|0010"] = "test 555";
+		pDICOMManager->ActualizarJerarquia(modify_base);
+		
+		// save dicom file
+		pDICOMManager->AlmacenarFichero(dst_path_file);
+	
+		delete pDICOMManager;
+		pDICOMManager = NULL;
+		return true;
+	}
+	return false;
 }
 
 //imgType 包括png bmp jpg jpeg等opencv能够进行编码解码的文件
@@ -317,6 +389,9 @@ ImageMPRProcess::~ImageMPRProcess()
 
 bool ImageMPRProcess::Excute(std::string& out_image_data)
 {
+	ImageProcessBase::Excute(out_image_data);
+	
+
 #if 0	
 	// 暂时，先从本地读取Dicom文件
 	GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
@@ -387,6 +462,7 @@ ImageVRProcess::~ImageVRProcess()
 
 bool ImageVRProcess::Excute(std::string& out_image_data)
 {
+	ImageProcessBase::Excute(out_image_data);
 #if 0
 	// 暂时，先从本地读取Dicom文件
 	//GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
@@ -461,6 +537,7 @@ ImageCPRProcess::~ImageCPRProcess()
 
 bool ImageCPRProcess::Excute(std::string& out_image_data)
 {	
+	ImageProcessBase::Excute(out_image_data);
 #if 0
 	// 1.read dcm image from directory
 

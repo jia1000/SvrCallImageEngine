@@ -66,6 +66,7 @@ protected:
 	//cv::Mat Base2Mat(std::string &base64_data);
 	//bool SaveBitmapToFile(HBITMAP hBitmap, LPCWSTR lpFileName);
 
+	bool SaveDicomFile(const std::string src_path_file, const std::string dst_path_file);
 	//int req_type;
 	std::string m_key1_str_req_type;	// 请求类型，如MPR VR CPR等
 	std::string m_key2_str_opertation;	// 不同图像操作类型，如， zoom rotate move等

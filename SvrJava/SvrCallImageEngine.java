@@ -19,7 +19,7 @@ class SvrCallImageEngine {
 		//int[] array = {1, 2, 3, 4, 5, 6, 7, 8, 9, 101};
 		//new SvrCallImageEngine().test_int_array(array);
 
-		String json_data = "{\"request_type\":\"mpr\",\"image_operation\":\"Zoom\",\"image_paras\":\"1.5\"}";
+		String json_data = "{\"request_type\":\"mpr\",\"image_operation\":\"move\",\"image_paras\":\"0.9\"}";
 		new SvrCallImageEngine().test_json(json_data);
 
         	System.out.println("end..................................................");
