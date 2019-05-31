@@ -31,6 +31,9 @@ public:
 
 	static DataTransferController* GetInstance();
 	
+	bool ParseLoadSeriesUseRapidJson(const char* json_data, std::string& js_data);
+	bool ParseSwitchSeriesUseRapidJson(const char* json_data, std::string& js_data);
+	bool ParseUnloadSeriesUseRapidJson(const char* json_data, std::string& js_data);	
 	bool ParseImageOperationDataUseRapidJson(const char* json_data, std::string& js_data);
 
 private:

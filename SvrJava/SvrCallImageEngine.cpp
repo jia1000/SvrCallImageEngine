@@ -13,11 +13,65 @@
 
 using namespace rapidjson;
 
-JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_test_1json
+JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_LoadSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
-	printf("json old data : %s\n", str);
+	printf("LoadSeries: \n\njson old data : %s\n", str);
+
+	Document d;
+    	d.Parse(str);
+
+	std::string resource_data("");
+	if (DataTransferController::GetInstance()->ParseLoadSeriesUseRapidJson(
+	str, resource_data)) {
+		//return true;
+	}
+	char cap[128] = {0};  
+	return env->NewStringUTF(cap); 
+}
+
+JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_SwitchSeries
+  (JNIEnv *env, jobject obj , jstring string)
+{
+	const char* str = env->GetStringUTFChars(string, 0);  
+	printf("SwitchSeries: \n\njson old data : %s\n", str);
+
+	Document d;
+    	d.Parse(str);
+
+	std::string resource_data("");
+	if (DataTransferController::GetInstance()->ParseSwitchSeriesUseRapidJson(
+	str, resource_data)) {
+		//return true;
+	}
+	char cap[128] = {0};  
+	return env->NewStringUTF(cap); 
+}
+
+JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_UnloadSeries
+  (JNIEnv *env, jobject obj , jstring string)
+{
+	const char* str = env->GetStringUTFChars(string, 0);  
+	printf("UnloadSeries: \n\njson old data : %s\n", str);
+
+	Document d;
+    	d.Parse(str);
+
+	std::string resource_data("");
+	if (DataTransferController::GetInstance()->ParseUnloadSeriesUseRapidJson(
+	str, resource_data)) {
+		//return true;
+	}
+	char cap[128] = {0};  
+	return env->NewStringUTF(cap); 
+}
+
+JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_ProcessSeries
+  (JNIEnv *env, jobject obj , jstring string)
+{
+	const char* str = env->GetStringUTFChars(string, 0);  
+	printf("ProcessSeries: \n\njson old data : %s\n", str);
 
 	Document d;
     	d.Parse(str);
@@ -27,6 +81,14 @@ JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_test_1json
 	str, resource_data)) {
 		//return true;
 	}
+	char cap[128] = {0};  
+	return env->NewStringUTF(cap);  
+}
+
+JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_test_1json
+  (JNIEnv *env, jobject obj , jstring string)
+{
+	
 
 #if 0
 	{

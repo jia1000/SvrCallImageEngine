@@ -43,7 +43,53 @@ DataTransferController::~DataTransferController()
 	instance = nullptr;
 }
 
+bool DataTransferController::ParseLoadSeriesUseRapidJson(const char* json_data, std::string& js_data)
+{
+	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
+	Document doc;
+	doc.Parse(json_data);
+	
+	const char JSON_KEY_DICOM_PATH[] = "dicom_path";
+	if (doc.HasMember(JSON_KEY_DICOM_PATH)) {
+		const Value& value = doc[JSON_KEY_DICOM_PATH];
+		printf("load series dicom path : %s\n", value.GetString());
+		
+	}
 
+	return true;
+}
+
+bool DataTransferController::ParseSwitchSeriesUseRapidJson(const char* json_data, std::string& js_data)
+{
+	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
+	Document doc;
+	doc.Parse(json_data);
+	
+	const char JSON_KEY_DICOM_PATH[] = "dicom_path";
+	if (doc.HasMember(JSON_KEY_DICOM_PATH)) {
+		const Value& value = doc[JSON_KEY_DICOM_PATH];
+		printf("switch series dicom path : %s\n", value.GetString());
+		
+	}
+
+	return true;
+}
+
+bool DataTransferController::ParseUnloadSeriesUseRapidJson(const char* json_data, std::string& js_data)
+{
+	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
+	Document doc;
+	doc.Parse(json_data);
+	
+	const char JSON_KEY_DICOM_PATH[] = "dicom_path";
+	if (doc.HasMember(JSON_KEY_DICOM_PATH)) {
+		const Value& value = doc[JSON_KEY_DICOM_PATH];
+		printf("unload series dicom path : %s\n", value.GetString());
+		
+	}
+
+	return true;
+}
 
 bool DataTransferController::ParseImageOperationDataUseRapidJson(const char* json_data, std::string& js_data)
 {
