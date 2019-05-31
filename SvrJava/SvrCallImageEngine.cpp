@@ -8,9 +8,59 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-#include "EngineController/Controller.h"
+//#include "EngineController/Controller.h"
+#include "EngineController/data_transfer_control.h"
 
 using namespace rapidjson;
+
+JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_test_1json
+  (JNIEnv *env, jobject obj , jstring string)
+{
+	const char* str = env->GetStringUTFChars(string, 0);  
+	printf("json old data : %s\n", str);
+
+	Document d;
+    	d.Parse(str);
+
+	std::string resource_data("");
+	if (DataTransferController::GetInstance()->ParseImageOperationDataUseRapidJson(
+	str, resource_data)) {
+		//return true;
+	}
+
+#if 0
+	{
+		std::string key = "request_type";
+		Value& s = d[key.c_str()];
+		s.SetString("mpr");
+		printf("%s : %s\n", key.c_str(), s.GetString());
+	}
+	{
+		std::string key = "image_operation";
+		Value& s = d[key.c_str()];
+		s.SetString("Move");
+		printf("%s : %s\n", key.c_str(), s.GetString());
+	}
+	{
+		std::string key = "image_paras";
+		Value& s = d[key.c_str()];
+		s.SetString("0.9");
+		printf("%s : %s\n", key.c_str(), s.GetString());
+	}
+	
+	StringBuffer buff;
+	Writer<StringBuffer> writer(buff);
+	d.Accept(writer);
+
+	printf("json new data : %s\n", buff.GetString());
+#endif
+	///////////////////////////////
+	//Test_Controller("../10.dcm", "../20.dcm");
+	///////////////////////////////
+
+	char cap[128] = {0};  
+	return env->NewStringUTF(cap);  
+}
 
 JNIEXPORT void JNICALL Java_SvrCallImageEngine_print
   (JNIEnv *env, jobject obj)
@@ -77,44 +127,4 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_test_1int_1array
     	return sum;  
 }
 
-JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_test_1json
-  (JNIEnv *env, jobject obj , jstring string)
-{
-	const char* str = env->GetStringUTFChars(string, 0);  
-	printf("json old data : %s\n", str);
 
-	Document d;
-    	d.Parse(str);
-
-	{
-		std::string key = "request_type";
-		Value& s = d[key.c_str()];
-		s.SetString("mpr");
-		printf("%s : %s\n", key.c_str(), s.GetString());
-	}
-	{
-		std::string key = "image_operation";
-		Value& s = d[key.c_str()];
-		s.SetString("Move");
-		printf("%s : %s\n", key.c_str(), s.GetString());
-	}
-	{
-		std::string key = "image_paras";
-		Value& s = d[key.c_str()];
-		s.SetString("0.9");
-		printf("%s : %s\n", key.c_str(), s.GetString());
-	}
-	
-	StringBuffer buff;
-	Writer<StringBuffer> writer(buff);
-	d.Accept(writer);
-
-	printf("json new data : %s\n", buff.GetString());
-
-	///////////////////////////////
-	Test_Controller("../10.dcm", "../20.dcm");
-	///////////////////////////////
-
-	char cap[128] = {0};  
-	return env->NewStringUTF(cap);  
-}

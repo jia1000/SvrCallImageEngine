@@ -28,7 +28,8 @@ add_library(dicom_engine  SHARED ${DIRSRCSdicom_engine})
 TARGET_LINK_LIBRARIES(dicom_engine ${DCMTK_LIBRARIES})
 
 # 生成controller库
-add_library(controller  SHARED ./EngineController/Controller.cpp ./EngineController/Controller.h)
+aux_source_directory(./EngineController  DIRSRCS_Controller)
+add_library(controller  SHARED ${DIRSRCS_Controller})
 TARGET_LINK_LIBRARIES(controller  dicom_engine)
 
 # 生成SvrCallImageEngine库
