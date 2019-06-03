@@ -10,8 +10,10 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${DCMTK_INCLUDE_DIRS}/)
 include_directories(./DicomEngine/)
 # jni.h文件的依赖
-include_directories(/usr/local/include/jdk1.8.0_211/include/)
-include_directories(/usr/local/include/jdk1.8.0_211/include/linux/)
+#include_directories(/usr/local/include/jdk1.8.0_211/include/)
+#include_directories(/usr/local/include/jdk1.8.0_211/include/linux/)
+include_directories(/opt/jdk1.8.0_151/include/)
+include_directories(/opt/jdk1.8.0_151/include/linux/)
 
 # 添加 DicomEngine 项目文件
 aux_source_directory(./DicomEngine/api 			DIRSRCSdicom_engine)

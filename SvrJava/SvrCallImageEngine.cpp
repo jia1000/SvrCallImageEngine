@@ -13,7 +13,11 @@
 
 using namespace rapidjson;
 
-JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_LoadSeries
+#define  RET_STATUS_FAILURE    (-1)
+#define  RET_STATUS_SUCCESS    (1)
+
+
+JNIEXPORT jint JNICALL Java_SvrCallImageEngine_LoadSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
@@ -25,13 +29,12 @@ JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_LoadSeries
 	std::string resource_data("");
 	if (DataTransferController::GetInstance()->ParseLoadSeriesUseRapidJson(
 	str, resource_data)) {
-		//return true;
+		return RET_STATUS_FAILURE;
 	}
-	char cap[128] = {0};  
-	return env->NewStringUTF(cap); 
+	return RET_STATUS_SUCCESS; 
 }
 
-JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_SwitchSeries
+JNIEXPORT jint JNICALL Java_SvrCallImageEngine_SwitchSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
@@ -43,13 +46,13 @@ JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_SwitchSeries
 	std::string resource_data("");
 	if (DataTransferController::GetInstance()->ParseSwitchSeriesUseRapidJson(
 	str, resource_data)) {
-		//return true;
+		return RET_STATUS_FAILURE;
 	}
-	char cap[128] = {0};  
-	return env->NewStringUTF(cap); 
+	
+	return RET_STATUS_SUCCESS; 
 }
 
-JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_UnloadSeries
+JNIEXPORT jint JNICALL Java_SvrCallImageEngine_UnloadSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
@@ -61,13 +64,12 @@ JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_UnloadSeries
 	std::string resource_data("");
 	if (DataTransferController::GetInstance()->ParseUnloadSeriesUseRapidJson(
 	str, resource_data)) {
-		//return true;
+		return RET_STATUS_FAILURE;
 	}
-	char cap[128] = {0};  
-	return env->NewStringUTF(cap); 
+	return RET_STATUS_SUCCESS; 
 }
 
-JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_ProcessSeries
+JNIEXPORT jint JNICALL Java_SvrCallImageEngine_ProcessSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
@@ -79,10 +81,9 @@ JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_ProcessSeries
 	std::string resource_data("");
 	if (DataTransferController::GetInstance()->ParseImageOperationDataUseRapidJson(
 	str, resource_data)) {
-		//return true;
+		return RET_STATUS_FAILURE;
 	}
-	char cap[128] = {0};  
-	return env->NewStringUTF(cap);  
+	return RET_STATUS_SUCCESS;  
 }
 
 JNIEXPORT jstring JNICALL Java_SvrCallImageEngine_test_1json

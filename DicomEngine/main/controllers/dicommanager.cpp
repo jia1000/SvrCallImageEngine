@@ -1,4 +1,4 @@
-/*
+﻿/*
  *
  *  $Id: dicommanager.cpp $
  *  DeepWise Dicom Viewer
@@ -12,6 +12,10 @@
  *
  */
 //#define _GINKGO_TRACE
+
+#define USE_V364_MY_DCMTK  // 187服务器和本地的DCMTK的版本不一致，导致它们的接口不一样。
+
+
 //para la comprobacion de si esta correcto el fichero
 #include <sstream>
 #include <queue>
@@ -226,7 +230,11 @@ namespace GIL
             DcmDataDictionary &dict = dcmDataDict.wrlock();
             dict.addEntry(new DcmDictEntry(DW_TAG_AI_RESULT_NUM, EVR_UT, "AI Result",    1, 1, "private", OFTrue, PRIVATE_CREATOR_NAME));
             dict.addEntry(new DcmDictEntry(DW_TAG_OLD_SERIES_NUM, EVR_UT, "Old Series",    1, 1, "private", OFTrue, PRIVATE_CREATOR_NAME));
+#ifdef USE_V364_MY_DCMTK
             dcmDataDict.wrunlock();
+#else
+	dcmDataDict.unlock();
+#endif
         }
 
         void addPrivateElements(DcmItem &item, std::string aiResult, std::string oldSeries) {
@@ -917,7 +925,11 @@ namespace GIL
 				DcmTagKey key(g,e);
 				const DcmDataDictionary& globalDataDict = dcmDataDict.rdlock();
 				const DcmDictEntry *dicent = globalDataDict.findEntry(key,NULL);
+#ifdef USE_V364_MY_DCMTK
 				dcmDataDict.rdunlock();
+#else
+				dcmDataDict.unlock();
+#endif
 				if (dicent != NULL) {
 					return std::string(dicent->getTagName());
 				}
@@ -998,7 +1010,11 @@ namespace GIL
 				DcmTagKey key(0xffff, 0xffff);
 				const DcmDataDictionary& globalDataDict = dcmDataDict.rdlock();
 				const DcmDictEntry *dicent = globalDataDict.findEntry(dicName.c_str());
+#ifdef USE_V364_MY_DCMTK
 				dcmDataDict.rdunlock();
+#else
+				dcmDataDict.unlock();
+#endif
 				if (dicent != NULL) {
 					// found dictionary name, copy group and element number
 					key = dicent->getKey();
