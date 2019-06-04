@@ -39,6 +39,7 @@
 
 #include <unistd.h>   // 创建文件夹 access 依赖的头文件
 #include <sys/stat.h> // 创建文件夹 mkdir  依赖的头文件
+#include <sstream>
 
 // only once
 //static DW::IO::IDicomReader* reader = NULL;
@@ -56,7 +57,18 @@ const std::string series_name_mpr("series1");
 const std::string series_name_vr("series1");
 const std::string series_name_cpr("series1");
 
-
+#define JSON_KEY_VESSEL_NAME				"vessel_name"
+#define JSON_KEY_BLEND_MODE				"blend_mode"
+#define JSON_KEY_GENERATE_RULE				"generate_rule"
+#define JSON_KEY_INIT_ORIENTATION			"init_orientation"
+#define JSON_KEY_CLIP_PERCENT				"clip_percent"
+#define JSON_KEY_THICKNESS				"thickness"
+#define JSON_KEY_SPACING_BETWEEN_SLICES			"spacing_between_slices"
+#define JSON_KEY_OUTPUT_IMAGE_NUMBER			"output_image_number"
+#define JSON_KEY_OUTPUT_PATH				"output_path"
+#define JSON_KEY_WINDOW_WIDTH				"window_width"
+#define JSON_KEY_WINDOW_LEVEL				"window_level"
+#define JSON_KEY_ROTATION_DIRECTION			"rotation_direction"
 
 ImageProcessBase::ImageProcessBase(std::string str_paras)
 	: m_key3_str_paras(str_paras)
@@ -80,20 +92,25 @@ ImageProcessBase::~ImageProcessBase()
 //	}
 //}
 
-void ImageProcessBase::SetKey2_ImageOperation(std::string str_opertation) 
-{ 
-	m_key2_str_opertation = str_opertation; 
-}
+//void ImageProcessBase::SetKey2_ImageOperation(std::string str_opertation) 
+//{ 
+//	m_key2_str_opertation = str_opertation; 
+//}
 
-void ImageProcessBase::SetKey3_ImageOperationParas(std::string str_paras) 
-{ 
-	m_key3_str_paras = str_paras; 
+//void ImageProcessBase::SetKey3_ImageOperationParas(std::string str_paras) 
+//{ 
+//	m_key3_str_paras = str_paras; 
+//}
+
+bool ImageProcessBase::ParseJsonData()
+{
+	return true;
 }
 
 bool ImageProcessBase::Excute(std::string& out_image_data)
 {
-	std::string::size_type sz;
-	double paras = std::stod(m_key3_str_paras, &sz);
+	//std::string::size_type sz;
+	//double paras = std::stod(m_key3_str_paras, &sz);
 
 	printf("Dcm Loader....\n");
 	
@@ -376,6 +393,30 @@ bool ImageProcessBase::SaveBitmapToFile(HBITMAP hBitmap, LPCWSTR lpFileName)
 }
 #endif
 
+int ImageProcessBase::GetJsonDataInt(std::string key)
+{	
+	if (doc.HasMember(key.c_str())) {
+		const Value& value = doc[key.c_str()];
+		return value.GetInt();
+	}
+	return 0;
+}
+std::string ImageProcessBase::GetJsonDataString(std::string key)
+{
+	if (doc.HasMember(key.c_str())) {
+		const Value& value = doc[key.c_str()];
+		return value.GetString();
+	}
+	return "";
+}
+float ImageProcessBase::GetJsonDataFloat(std::string key)
+{
+	if (doc.HasMember(key.c_str())) {
+		const Value& value = doc[key.c_str()];
+		return value.GetDouble();
+	}
+	return 0.0f;
+}
 //////////////////////////////////////////////////////////////////////////
 ImageMPRProcess::ImageMPRProcess(std::string str_paras)
 	: ImageProcessBase(str_paras)
@@ -386,11 +427,67 @@ ImageMPRProcess::ImageMPRProcess(std::string str_paras)
 ImageMPRProcess::~ImageMPRProcess()
 {
 }
+bool ImageMPRProcess::ParseJsonData()
+{
+	params.image_type				= GetJsonDataInt("image_type");
+	params.blend_mode				=GetJsonDataInt("blend_mode");
+	params.init_orientatioin		=GetJsonDataInt("init_orientation");
+	params.clip_percent				=GetJsonDataFloat("clip_percent");
+	params.thickness				=GetJsonDataFloat("thickness");
+	params.spacing_between_slices	=GetJsonDataFloat("spacing_between_slices");
+	//params.output_image_number		=GetJsonDataInt("output_image_number");
+	params.output_path				=GetJsonDataString(JSON_KEY_OUTPUT_PATH);
+	params.window_width				=GetJsonDataInt("window_width");
+	params.window_level				=GetJsonDataInt("window_level");
+
+	return true;
+}
 
 bool ImageMPRProcess::Excute(std::string& out_image_data)
 {
-	ImageProcessBase::Excute(out_image_data);
+	//ImageProcessBase::Excute(out_image_data);
 	
+	if (false == ParseJsonData()) {
+		return false;
+	}
+
+	//std::string::size_type sz;
+	//double paras = std::stod(m_key3_str_paras, &sz);
+
+	printf("Dcm Loader....\n");
+
+	printf("Operation : %s\n", m_wnd_name.c_str());
+
+	printf("Save Image to ....\n");
+	std::string src_path_file("../10.dcm");
+	std::string dst_dir_path(params.output_path);
+	//dst_dir_path += m_wnd_name;
+
+	// 创建文件夹
+	TryCreateDir(dst_dir_path);
+	
+	//dst_dir_path += "/";
+		
+	int count_generate_image_number = 10;
+	for (int i = 0; i < count_generate_image_number; ++i) {
+		std::string dst_file_path = dst_dir_path;
+
+		std::stringstream ss_orientation;
+		ss_orientation << params.init_orientatioin;
+		std::string str_rule = ss_orientation.str();
+
+		std::stringstream ss_index;
+		ss_index << i + 1;
+		std::string str_index = ss_index.str();
+		
+
+		dst_file_path += str_rule;
+		dst_file_path += "_";
+		dst_file_path += str_index;
+		dst_file_path += ".dcm";
+		printf("path : %s\n", dst_file_path.c_str());
+		SaveDicomFile(src_path_file, dst_file_path);
+	}
 
 #if 0	
 	// 暂时，先从本地读取Dicom文件
@@ -460,9 +557,73 @@ ImageVRProcess::~ImageVRProcess()
 {
 }
 
+bool ImageVRProcess::ParseJsonData()
+{
+	params.image_type						= GetJsonDataInt("image_type");
+	params.blend_mode						= GetJsonDataInt("blend_mode");
+	params.init_orientatioin				= GetJsonDataInt("init_orientatioin");
+	params.generate_rule					= GetJsonDataInt("generate_rule");
+	params.clip_percent						= GetJsonDataFloat("clip_percent");
+	params.rotation_direction				= GetJsonDataInt("rotation_direction");
+	params.rotation_angle					= GetJsonDataFloat("rotation_angle");
+	params.output_image_number 				= GetJsonDataInt("output_image_number");
+	params.output_path						= GetJsonDataString(JSON_KEY_OUTPUT_PATH);
+	params.window_width						= GetJsonDataInt("window_width");
+	params.window_level						= GetJsonDataInt("window_level");
+	return true;
+}
+
 bool ImageVRProcess::Excute(std::string& out_image_data)
 {
-	ImageProcessBase::Excute(out_image_data);
+	//ImageProcessBase::Excute(out_image_data);
+
+	if (false == ParseJsonData()) {
+		return false;
+	}
+
+	//std::string::size_type sz;
+	//double paras = std::stod(m_key3_str_paras, &sz);
+
+	printf("Dcm Loader....\n");
+
+	printf("Operation : %s\n", m_wnd_name.c_str());
+
+	printf("Save Image to ....\n");
+	std::string src_path_file("../10.dcm");
+	std::string dst_dir_path(params.output_path);
+	//dst_dir_path += m_wnd_name;
+
+	// 创建文件夹
+	TryCreateDir(dst_dir_path);
+	
+	//dst_dir_path += "/";
+
+	int angle = (int)params.rotation_angle;
+	for (int i = 0; i < params.output_image_number; ++i) {
+		std::string dst_file_path = dst_dir_path;
+
+		std::stringstream ss_rule;
+		ss_rule << params.generate_rule;
+		std::string str_rule = ss_rule.str();
+
+		std::stringstream ss_blend;
+		ss_blend << params.blend_mode;
+		std::string str_blend = ss_blend.str();
+
+		std::stringstream ss_angle;
+		ss_angle << angle * i;
+		std::string str_angle = ss_angle.str();
+
+		dst_file_path += str_rule;
+		dst_file_path += "_";
+		dst_file_path += str_blend;
+		dst_file_path += "_";
+		dst_file_path += str_angle;
+		dst_file_path += ".dcm";
+		printf("path : %s\n", dst_file_path.c_str());
+		SaveDicomFile(src_path_file, dst_file_path);
+	}
+
 #if 0
 	// 暂时，先从本地读取Dicom文件
 	//GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
@@ -535,9 +696,99 @@ ImageCPRProcess::~ImageCPRProcess()
 {
 }
 
+bool ImageCPRProcess::ParseJsonData()
+{
+	params.image_type				= GetJsonDataInt("image_type");
+	params.vessel_name				= GetJsonDataString(JSON_KEY_VESSEL_NAME);	
+	params.init_orientatioin		= GetJsonDataInt("init_orientatioin");
+	params.rotation_direction		= GetJsonDataInt("rotation_direction");
+	params.rotation_angle			= GetJsonDataFloat("rotation_angle");
+	params.output_image_number 		= GetJsonDataInt("output_image_number");
+	params.output_path				= GetJsonDataString(JSON_KEY_OUTPUT_PATH);
+	printf("output_path--%s--------------------------\n", params.output_path.c_str());
+	params.window_width				= GetJsonDataInt("window_width");
+	params.window_level				= GetJsonDataInt("window_level");
+	return true;
+
+}
+
+void ImageProcessBase::SplitString(const std::string& src, std::vector<std::string>& v, const std::string& c)
+{
+	std::string::size_type pos1, pos2;
+	pos2 = src.find(c);
+	pos1 = 0;
+	while(std::string::npos != pos2)
+	{
+		v.push_back(src.substr(pos1, pos2 - pos1));
+		pos1 = pos2 + c.size();
+		pos2 = src.find(c, pos1);
+	}
+	if(pos1 != src.length()) 
+	{
+		v.push_back(src.substr(pos1));
+	}
+}
+void ImageProcessBase::TryCreateDir(const std::string& dir)
+{
+	std::vector<std::string> v;
+	SplitString(dir, v, "/");
+
+	std::string dst_dir_path("");
+	for(auto iter = v.begin(); iter != v.end(); ++iter)
+	{
+		// 创建文件夹
+		dst_dir_path += *iter;
+		dst_dir_path += "/";
+		if( 0 != access(dst_dir_path.c_str(), 0))
+		{
+			printf("create folder: %s\n", dst_dir_path.c_str());
+			// 如果文件夹不存在，创建
+			mkdir(dst_dir_path.c_str(), 0755);
+		}
+	}
+}
+
 bool ImageCPRProcess::Excute(std::string& out_image_data)
 {	
-	ImageProcessBase::Excute(out_image_data);
+	//ImageProcessBase::Excute(out_image_data);
+
+	if (false == ParseJsonData()) {
+		return false;
+	}
+		
+	//std::string::size_type sz;
+	//double paras = std::stod(m_key3_str_paras, &sz);
+
+	printf("Dcm Loader....\n");
+
+	printf("Operation : %s\n", m_wnd_name.c_str());
+
+	printf("Save Image to ....\n");
+	std::string src_path_file("../10.dcm");
+	std::string dst_dir_path(params.output_path);
+	//dst_dir_path += m_wnd_name;
+
+	// 创建文件夹
+	TryCreateDir(dst_dir_path);
+	
+	//dst_dir_path += "/";
+
+	int angle = (int)params.rotation_angle;
+	printf("output_image_number : %d\n", params.output_image_number);
+	for (int i = 0; i < params.output_image_number; ++i) {
+		std::string dst_file_path = dst_dir_path;
+		std::stringstream ss;
+		ss << angle * i;
+		std::string str_angle = ss.str();
+	
+		dst_file_path += params.vessel_name;
+		dst_file_path += "_";
+		dst_file_path += str_angle;
+		dst_file_path += ".dcm";
+		printf("path : %s\n", dst_file_path.c_str());
+		SaveDicomFile(src_path_file, dst_file_path);
+	}
+
 #if 0
 	// 1.read dcm image from directory
 

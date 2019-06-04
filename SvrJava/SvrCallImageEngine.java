@@ -50,7 +50,8 @@ class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().UnloadSeries(json_data);
 		}
-		{
+		boolean is_open = true;
+		if(is_open){
 			//json_data += "\"image_type\":0,";
 			//json_data += "\"vessel_name\":\"L_ICA\",";
 			
@@ -58,47 +59,48 @@ class SvrCallImageEngine {
 			String json_data = "{";
 			json_data += "\"image_type\":2,"; 				// 图像类型
 			json_data += "\"vessel_name\":\"L_ICA\","; 		// 血管名称
-			json_data += "\"Init_orientation\":2,"; 		// 正位（起始位置）标识
-			json_data += "\"Rotation_direction\":0,"; 		// 旋转方向
+			json_data += "\"init_orientation\":2,"; 		// 正位（起始位置）标识
+			json_data += "\"rotation_direction\":0,"; 		// 旋转方向
 			json_data += "\"rotation_angle\":45.0,"; 		// 旋转角度
-			json_data += "\"Output_Image_number\":4,"; 	// 输出图像数目
-			json_data += "\"Output_path\":\"../build/cpr/\","; // 输出图像目录
-			json_data += "\"Window_width\":2000,"; 		// 窗宽
-			json_data += "\"Window_level\":400,"; 			// 窗位
-			json_data += "\"Last_variable\":999"; 			// 
+			json_data += "\"output_image_number\":4,"; 	// 输出图像数目
+			json_data += "\"output_path\":\"../build/cpr7/\","; // 输出图像目录
+			json_data += "\"window_width\":2000,"; 		// 窗宽
+			json_data += "\"window_level\":400,"; 			// 窗位
+			json_data += "\"last_variable\":777"; 			// 
 			json_data += "}";
 			new SvrCallImageEngine().ProcessSeries(json_data);
 		}
-		{
+		if(is_open){
 			// VR 和 VRMIP 操作
 			String json_data = "{";
 			json_data += "\"image_type\":0,"; 				// 图像类型
-			json_data += "\"Blend_mode\":0,"; 				// 绘制方式 : VR为0；  VRMIP为1
-			json_data += "\"Init_orientation\":2,"; 		// 正位（起始位置）标识
-			json_data += "\"Clip_percent\":1.0,"; 			// 截取比例;  若为0.35，则表示颅内;其它为完整
-			json_data += "\"Rotation_direction\":0,"; 		// 旋转方向
+			json_data += "\"blend_mode\":1,"; 				// 绘制方式 : VR为0；  VRMIP为1
+			json_data += "\"init_orientation\":2,"; 		// 正位（起始位置）标识
+			json_data += "\"generate_rule\":1,"; 			// generate_rule
+			json_data += "\"clip_percent\":1.0,"; 			// 截取比例;  若为0.35，则表示颅内;其它为完整
+			json_data += "\"rotation_direction\":0,"; 		// 旋转方向
 			json_data += "\"rotation_angle\":30.0,"; 		// 旋转角度
-			json_data += "\"Output_Image_number\":12,"; 	// 输出图像数目
-			json_data += "\"Output_path\":\"../build/vr/\","; // 输出图像目录
-			json_data += "\"Window_width\":2000,"; 		// 窗宽
-			json_data += "\"Window_level\":400,"; 			// 窗位
-			json_data += "\"Last_variable\":999"; 			// 
+			json_data += "\"output_image_number\":12,"; 	// 输出图像数目
+			json_data += "\"output_path\":\"../build/vr8/\","; // 输出图像目录
+			json_data += "\"window_width\":2000,"; 		// 窗宽
+			json_data += "\"window_level\":400,"; 			// 窗位
+			json_data += "\"last_variable\":888"; 			// 
 			json_data += "}";
 			new SvrCallImageEngine().ProcessSeries(json_data);
 		}
-		{
+		if(is_open){
 			// MPRMIP 操作
 			String json_data = "{";
 			json_data += "\"image_type\":1,"; 				// 图像类型
-			json_data += "\"Blend_mode\":1,"; 				// 绘制方式 : VR为0；  VRMIP为1
-			json_data += "\"Init_orientation\":0,"; 		// 正位（起始位置）标识
-			json_data += "\"Clip_percent\":0.35,"; 		// 截取比例;  
+			json_data += "\"blend_mode\":1,"; 				// 绘制方式 : VR为0；  VRMIP为1
+			json_data += "\"init_orientation\":1,"; 		// 正位（起始位置）标识
+			json_data += "\"clip_percent\":0.35,"; 		// 截取比例;  
 			json_data += "\"thickness\":25.0,"; 			// 层厚
-			json_data += "\"Spacing_between_slices\":5.0,";// 层间距
-			json_data += "\"Output_path\":\"../build/mprmip/\","; // 输出图像目录
-			json_data += "\"Window_width\":2000,"; 		// 窗宽
-			json_data += "\"Window_level\":400,"; 			// 窗位
-			json_data += "\"Last_variable\":999"; 			// 
+			json_data += "\"spacing_between_slices\":5.0,";// 层间距
+			json_data += "\"output_path\":\"../build/mprmip9/\","; // 输出图像目录
+			json_data += "\"window_width\":2000,"; 		// 窗宽
+			json_data += "\"window_level\":400,"; 			// 窗位
+			json_data += "\"last_variable\":999"; 			// 
 			json_data += "}";
 			new SvrCallImageEngine().ProcessSeries(json_data);
 		}

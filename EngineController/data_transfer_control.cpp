@@ -14,13 +14,13 @@
 #include <chrono>
 
 
-#include "rapidjson/rapidjson.h"
-#include "rapidjson/document.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
-
-using namespace rapidjson;
+//#include "rapidjson/rapidjson.h"
+//#include "rapidjson/document.h"
+//#include "rapidjson/reader.h"
+//#include "rapidjson/writer.h"
+//#include "rapidjson/stringbuffer.h"
+//
+//using namespace rapidjson;
 
 
 DataTransferController* DataTransferController::instance = nullptr;
@@ -104,7 +104,7 @@ bool DataTransferController::ParseImageOperationDataUseRapidJson(const char* jso
 	total_diff += span;
 
 	// 获得关键性的参数
-	std::string key_name1("");
+	int key_name1 = 0;
 	std::string key_name2("");
 	std::string key_name3("");
 	std::string key_name4("");
@@ -113,37 +113,17 @@ bool DataTransferController::ParseImageOperationDataUseRapidJson(const char* jso
 	int key_name5 = 0;
 	int key_name6 = 0;
 
-	if (doc.HasMember(JSON_KEY_REQUEST_TYPE)) {
-		const Value& value = doc[JSON_KEY_REQUEST_TYPE];
-		key_name1 = value.GetString();
-		// 都转为小写字符
-		std::transform(key_name1.begin(), key_name1.end(), key_name1.begin(), ::tolower);
+	if (doc.HasMember(JSON_KEY_IMAGE_TYPE)) {
+		const Value& value = doc[JSON_KEY_IMAGE_TYPE];
+		key_name1 = value.GetInt();
 	}
-	if (doc.HasMember(JSON_KEY_IMAGE_OPERATION)) {
-		const Value& value = doc[JSON_KEY_IMAGE_OPERATION];
-		key_name2 = value.GetString();
-		// 都转为小写字符
-		std::transform(key_name2.begin(), key_name2.end(), key_name2.begin(), ::tolower);
-	}
+	//if (doc.HasMember(JSON_KEY_VESSEL_NAME)) {
+	//	const Value& value = doc[JSON_KEY_VESSEL_NAME];
+	//	key_name2 = value.GetString();
+	//	// 都转为大写字符
+	//	std::transform(key_name2.begin(), key_name2.end(), key_name2.begin(), ::toupper);
+	//}
 
-	if (doc.HasMember(JSON_KEY_IMAGE_PARAS)) {
-		const Value& value = doc[JSON_KEY_IMAGE_PARAS];
-		key_name3 = value.GetString();
-		// 都转为小写字符
-		std::transform(key_name3.begin(), key_name3.end(), key_name3.begin(), ::tolower);
-	}
-	if (doc.HasMember(JSON_KEY_IMAGE_DATA)) {
-		const Value& value = doc[JSON_KEY_IMAGE_DATA];
-		key_name4 = value.GetString();
-	}
-	if (doc.HasMember(JSON_KEY_IMAGE_SEQUENCE)) {
-		const Value& value = doc[JSON_KEY_IMAGE_SEQUENCE];
-		key_name5 = value.GetInt();
-	}
-	if (doc.HasMember(JSON_KEY_IMAGE_MAX)) {
-		const Value& value = doc[JSON_KEY_IMAGE_MAX];
-		key_name6 = value.GetInt();
-	}
 
 	if(image_process) {
 		delete image_process;
@@ -152,25 +132,28 @@ bool DataTransferController::ParseImageOperationDataUseRapidJson(const char* jso
 
 	std::string out_image_data = "";
 
-	if (key_name1 == JSON_VALUE_REQUEST_TYPE_MPR) {
+	if (key_name1 == JSON_VALUE_REQUEST_TYPE_VR) {
+		//CGLogger::Debug("Debug_CTA:VR---begin");
+		image_process = new ImageVRProcess(key_name3);
+		image_process->SetDocument(json_data);
+		//image_process->SetKey2_ImageOperation(key_name2);
+		image_process->Excute(out_image_data);
+		//CGLogger::Debug("Debug_CTA:VR---");
+	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_MPR) {
 		//CGLogger::Debug("Debug_CTA:MPR---begin");
 		printf("Debug_CTA:MPR---begin\n");
 		image_process = new ImageMPRProcess(key_name3);
-		image_process->SetKey2_ImageOperation(key_name2);
+		image_process->SetDocument(json_data);
+		//image_process->SetKey2_ImageOperation(key_name2);
 		image_process->Excute(out_image_data);
 		//CGLogger::Debug("Debug_CTA:MPR---");
 		printf("Debug_CTA:MPR---end\n");
-	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_VR) {
-		//CGLogger::Debug("Debug_CTA:VR---begin");
-		image_process = new ImageVRProcess(key_name3);
-		image_process->SetKey2_ImageOperation(key_name2);
-		image_process->Excute(out_image_data);
-		//CGLogger::Debug("Debug_CTA:VR---");
 	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_CPR) {
 		image_process = new ImageCPRProcess(key_name3);
-		image_process->SetKey2_ImageOperation(key_name2);
+		image_process->SetDocument(json_data);
+		//image_process->SetKey2_ImageOperation(key_name2);
 		image_process->Excute(out_image_data);		
-	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_TIME) {	
+	} else {//if (key_name1 == JSON_VALUE_REQUEST_TYPE_TIME) {	
 		printf("switch time..\n");	
 		return true;
 	} 
