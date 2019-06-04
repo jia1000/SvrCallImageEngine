@@ -5,23 +5,11 @@
 
 #include <algorithm>
 
-
 //#include "json/json.h"
-
 
 #include <fstream> // ifstream, ifstream::in
 //#include <io.h>
 #include <chrono>
-
-
-//#include "rapidjson/rapidjson.h"
-//#include "rapidjson/document.h"
-//#include "rapidjson/reader.h"
-//#include "rapidjson/writer.h"
-//#include "rapidjson/stringbuffer.h"
-//
-//using namespace rapidjson;
-
 
 DataTransferController* DataTransferController::instance = nullptr;
 
@@ -105,25 +93,12 @@ bool DataTransferController::ParseImageOperationDataUseRapidJson(const char* jso
 
 	// 获得关键性的参数
 	int key_name1 = 0;
-	std::string key_name2("");
 	std::string key_name3("");
-	std::string key_name4("");
-	//std::string key_name5("");
-	//std::string key_name6("");
-	int key_name5 = 0;
-	int key_name6 = 0;
 
 	if (doc.HasMember(JSON_KEY_IMAGE_TYPE)) {
 		const Value& value = doc[JSON_KEY_IMAGE_TYPE];
 		key_name1 = value.GetInt();
 	}
-	//if (doc.HasMember(JSON_KEY_VESSEL_NAME)) {
-	//	const Value& value = doc[JSON_KEY_VESSEL_NAME];
-	//	key_name2 = value.GetString();
-	//	// 都转为大写字符
-	//	std::transform(key_name2.begin(), key_name2.end(), key_name2.begin(), ::toupper);
-	//}
-
 
 	if(image_process) {
 		delete image_process;
@@ -133,33 +108,23 @@ bool DataTransferController::ParseImageOperationDataUseRapidJson(const char* jso
 	std::string out_image_data = "";
 
 	if (key_name1 == JSON_VALUE_REQUEST_TYPE_VR) {
-		//CGLogger::Debug("Debug_CTA:VR---begin");
 		image_process = new ImageVRProcess(key_name3);
 		image_process->SetDocument(json_data);
-		//image_process->SetKey2_ImageOperation(key_name2);
 		image_process->Excute(out_image_data);
-		//CGLogger::Debug("Debug_CTA:VR---");
 	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_MPR) {
-		//CGLogger::Debug("Debug_CTA:MPR---begin");
-		printf("Debug_CTA:MPR---begin\n");
 		image_process = new ImageMPRProcess(key_name3);
 		image_process->SetDocument(json_data);
-		//image_process->SetKey2_ImageOperation(key_name2);
 		image_process->Excute(out_image_data);
-		//CGLogger::Debug("Debug_CTA:MPR---");
-		printf("Debug_CTA:MPR---end\n");
 	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_CPR) {
 		image_process = new ImageCPRProcess(key_name3);
 		image_process->SetDocument(json_data);
-		//image_process->SetKey2_ImageOperation(key_name2);
 		image_process->Excute(out_image_data);		
-	} else {//if (key_name1 == JSON_VALUE_REQUEST_TYPE_TIME) {	
-		printf("switch time..\n");	
+	} else {	
+		printf("switch other..\n");	
 		return true;
 	} 
 
-	// 模拟再发送给浏览器
-	
+	// 模拟再发送给浏览器	
 
 	return true;
 }

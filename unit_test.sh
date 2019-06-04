@@ -1,6 +1,7 @@
 # 执行java的设置
 #source /etc/profile
 # 进入Java文件所在路径， 得到.class .h 
+clear
 cd SvrJava
 javac SvrCallImageEngine.java
 javah -jni SvrCallImageEngine

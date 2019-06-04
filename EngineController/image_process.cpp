@@ -1,30 +1,12 @@
 //#include "stdafx.h"
 
 #include "image_process.h"
-//#include "io/txt_reader.h"
-//#include "tools/string_util.h"
-//#include "io/nii_loader.h"
 
 #include <algorithm>
 //#include "json/json.h"
 #include <fstream> // ifstream, ifstream::in
-//#include <io.h>
 
 #include "api/studycontextmy.h"
-//#include "curve_source.h"
-//#include "data/data_definition.h"
-//#include "data/data_loader.h"
-//#include "data_source.h"
-//#include "encrypt/Utf8String.h"
-//#include "io/dcm_reader.h"
-//#include "render_source.h"
-//#include "render_facade.h"
-
-//using namespace DW;
-//using namespace DW::IMAGE;
-//using namespace DW::Render;
-//using namespace DW::IO;
-
 #include "./DicomEngine/api/studycontextmy.h"
 #include "./DicomEngine/main/controllers/dicommanager.h"
 #include "./DicomEngine/api/dicom/dicomdataset.h"
@@ -57,18 +39,18 @@ const std::string series_name_mpr("series1");
 const std::string series_name_vr("series1");
 const std::string series_name_cpr("series1");
 
-#define JSON_KEY_VESSEL_NAME				"vessel_name"
+#define JSON_KEY_VESSEL_NAME			"vessel_name"
 #define JSON_KEY_BLEND_MODE				"blend_mode"
-#define JSON_KEY_GENERATE_RULE				"generate_rule"
-#define JSON_KEY_INIT_ORIENTATION			"init_orientation"
-#define JSON_KEY_CLIP_PERCENT				"clip_percent"
+#define JSON_KEY_GENERATE_RULE			"generate_rule"
+#define JSON_KEY_INIT_ORIENTATION		"init_orientation"
+#define JSON_KEY_CLIP_PERCENT			"clip_percent"
 #define JSON_KEY_THICKNESS				"thickness"
-#define JSON_KEY_SPACING_BETWEEN_SLICES			"spacing_between_slices"
-#define JSON_KEY_OUTPUT_IMAGE_NUMBER			"output_image_number"
-#define JSON_KEY_OUTPUT_PATH				"output_path"
-#define JSON_KEY_WINDOW_WIDTH				"window_width"
-#define JSON_KEY_WINDOW_LEVEL				"window_level"
-#define JSON_KEY_ROTATION_DIRECTION			"rotation_direction"
+#define JSON_KEY_SPACING_BETWEEN_SLICES	"spacing_between_slices"
+#define JSON_KEY_OUTPUT_IMAGE_NUMBER	"output_image_number"
+#define JSON_KEY_OUTPUT_PATH			"output_path"
+#define JSON_KEY_WINDOW_WIDTH			"window_width"
+#define JSON_KEY_WINDOW_LEVEL			"window_level"
+#define JSON_KEY_ROTATION_DIRECTION		"rotation_direction"
 
 ImageProcessBase::ImageProcessBase(std::string str_paras)
 	: m_key3_str_paras(str_paras)
@@ -81,27 +63,6 @@ ImageProcessBase::~ImageProcessBase()
 	
 }
 
-//void ImageProcessBase::SetKey1_RequestType(std::string str_req_type)
-//{
-//	if (str_req_type == JSON_VALUE_REQUEST_TYPE_MPR) {
-//		req_type = (int)RenderControlType::MPR;
-//	} else if (str_req_type == JSON_VALUE_REQUEST_TYPE_VR) {
-//		req_type = (int)RenderControlType::VR;
-//	} else if (str_req_type == JSON_VALUE_REQUEST_TYPE_CPR) {
-//		req_type = (int)RenderControlType::STRAIGHTENED_CPR;
-//	}
-//}
-
-//void ImageProcessBase::SetKey2_ImageOperation(std::string str_opertation) 
-//{ 
-//	m_key2_str_opertation = str_opertation; 
-//}
-
-//void ImageProcessBase::SetKey3_ImageOperationParas(std::string str_paras) 
-//{ 
-//	m_key3_str_paras = str_paras; 
-//}
-
 bool ImageProcessBase::ParseJsonData()
 {
 	return true;
@@ -109,116 +70,7 @@ bool ImageProcessBase::ParseJsonData()
 
 bool ImageProcessBase::Excute(std::string& out_image_data)
 {
-	//std::string::size_type sz;
-	//double paras = std::stod(m_key3_str_paras, &sz);
-
-	printf("Dcm Loader....\n");
-	
-	printf("Operation : %s\n", m_key2_str_opertation.c_str());
-
-	printf("Save Image to ....\n");
-	std::string src_path_file("../10.dcm");
-	std::string dst_path_file("../build/");
-	dst_path_file += m_wnd_name;
-	
-	// 创建文件夹
-	if( 0 != access(dst_path_file.c_str(), 0))
-	{
-		printf("create folder\n");
-		// 如果文件夹不存在，创建
-		mkdir(dst_path_file.c_str(), 0755);
-	}
-	dst_path_file += "/";
-
-	dst_path_file += m_key2_str_opertation;
-	dst_path_file += "_";
-	dst_path_file += m_key3_str_paras;
-	dst_path_file += ".dcm";
-	printf("path : %s\n", dst_path_file.c_str());
-	SaveDicomFile(src_path_file, dst_path_file);
-
 	return true;
-}
-std::string ImageProcessBase::base64Decode(const char* Data, int DataByte) {
-	//解码表
-	const char DecodeTable[] =
-	{
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		62, // '+'
-		0, 0, 0,
-		63, // '/'
-		52, 53, 54, 55, 56, 57, 58, 59, 60, 61, // '0'-'9'
-		0, 0, 0, 0, 0, 0, 0,
-		0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12,
-		13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, // 'A'-'Z'
-		0, 0, 0, 0, 0, 0,
-		26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38,
-		39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, // 'a'-'z'
-	};
-	std::string strDecode;
-	int nValue;
-	int i = 0;
-	while (i < DataByte) {
-		if (*Data != '\r' && *Data != '\n') {
-			nValue = DecodeTable[*Data++] << 18;
-			nValue += DecodeTable[*Data++] << 12;
-			strDecode += (nValue & 0x00FF0000) >> 16;
-			if (*Data != '=') {
-				nValue += DecodeTable[*Data++] << 6;
-				strDecode += (nValue & 0x0000FF00) >> 8;
-				if (*Data != '=') {
-					nValue += DecodeTable[*Data++];
-					strDecode += nValue & 0x000000FF;
-				}
-			}
-			i += 4;
-		}
-		else {
-			Data++;
-			i++;
-		}
-	}
-	return strDecode;
-}
-
-
-std::string ImageProcessBase::base64Encode(const unsigned char* Data, int DataByte) {
-	//编码表
-	const char EncodeTable[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-	//返回值
-	std::string strEncode;
-	unsigned char Tmp[4] = { 0 };
-	int LineLength = 0;
-	for (int i = 0; i < (int)(DataByte / 3); i++) {
-		Tmp[1] = *Data++;
-		Tmp[2] = *Data++;
-		Tmp[3] = *Data++;
-		strEncode += EncodeTable[Tmp[1] >> 2];
-		strEncode += EncodeTable[((Tmp[1] << 4) | (Tmp[2] >> 4)) & 0x3F];
-		strEncode += EncodeTable[((Tmp[2] << 2) | (Tmp[3] >> 6)) & 0x3F];
-		strEncode += EncodeTable[Tmp[3] & 0x3F];
-		if (LineLength += 4, LineLength == 76) { strEncode += "\r\n"; LineLength = 0; }
-	}
-	//对剩余数据进行编码
-	int Mod = DataByte % 3;
-	if (Mod == 1) {
-		Tmp[1] = *Data++;
-		strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
-		strEncode += EncodeTable[((Tmp[1] & 0x03) << 4)];
-		strEncode += "==";
-	}
-	else if (Mod == 2) {
-		Tmp[1] = *Data++;
-		Tmp[2] = *Data++;
-		strEncode += EncodeTable[(Tmp[1] & 0xFC) >> 2];
-		strEncode += EncodeTable[((Tmp[1] & 0x03) << 4) | ((Tmp[2] & 0xF0) >> 4)];
-		strEncode += EncodeTable[((Tmp[2] & 0x0F) << 2)];
-		strEncode += "=";
-	}
-
-
-	return strEncode;
 }
 
 bool ImageProcessBase::SaveDicomFile(
@@ -249,149 +101,6 @@ bool ImageProcessBase::SaveDicomFile(
 	}
 	return false;
 }
-
-//imgType 包括png bmp jpg jpeg等opencv能够进行编码解码的文件
-#if 0
-std::string ImageProcessBase::Mat2Base64(const cv::Mat &img, std::string imgType) {
-	//Mat转base64
-	std::string img_data;
-	std::vector<uchar> vecImg;
-	std::vector<int> vecCompression_params;
-	vecCompression_params.push_back(CV_IMWRITE_JPEG_QUALITY);
-	vecCompression_params.push_back(90);
-	imgType = "." + imgType;
-	cv::imencode(imgType, img, vecImg, vecCompression_params);
-	img_data = base64Encode(vecImg.data(), vecImg.size());
-	return img_data;
-}
-#endif
-
-#if 0
-cv::Mat ImageProcessBase::Base2Mat(std::string &base64_data) {
-	cv::Mat img;
-	std::string s_mat;
-	s_mat = base64Decode(base64_data.data(), base64_data.size());
-	std::vector<char> base64_img(s_mat.begin(), s_mat.end());
-	img = cv::imdecode(base64_img, CV_LOAD_IMAGE_COLOR);
-	return img;
-}
-#endif
-
-#if 0
-bool ImageProcessBase::SaveBitmapToFile(HBITMAP hBitmap, LPCWSTR lpFileName)
-{
-	HDC                hDC;                //设备描述表
-	int                iBits;              //当前显示分辨率下每个像素所占字节数
-	WORD               wBitCount = 0;      //位图中每个像素所占字节数    
-	DWORD              dwPaletteSize=0;    //定义调色板大小
-	DWORD              dwBmBitsSize;       //位图中像素字节大小
-	DWORD              dwDIBSize;          //位图文件大小
-	DWORD              dwWritten;          //写入文件字节数
-	BITMAP             Bitmap;             //位图结构
-	BITMAPFILEHEADER   bmfHdr;             //位图属性结构   
-	BITMAPINFOHEADER   bi;                 //位图文件头结构
-	LPBITMAPINFOHEADER lpbi;               //位图信息头结构     指向位图信息头结构
-	HANDLE             fh;                 //定义文件句柄
-	HANDLE             hDib;               //分配内存句柄
-	HANDLE             hPal;               //分配内存句柄
-	HANDLE             hOldPal=NULL;       //调色板句柄  
-
-	//计算位图文件每个像素所占字节数   
-	hDC = CreateDC(L"DISPLAY",NULL,NULL,NULL);   
-	iBits = GetDeviceCaps(hDC, BITSPIXEL) * GetDeviceCaps(hDC, PLANES);   
-	DeleteDC(hDC);
-
-	if (iBits <= 1)       
-		wBitCount = 1;   
-	else if (iBits <= 4)       
-		wBitCount = 4;   
-	else if (iBits <= 8)       
-		wBitCount = 8;   
-	else if (iBits <= 24)
-		wBitCount = 24;
-	else if (iBits<=32)
-		wBitCount = 24;
-
-
-	//计算调色板大小   
-	if (wBitCount <= 8) {       
-		dwPaletteSize = (1 << wBitCount) *sizeof(RGBQUAD);
-	}
-
-	//设置位图信息头结构   
-	GetObject(hBitmap, sizeof(BITMAP), (LPSTR)&Bitmap);   
-	bi.biSize            = sizeof(BITMAPINFOHEADER);   
-	bi.biWidth           = Bitmap.bmWidth;   
-	bi.biHeight          = Bitmap.bmHeight;   
-	bi.biPlanes          = 1;   
-	bi.biBitCount         = wBitCount;       
-	bi.biCompression      = BI_RGB;   
-	bi.biSizeImage        = 0;   
-	bi.biXPelsPerMeter     = 0;   
-	bi.biYPelsPerMeter     = 0;   
-	bi.biClrUsed         = 0;   
-	bi.biClrImportant      = 0;   
-	dwBmBitsSize = ((Bitmap.bmWidth *wBitCount+31)/32)* 4*Bitmap.bmHeight ;
-
-	//为位图内容分配内存   
-	hDib  = GlobalAlloc(GHND,dwBmBitsSize+dwPaletteSize+sizeof(BITMAPINFOHEADER));   
-	lpbi = (LPBITMAPINFOHEADER)GlobalLock(hDib);
-	if (lpbi==NULL)
-	{
-		return false;
-	}
-
-	*lpbi = bi;   
-	// 处理调色板
-	hPal = GetStockObject(DEFAULT_PALETTE);   
-	if (hPal)
-	{       
-		hDC  = GetDC(NULL);       
-		hOldPal = ::SelectPalette(hDC, (HPALETTE)hPal, FALSE);       
-		RealizePalette(hDC);       
-	}   
-	// 获取该调色板下新的像素值   
-	GetDIBits(hDC, hBitmap, 0, (UINT) Bitmap.bmHeight,       
-		(LPSTR)lpbi + sizeof(BITMAPINFOHEADER)+dwPaletteSize,
-		(LPBITMAPINFO)lpbi, DIB_RGB_COLORS);   
-	//恢复调色板      
-	if (hOldPal)       
-	{       
-		SelectPalette(hDC, (HPALETTE)hOldPal, TRUE);       
-		RealizePalette(hDC);       
-		ReleaseDC(NULL, hDC);       
-	}   
-	//创建位图文件       
-	fh = CreateFile(lpFileName, GENERIC_WRITE,        
-		0, NULL, CREATE_ALWAYS,       
-		FILE_ATTRIBUTE_NORMAL | FILE_FLAG_SEQUENTIAL_SCAN, NULL);   
-
-	if (fh == INVALID_HANDLE_VALUE) {
-		return false;
-	}
-
-	// 设置位图文件头   
-	bmfHdr.bfType = 0x4D42;  // "BM"   
-	dwDIBSize    = sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER)+ dwPaletteSize + dwBmBitsSize;     
-	bmfHdr.bfSize = dwDIBSize;   
-	bmfHdr.bfReserved1 = 0;   
-	bmfHdr.bfReserved2 = 0;   
-	bmfHdr.bfOffBits = (DWORD)sizeof(BITMAPFILEHEADER) + (DWORD)sizeof(BITMAPINFOHEADER)+ dwPaletteSize;
-
-	// 写入位图文件头   
-	WriteFile(fh, (LPSTR)&bmfHdr, sizeof(BITMAPFILEHEADER), &dwWritten, NULL);
-
-	// 写入位图文件其余内容   
-	WriteFile(fh, (LPSTR)lpbi, dwDIBSize, &dwWritten, NULL);
-
-	//清除      
-	GlobalUnlock(hDib);   
-	GlobalFree(hDib);   
-	CloseHandle(fh);
-
-	return true;
-}
-#endif
 
 int ImageProcessBase::GetJsonDataInt(std::string key)
 {	
@@ -435,7 +144,6 @@ bool ImageMPRProcess::ParseJsonData()
 	params.clip_percent				=GetJsonDataFloat("clip_percent");
 	params.thickness				=GetJsonDataFloat("thickness");
 	params.spacing_between_slices	=GetJsonDataFloat("spacing_between_slices");
-	//params.output_image_number		=GetJsonDataInt("output_image_number");
 	params.output_path				=GetJsonDataString(JSON_KEY_OUTPUT_PATH);
 	params.window_width				=GetJsonDataInt("window_width");
 	params.window_level				=GetJsonDataInt("window_level");
@@ -445,15 +153,10 @@ bool ImageMPRProcess::ParseJsonData()
 
 bool ImageMPRProcess::Excute(std::string& out_image_data)
 {
-	//ImageProcessBase::Excute(out_image_data);
-	
 	if (false == ParseJsonData()) {
 		return false;
 	}
-
-	//std::string::size_type sz;
-	//double paras = std::stod(m_key3_str_paras, &sz);
-
+	
 	printf("Dcm Loader....\n");
 
 	printf("Operation : %s\n", m_wnd_name.c_str());
@@ -559,31 +262,26 @@ ImageVRProcess::~ImageVRProcess()
 
 bool ImageVRProcess::ParseJsonData()
 {
-	params.image_type						= GetJsonDataInt("image_type");
-	params.blend_mode						= GetJsonDataInt("blend_mode");
-	params.init_orientatioin				= GetJsonDataInt("init_orientatioin");
-	params.generate_rule					= GetJsonDataInt("generate_rule");
-	params.clip_percent						= GetJsonDataFloat("clip_percent");
-	params.rotation_direction				= GetJsonDataInt("rotation_direction");
-	params.rotation_angle					= GetJsonDataFloat("rotation_angle");
-	params.output_image_number 				= GetJsonDataInt("output_image_number");
-	params.output_path						= GetJsonDataString(JSON_KEY_OUTPUT_PATH);
-	params.window_width						= GetJsonDataInt("window_width");
-	params.window_level						= GetJsonDataInt("window_level");
+	params.image_type			= GetJsonDataInt("image_type");
+	params.blend_mode			= GetJsonDataInt("blend_mode");
+	params.init_orientatioin	= GetJsonDataInt("init_orientatioin");
+	params.generate_rule		= GetJsonDataInt("generate_rule");
+	params.clip_percent			= GetJsonDataFloat("clip_percent");
+	params.rotation_direction	= GetJsonDataInt("rotation_direction");
+	params.rotation_angle		= GetJsonDataFloat("rotation_angle");
+	params.output_image_number 	= GetJsonDataInt("output_image_number");
+	params.output_path			= GetJsonDataString(JSON_KEY_OUTPUT_PATH);
+	params.window_width			= GetJsonDataInt("window_width");
+	params.window_level			= GetJsonDataInt("window_level");
 	return true;
 }
 
 bool ImageVRProcess::Excute(std::string& out_image_data)
 {
-	//ImageProcessBase::Excute(out_image_data);
-
 	if (false == ParseJsonData()) {
 		return false;
 	}
-
-	//std::string::size_type sz;
-	//double paras = std::stod(m_key3_str_paras, &sz);
-
+	
 	printf("Dcm Loader....\n");
 
 	printf("Operation : %s\n", m_wnd_name.c_str());
@@ -677,10 +375,7 @@ bool ImageVRProcess::Excute(std::string& out_image_data)
 
 	std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
 	SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
-#ifdef USE_OPEN_CV
-	cv::Mat src = cv::imread(screen_shot_file_path.c_str());
-	out_image_data = Mat2Base64(src, "bmp");
-#endif
+
 #endif
 	return true;
 }
@@ -705,7 +400,6 @@ bool ImageCPRProcess::ParseJsonData()
 	params.rotation_angle			= GetJsonDataFloat("rotation_angle");
 	params.output_image_number 		= GetJsonDataInt("output_image_number");
 	params.output_path				= GetJsonDataString(JSON_KEY_OUTPUT_PATH);
-	printf("output_path--%s--------------------------\n", params.output_path.c_str());
 	params.window_width				= GetJsonDataInt("window_width");
 	params.window_level				= GetJsonDataInt("window_level");
 	return true;
@@ -750,15 +444,10 @@ void ImageProcessBase::TryCreateDir(const std::string& dir)
 
 bool ImageCPRProcess::Excute(std::string& out_image_data)
 {	
-	//ImageProcessBase::Excute(out_image_data);
-
 	if (false == ParseJsonData()) {
 		return false;
 	}
-		
-	//std::string::size_type sz;
-	//double paras = std::stod(m_key3_str_paras, &sz);
-
+	
 	printf("Dcm Loader....\n");
 
 	printf("Operation : %s\n", m_wnd_name.c_str());
@@ -861,10 +550,6 @@ bool ImageCPRProcess::Excute(std::string& out_image_data)
 
 	//std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
 	//SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
-#ifdef USE_OPEN_CV
-	cv::Mat src = cv::imread(screen_shot_file_path.c_str());
-	out_image_data = Mat2Base64(src, "bmp");
-#endif
 #endif
 	return true;
 }
