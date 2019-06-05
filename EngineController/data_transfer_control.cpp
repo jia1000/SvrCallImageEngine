@@ -87,8 +87,8 @@ int DataTransferController::ParseImageOperationDataUseRapidJson(const char* json
 	int key_name1 = 0;
 	std::string key_name3("");
 
-	int ret = GetJsonDataInt(doc, JSON_KEY_DICOM_PATH, key_name1);
-
+	int ret = GetJsonDataInt(doc, JSON_KEY_IMAGE_TYPE, key_name1);
+	
 	if (ret <= 0)
 	{
 		return ret;

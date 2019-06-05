@@ -13,10 +13,12 @@ int GetJsonDataInt(const Document& doc, const std::string key, int& data)
 			return RET_STATUS_SUCCESS;
 		} else {
 			// json类型错误
+			printf("json value(%s) type error\n", key.c_str());
 			return RET_STATUS_JSON_VALUE_TYPE_ERROR;
 		}
 	} else {
 		// json值未找到
+		printf("json value(%s) not found\n", key.c_str());
 		return RET_STATUS_JSON_NAME_NOT_FOUND;
 	}
 	return RET_STATUS_FAILURE;
@@ -31,10 +33,12 @@ int GetJsonDataString(const Document& doc, const std::string key, std::string& d
 			return RET_STATUS_SUCCESS;
 		} else {
 			// json类型错误
+			printf("json value(%s) type error\n", key.c_str());
 			return RET_STATUS_JSON_VALUE_TYPE_ERROR;
 		}
 	} else {
 		// json值未找到
+		printf("json value(%s) not found\n", key.c_str());
 		return RET_STATUS_JSON_NAME_NOT_FOUND;
 	}
 	return RET_STATUS_FAILURE;	
@@ -50,10 +54,12 @@ int GetJsonDataFloat(const Document& doc, const std::string key, float& data)
 			return RET_STATUS_SUCCESS;
 		} else {
 			// json类型错误
+			printf("json value(%s) type error\n", key.c_str());
 			return RET_STATUS_JSON_VALUE_TYPE_ERROR;
 		}
 	} else {
 		// json值未找到
+		printf("json value(%s) not found\n", key.c_str());
 		return RET_STATUS_JSON_NAME_NOT_FOUND;
 	}
 	return RET_STATUS_FAILURE;	

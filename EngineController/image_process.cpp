@@ -66,7 +66,7 @@ int ImageProcessBase::Excute(std::string& out_image_data)
 bool ImageProcessBase::SaveDicomFile(
 	const std::string src_path_file, const std::string dst_path_file)
 {
-	printf("SaveDicomFile()\n");
+	//printf("SaveDicomFile()\n");
 
 	GIL::DICOM::DicomDataset base;
 	GIL::DICOM::IDICOMManager*	pDICOMManager = new GIL::DICOM::DICOMManager();
@@ -75,7 +75,7 @@ bool ImageProcessBase::SaveDicomFile(
 		pDICOMManager->CargarFichero(src_path_file, base);
 		std::string str_tag("");
 		base.getTag(GKDCM_PatientName , str_tag);
-		printf("patient name : %s(use DicomManager)\n", str_tag.c_str());
+		//printf("patient name : %s(use DicomManager)\n", str_tag.c_str());
 
 		// modify one tag
 		GIL::DICOM::DicomDataset modify_base;		
@@ -90,6 +90,41 @@ bool ImageProcessBase::SaveDicomFile(
 		return true;
 	}
 	return false;
+}
+void ImageProcessBase::SplitString(const std::string& src, std::vector<std::string>& v, const std::string& c)
+{
+	std::string::size_type pos1, pos2;
+	pos2 = src.find(c);
+	pos1 = 0;
+	while(std::string::npos != pos2)
+	{
+		v.push_back(src.substr(pos1, pos2 - pos1));
+		pos1 = pos2 + c.size();
+		pos2 = src.find(c, pos1);
+	}
+	if(pos1 != src.length()) 
+	{
+		v.push_back(src.substr(pos1) );
+	}
+}
+void ImageProcessBase::TryCreateDir(const std::string& dir)
+{
+	std::vector<std::string> v;
+	SplitString(dir, v, "/");
+
+	std::string dst_dir_path("" );
+	for(auto iter = v.begin(); iter != v.end(); ++iter)
+	{
+		// 创建文件夹
+		dst_dir_path += *iter;
+		dst_dir_path += "/";
+		if( 0 != access(dst_dir_path.c_str(), 0))
+		{
+			printf("create folder: %s\n", dst_dir_path.c_str());
+			// 如果文件夹不存在，创建
+			mkdir(dst_dir_path.c_str(), 0755);
+		}
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -129,20 +164,22 @@ int ImageMPRProcess::ParseJsonData()
 
 int ImageMPRProcess::Excute(std::string& out_image_data)
 {
-	if (false == ParseJsonData()) {
-		return false;
+	int ret = ParseJsonData();
+	if (ret <= 0 ) {
+		printf("ret mpr excute : %d\n", ret);
+		return ret;
 	}
 	
 	printf("Dcm Loader....\n");
 
 	printf("Operation : %s\n", m_wnd_name.c_str());
 
-	printf("Save Image to ....\n");
 	std::string src_path_file("../10.dcm");
 	std::string dst_dir_path(params.output_path);
 	//dst_dir_path += m_wnd_name;
 
 	// 创建文件夹
+	printf("Save Image to  : %s\n", dst_dir_path.c_str());
 	TryCreateDir(dst_dir_path);
 	
 	//dst_dir_path += "/";
@@ -164,7 +201,7 @@ int ImageMPRProcess::Excute(std::string& out_image_data)
 		dst_file_path += "_";
 		dst_file_path += str_index;
 		dst_file_path += ".dcm";
-		printf("path : %s\n", dst_file_path.c_str());
+		//printf("path : %s\n", dst_file_path.c_str());
 		SaveDicomFile(src_path_file, dst_file_path);
 	}
 
@@ -243,7 +280,7 @@ int ImageVRProcess::ParseJsonData()
 	if(ret <= 0) return ret;
 	ret = GetJsonDataInt(doc, "blend_mode", params.blend_mode);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "init_orientatioin", params.init_orientatioin);
+	ret = GetJsonDataInt(doc, "init_orientation", params.init_orientatioin);
 	if(ret <= 0) return ret;
 	ret = GetJsonDataInt(doc, "generate_rule", params.generate_rule);
 	if(ret <= 0) return ret;
@@ -265,20 +302,22 @@ int ImageVRProcess::ParseJsonData()
 
 int ImageVRProcess::Excute(std::string& out_image_data)
 {
-	if (false == ParseJsonData()) {
-		return false;
+	int ret = ParseJsonData();
+	if (ret <= 0 ) {
+		printf("ret vr excute : %d\n", ret);
+		return ret;
 	}
 	
 	printf("Dcm Loader....\n");
 
 	printf("Operation : %s\n", m_wnd_name.c_str());
 
-	printf("Save Image to ....\n");
 	std::string src_path_file("../10.dcm");
 	std::string dst_dir_path(params.output_path);
 	//dst_dir_path += m_wnd_name;
 
 	// 创建文件夹
+	printf("Save Image to  : %s\n", dst_dir_path.c_str());
 	TryCreateDir(dst_dir_path);
 	
 	//dst_dir_path += "/";
@@ -312,7 +351,7 @@ int ImageVRProcess::Excute(std::string& out_image_data)
 		dst_file_path += "_";
 		dst_file_path += str_angle;
 		dst_file_path += ".dcm";
-		printf("path : %s\n", dst_file_path.c_str());
+		//printf("path : %s\n", dst_file_path.c_str());
 		SaveDicomFile(src_path_file, dst_file_path);
 	}
 
@@ -392,7 +431,7 @@ int ImageCPRProcess::ParseJsonData()
 	if(ret <= 0) return ret;
 	ret = GetJsonDataString(doc, JSON_KEY_VESSEL_NAME , params.vessel_name		);	
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "init_orientatioin"     , params.init_orientatioin);
+	ret = GetJsonDataInt(doc, "init_orientation"     , params.init_orientatioin);
 	if(ret <= 0) return ret;
 	ret = GetJsonDataInt(doc, "rotation_direction"    , params.rotation_direction);
 	if(ret <= 0) return ret;
@@ -408,58 +447,25 @@ int ImageCPRProcess::ParseJsonData()
 	return ret;
 }
 
-void ImageProcessBase::SplitString(const std::string& src, std::vector<std::string>& v, const std::string& c)
-{
-	std::string::size_type pos1, pos2;
-	pos2 = src.find(c);
-	pos1 = 0;
-	while(std::string::npos != pos2)
-	{
-		v.push_back(src.substr(pos1, pos2 - pos1));
-		pos1 = pos2 + c.size();
-		pos2 = src.find(c, pos1);
-	}
-	if(pos1 != src.length()) 
-	{
-		v.push_back(src.substr(pos1) );
-	}
-}
-void ImageProcessBase::TryCreateDir(const std::string& dir)
-{
-	std::vector<std::string> v;
-	SplitString(dir, v, "/");
-
-	std::string dst_dir_path("" );
-	for(auto iter = v.begin(); iter != v.end(); ++iter)
-	{
-		// 创建文件夹
-		dst_dir_path += *iter;
-		dst_dir_path += "/";
-		if( 0 != access(dst_dir_path.c_str(), 0))
-		{
-			printf("create folder: %s\n", dst_dir_path.c_str());
-			// 如果文件夹不存在，创建
-			mkdir(dst_dir_path.c_str(), 0755);
-		}
-	}
-}
 
 int ImageCPRProcess::Excute(std::string& out_image_data)
 {	
-	if (false == ParseJsonData()) {
-		return false;
+	int ret = ParseJsonData();
+	if (ret <= 0 ) {
+		printf("ret cpr excute : %d\n", ret);
+		return ret;
 	}
 	
 	printf("Dcm Loader....\n");
 
 	printf("Operation : %s\n", m_wnd_name.c_str());
 
-	printf("Save Image to ....\n");
 	std::string src_path_file("../10.dcm");
 	std::string dst_dir_path(params.output_path);
 	//dst_dir_path += m_wnd_name;
 
 	// 创建文件夹
+	printf("Save Image to  : %s\n", dst_dir_path.c_str());
 	TryCreateDir(dst_dir_path);
 	
 	//dst_dir_path += "/";
@@ -476,7 +482,7 @@ int ImageCPRProcess::Excute(std::string& out_image_data)
 		dst_file_path += "_";
 		dst_file_path += str_angle;
 		dst_file_path += ".dcm";
-		printf("path : %s\n", dst_file_path.c_str());
+		//printf("path : %s\n", dst_file_path.c_str());
 		SaveDicomFile(src_path_file, dst_file_path);
 	}
 
