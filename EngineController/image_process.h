@@ -17,14 +17,8 @@
 #include <iostream> 
 #include <vector>
 
-#include "rapidjson/rapidjson.h"
-#include "rapidjson/document.h"
-#include "rapidjson/reader.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
 
-using namespace rapidjson;
-
+#include "common_utils.h"
 
 #define JSON_KEY_DICOM_PATH				"dicom_path"
 
@@ -140,7 +134,7 @@ public:
 	virtual ~ImageProcessBase();
 
 	virtual int Excute(std::string& out_image_data);
-	void SetDocument(const char* json_data) { doc.Parse(json_data); }
+	void SetDocument(const char* json_data);
 
 protected:
 	bool SaveDicomFile(const std::string src_path_file, const std::string dst_path_file);
@@ -156,7 +150,7 @@ protected:
 	std::string m_key3_str_paras;		// 不同图像操作类型的参数，参数含义会有不同。具体需要见产品设计
 	/// 窗口名称
 	std::string m_wnd_name;
-	Document doc;
+	rapidjson::Document doc;
 };
 
 //////////////////////////////////////////////////////////////////////////

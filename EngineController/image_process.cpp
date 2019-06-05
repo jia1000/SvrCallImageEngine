@@ -63,6 +63,11 @@ int ImageProcessBase::Excute(std::string& out_image_data)
 	return RET_STATUS_SUCCESS;
 }
 
+void ImageProcessBase::SetDocument(const char* json_data) 
+{ 
+	doc.Parse(json_data); 
+}
+
 bool ImageProcessBase::SaveDicomFile(
 	const std::string src_path_file, const std::string dst_path_file)
 {

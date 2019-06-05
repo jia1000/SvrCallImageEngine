@@ -13,6 +13,6 @@
 
 using namespace rapidjson;
 
-int GetJsonDataInt(const Document& doc, const std::string key, int& data);
-int GetJsonDataString(const Document& doc, const std::string key, std::string& data);
-int GetJsonDataFloat(const Document& doc, const std::string key, float& data);
+int GetJsonDataInt(const rapidjson::Document& doc, const std::string key, int& data);
+int GetJsonDataString(const rapidjson::Document& doc, const std::string key, std::string& data);
+int GetJsonDataFloat(const rapidjson::Document& doc, const std::string key, float& data);

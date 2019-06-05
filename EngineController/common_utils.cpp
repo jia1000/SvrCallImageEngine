@@ -3,7 +3,7 @@
 #include "image_process.h"
 
 
-int GetJsonDataInt(const Document& doc, const std::string key, int& data)
+int GetJsonDataInt(const rapidjson::Document& doc, const std::string key, int& data)
 {	
 	if (doc.HasMember(key.c_str())) {		
 		const Value& value = doc[key.c_str()];
@@ -23,7 +23,7 @@ int GetJsonDataInt(const Document& doc, const std::string key, int& data)
 	}
 	return RET_STATUS_FAILURE;
 }
-int GetJsonDataString(const Document& doc, const std::string key, std::string& data)
+int GetJsonDataString(const rapidjson::Document& doc, const std::string key, std::string& data)
 {
 	if (doc.HasMember(key.c_str())) {		
 		const Value& value = doc[key.c_str()];
@@ -44,7 +44,7 @@ int GetJsonDataString(const Document& doc, const std::string key, std::string& d
 	return RET_STATUS_FAILURE;	
 }
 
-int GetJsonDataFloat(const Document& doc, const std::string key, float& data)
+int GetJsonDataFloat(const rapidjson::Document& doc, const std::string key, float& data)
 {
 	if (doc.HasMember(key.c_str())) {		
 		const Value& value = doc[key.c_str()];
