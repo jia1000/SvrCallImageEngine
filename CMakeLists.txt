@@ -32,7 +32,9 @@ TARGET_LINK_LIBRARIES(dicom_engine ${DCMTK_LIBRARIES})
 # 生成controller库
 aux_source_directory(./EngineController  DIRSRCS_Controller)
 add_library(controller  SHARED ${DIRSRCS_Controller})
-TARGET_LINK_LIBRARIES(controller  dicom_engine)
+# 添加第三方依赖库的路径
+LINK_DIRECTORIES(../thirdparty/)
+TARGET_LINK_LIBRARIES(controller  dicom_engine jsoncpp)
 
 # 生成SvrCallImageEngine库
 add_compile_options(-fPIC)

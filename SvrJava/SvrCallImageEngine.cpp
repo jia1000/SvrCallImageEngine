@@ -1,4 +1,5 @@
 #include <jni.h>
+#include <jsoncpp/json/json.h>
 #include <string.h>
 #include "SvrCallImageEngine.h"
 
@@ -12,8 +13,7 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_LoadSeries
 	
 	std::string resource_data("");
 	int ret = DataTransferController::GetInstance()->
-				ParseLoadSeriesUseRapidJson(str, resource_data);
-
+				ParseLoadSeries(str, resource_data);
 	return ret; 
 }
 
@@ -25,7 +25,7 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_SwitchSeries
 
 	std::string resource_data("");
 	int ret = DataTransferController::GetInstance()->
-				ParseSwitchSeriesUseRapidJson(str, resource_data);
+				ParseSwitchSeries(str, resource_data);
 
 	return ret;	 
 }
@@ -38,7 +38,7 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_UnloadSeries
 	
 	std::string resource_data("");
 	int ret = DataTransferController::GetInstance()->
-				ParseUnloadSeriesUseRapidJson(str, resource_data);
+				ParseUnloadSeries(str, resource_data);
 				
 	return ret; 
 }
@@ -51,7 +51,7 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_ProcessSeries
 
 	std::string resource_data("");
 	int ret = DataTransferController::GetInstance()->
-				ParseImageOperationDataUseRapidJson(str, resource_data);
+				ParseImageOperationData(str, resource_data);
 
 	return ret;  
 }

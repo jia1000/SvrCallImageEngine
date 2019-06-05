@@ -6,8 +6,6 @@
 
 #include <algorithm>
 
-//#include "json/json.h"
-
 #include <fstream> // ifstream, ifstream::in
 //#include <io.h>
 #include <chrono>
@@ -32,51 +30,79 @@ DataTransferController::~DataTransferController()
 	instance = nullptr;
 }
 
-int DataTransferController::ParseLoadSeriesUseRapidJson(const char* json_data, std::string& js_data)
+int DataTransferController::ParseLoadSeries(const char* json_data, std::string& js_data)
 {
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
-	Document doc;
-	doc.Parse(json_data);	
+	printf("ret 01 \n");
 
+	Json::Value root;
+	Json::Reader reader;
+
+	printf("ret 1 \n");
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse loadserires's json.\n");
+		return RET_STATUS_JSON_PARSE_FAIL;
+	}
+	printf("ret 2 \n");
 	std::string data("");
-	int ret = GetJsonDataString(doc, JSON_KEY_DICOM_PATH, data);
+	int ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, data);
 	printf("load series dicom path : %s\n", data.c_str());
 
 	return ret;
 }
 
-int DataTransferController::ParseSwitchSeriesUseRapidJson(const char* json_data, std::string& js_data)
+int DataTransferController::ParseSwitchSeries(const char* json_data, std::string& js_data)
 {
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
-	Document doc;
-	doc.Parse(json_data);
+	Json::Value root;
+	Json::Reader reader;
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse switchserires's json.\n");
+		return RET_STATUS_JSON_PARSE_FAIL;
+	}
 	
 	std::string data("");
-	int ret = GetJsonDataString(doc, JSON_KEY_DICOM_PATH, data);
+	int ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, data);
 	printf("switch series dicom path : %s\n", data.c_str());
 
 	return ret;
 }
 
-int DataTransferController::ParseUnloadSeriesUseRapidJson(const char* json_data, std::string& js_data)
+int DataTransferController::ParseUnloadSeries(const char* json_data, std::string& js_data)
 {
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
-	Document doc;
-	doc.Parse(json_data);
+	Json::Value root;
+	Json::Reader reader;
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse unloadserires's json.\n");
+		return RET_STATUS_JSON_PARSE_FAIL;
+	}
 	
 	std::string data("");
-	int ret = GetJsonDataString(doc, JSON_KEY_DICOM_PATH, data);
+	int ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, data);
 	printf("unload series dicom path : %s\n", data.c_str());
 
 	return ret;
 }
 
-int DataTransferController::ParseImageOperationDataUseRapidJson(const char* json_data, std::string& js_data)
+int DataTransferController::ParseImageOperationData(const char* json_data, std::string& js_data)
 {
 	std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
-	Document doc;
-	doc.Parse(json_data);
+	Json::Value root;
+	Json::Reader reader;
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse imageoperation's json.\n");
+		return RET_STATUS_JSON_PARSE_FAIL;
+	}
 
 	std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
 	std::chrono::duration<double> span = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
@@ -87,7 +113,7 @@ int DataTransferController::ParseImageOperationDataUseRapidJson(const char* json
 	int key_name1 = 0;
 	std::string key_name3("");
 
-	int ret = GetJsonDataInt(doc, JSON_KEY_IMAGE_TYPE, key_name1);
+	int ret = GetJsonDataInt(root, JSON_KEY_IMAGE_TYPE, key_name1);
 	
 	if (ret <= 0)
 	{

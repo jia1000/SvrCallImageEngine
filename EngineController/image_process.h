@@ -36,7 +36,7 @@
 #define JSON_KEY_WINDOW_LEVEL			"window_level"
 #define JSON_KEY_ROTATION_DIRECTION		"rotation_direction"
 
-
+#define  RET_STATUS_JSON_PARSE_FAIL			(-4)
 #define  RET_STATUS_JSON_VALUE_TYPE_ERROR	(-3)
 #define  RET_STATUS_JSON_NAME_NOT_FOUND		(-2)
 #define  RET_STATUS_FAILURE    				(-1)
@@ -150,7 +150,7 @@ protected:
 	std::string m_key3_str_paras;		// 不同图像操作类型的参数，参数含义会有不同。具体需要见产品设计
 	/// 窗口名称
 	std::string m_wnd_name;
-	rapidjson::Document doc;
+	Json::Value root;
 };
 
 //////////////////////////////////////////////////////////////////////////

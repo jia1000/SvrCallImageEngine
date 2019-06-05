@@ -65,7 +65,13 @@ int ImageProcessBase::Excute(std::string& out_image_data)
 
 void ImageProcessBase::SetDocument(const char* json_data) 
 { 
-	doc.Parse(json_data); 
+	Json::Reader reader;
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse json.\n");
+		return ;
+	}
 }
 
 bool ImageProcessBase::SaveDicomFile(
@@ -145,25 +151,25 @@ ImageMPRProcess::~ImageMPRProcess()
 int ImageMPRProcess::ParseJsonData()
 {
 	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataInt(doc, "image_type", params.image_type);
+	ret = GetJsonDataInt(root, "image_type", params.image_type);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "image_type", params.image_type);
+	ret = GetJsonDataInt(root, "image_type", params.image_type);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "blend_mode", params.blend_mode);
+	ret = GetJsonDataInt(root, "blend_mode", params.blend_mode);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "init_orientation", params.init_orientatioin);
+	ret = GetJsonDataInt(root, "init_orientation", params.init_orientatioin);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(doc, "clip_percent", params.clip_percent);
+	ret = GetJsonDataFloat(root, "clip_percent", params.clip_percent);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(doc, "thickness", params.thickness	);
+	ret = GetJsonDataFloat(root, "thickness", params.thickness	);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(doc, "spacing_between_slices", params.spacing_between_slices);
+	ret = GetJsonDataFloat(root, "spacing_between_slices", params.spacing_between_slices);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataString(doc, JSON_KEY_OUTPUT_PATH, params.output_path);
+	ret = GetJsonDataString(root, JSON_KEY_OUTPUT_PATH, params.output_path);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "window_width", params.window_width);
+	ret = GetJsonDataInt(root, "window_width", params.window_width);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "window_level", params.window_level);
+	ret = GetJsonDataInt(root, "window_level", params.window_level);
 	return ret;
 }
 
@@ -281,27 +287,27 @@ ImageVRProcess::~ImageVRProcess()
 int ImageVRProcess::ParseJsonData()
 {
 	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataInt(doc, "image_type", params.image_type);
+	ret = GetJsonDataInt(root, "image_type", params.image_type);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "blend_mode", params.blend_mode);
+	ret = GetJsonDataInt(root, "blend_mode", params.blend_mode);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "init_orientation", params.init_orientatioin);
+	ret = GetJsonDataInt(root, "init_orientation", params.init_orientatioin);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "generate_rule", params.generate_rule);
+	ret = GetJsonDataInt(root, "generate_rule", params.generate_rule);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(doc, "clip_percent", params.clip_percent);
+	ret = GetJsonDataFloat(root, "clip_percent", params.clip_percent);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "rotation_direction", params.rotation_direction);
+	ret = GetJsonDataInt(root, "rotation_direction", params.rotation_direction);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(doc, "rotation_angle", params.rotation_angle);
+	ret = GetJsonDataFloat(root, "rotation_angle", params.rotation_angle);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "output_image_number", params.output_image_number);
+	ret = GetJsonDataInt(root, "output_image_number", params.output_image_number);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataString(doc, JSON_KEY_OUTPUT_PATH, params.output_path);
+	ret = GetJsonDataString(root, JSON_KEY_OUTPUT_PATH, params.output_path);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "window_width", params.window_width);
+	ret = GetJsonDataInt(root, "window_width", params.window_width);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "window_level", params.window_level);
+	ret = GetJsonDataInt(root, "window_level", params.window_level);
 	return ret;
 }
 
@@ -432,23 +438,23 @@ ImageCPRProcess::~ImageCPRProcess()
 int ImageCPRProcess::ParseJsonData()
 {
 	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataInt(doc, "image_type"         	, params.image_type		);
+	ret = GetJsonDataInt(root, "image_type"         	, params.image_type		);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataString(doc, JSON_KEY_VESSEL_NAME , params.vessel_name		);	
+	ret = GetJsonDataString(root, JSON_KEY_VESSEL_NAME , params.vessel_name		);	
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "init_orientation"     , params.init_orientatioin);
+	ret = GetJsonDataInt(root, "init_orientation"     , params.init_orientatioin);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "rotation_direction"    , params.rotation_direction);
+	ret = GetJsonDataInt(root, "rotation_direction"    , params.rotation_direction);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(doc, "rotation_angle"      , params.rotation_angle	 );
+	ret = GetJsonDataFloat(root, "rotation_angle"      , params.rotation_angle	 );
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "output_image_number"   , params.output_image_number    );
+	ret = GetJsonDataInt(root, "output_image_number"   , params.output_image_number    );
 	if(ret <= 0) return ret;
-	ret = GetJsonDataString(doc, JSON_KEY_OUTPUT_PATH , params.output_path		      );
+	ret = GetJsonDataString(root, JSON_KEY_OUTPUT_PATH , params.output_path		      );
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "window_width"         , params.window_width		);
+	ret = GetJsonDataInt(root, "window_width"         , params.window_width		);
 	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(doc, "window_level"         , params.window_level		);
+	ret = GetJsonDataInt(root, "window_level"         , params.window_level		);
 	return ret;
 }
 

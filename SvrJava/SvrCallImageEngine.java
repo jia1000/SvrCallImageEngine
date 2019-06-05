@@ -10,7 +10,9 @@ class SvrCallImageEngine {
 
 	public static void main(String args[]) {
 		System.out.println("begin...............................................");
+		boolean opened = true;
         // 加载Series
+		if(opened)
 		{
 			String json_data = "{";
 			json_data += "\"dicom_path\":\"../build/\",";
@@ -23,6 +25,7 @@ class SvrCallImageEngine {
 			new SvrCallImageEngine().LoadSeries(json_data);
 		}
 		// 切换Series
+		if(opened)
 		{			
 			String json_data = "{";
 			json_data += "\"patient_id\":\"lilsi\",";
@@ -32,6 +35,7 @@ class SvrCallImageEngine {
 			new SvrCallImageEngine().SwitchSeries(json_data);
 		}
 		// 卸载Series
+		if(opened)
 		{
 			String json_data = "{";
 			json_data += "\"patient_id\":\"wangmazi\",";
@@ -40,7 +44,7 @@ class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().UnloadSeries(json_data);
 		}
-		boolean opened = true;
+		
 		if(opened)
 		{
 			// CPR 操作

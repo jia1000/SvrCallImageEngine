@@ -17,6 +17,7 @@
 
 #include <iostream> 
 
+#include "global_define.h"
 
 class ImageProcessBase;
 
@@ -26,11 +27,11 @@ public:
 	~DataTransferController();
 
 	static DataTransferController* GetInstance();
-	
-	int ParseLoadSeriesUseRapidJson(const char* json_data, std::string& js_data);
-	int ParseSwitchSeriesUseRapidJson(const char* json_data, std::string& js_data);
-	int ParseUnloadSeriesUseRapidJson(const char* json_data, std::string& js_data);	
-	int ParseImageOperationDataUseRapidJson(const char* json_data, std::string& js_data);
+
+	int ParseLoadSeries(const char* json_data, std::string& js_data);
+	int ParseSwitchSeries(const char* json_data, std::string& js_data);
+	int ParseUnloadSeries(const char* json_data, std::string& js_data);	
+	int ParseImageOperationData(const char* json_data, std::string& js_data);
 	
 private:
 	DataTransferController();
