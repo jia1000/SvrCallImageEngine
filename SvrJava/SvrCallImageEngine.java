@@ -10,7 +10,7 @@ class SvrCallImageEngine {
 
 	public static void main(String args[]) {
 		System.out.println("begin...............................................");
-        
+        // 加载Series
 		{
 			String json_data = "{";
 			json_data += "\"dicom_path\":\"../build/\",";
@@ -22,6 +22,7 @@ class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().LoadSeries(json_data);
 		}
+		// 切换Series
 		{			
 			String json_data = "{";
 			json_data += "\"patient_id\":\"lilsi\",";
@@ -30,6 +31,7 @@ class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().SwitchSeries(json_data);
 		}
+		// 卸载Series
 		{
 			String json_data = "{";
 			json_data += "\"patient_id\":\"wangmazi\",";
@@ -38,8 +40,9 @@ class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().UnloadSeries(json_data);
 		}
-		boolean is_open = true;
-		if(is_open){
+		boolean opened = true;
+		if(opened)
+		{
 			// CPR 操作
 			String json_data = "{";
 			json_data += "\"image_type\":2,"; 			// 图像类型
@@ -55,7 +58,8 @@ class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().ProcessSeries(json_data);
 		}
-		if(is_open){
+		if(opened)
+		{
 			// VR 和 VRMIP 操作
 			String json_data = "{";
 			json_data += "\"image_type\":0,"; 			// 图像类型
@@ -73,7 +77,8 @@ class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().ProcessSeries(json_data);
 		}
-		if(is_open){
+		if(opened)
+		{
 			// MPRMIP 操作
 			String json_data = "{";
 			json_data += "\"image_type\":1,"; 			// 图像类型
