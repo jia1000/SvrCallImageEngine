@@ -13,8 +13,6 @@
 
 using namespace rapidjson;
 
-#define  RET_STATUS_FAILURE    (-1)
-#define  RET_STATUS_SUCCESS    (1)
 
 
 JNIEXPORT jint JNICALL Java_SvrCallImageEngine_LoadSeries
@@ -27,11 +25,10 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_LoadSeries
   d.Parse(str);
 
 	std::string resource_data("");
-	if (DataTransferController::GetInstance()->
-				ParseLoadSeriesUseRapidJson(str, resource_data)) {
-		return RET_STATUS_FAILURE;
-	}
-	return RET_STATUS_SUCCESS; 
+	int ret = DataTransferController::GetInstance()->
+				ParseLoadSeriesUseRapidJson(str, resource_data);
+
+	return ret; 
 }
 
 JNIEXPORT jint JNICALL Java_SvrCallImageEngine_SwitchSeries
@@ -44,12 +41,10 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_SwitchSeries
   d.Parse(str);
 
 	std::string resource_data("");
-	if (DataTransferController::GetInstance()->
-				ParseSwitchSeriesUseRapidJson(str, resource_data)) {
-		return RET_STATUS_FAILURE;
-	}
-	
-	return RET_STATUS_SUCCESS; 
+	int ret = DataTransferController::GetInstance()->
+				ParseSwitchSeriesUseRapidJson(str, resource_data);
+
+	return ret;	 
 }
 
 JNIEXPORT jint JNICALL Java_SvrCallImageEngine_UnloadSeries
@@ -62,11 +57,10 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_UnloadSeries
   d.Parse(str);
 
 	std::string resource_data("");
-	if (DataTransferController::GetInstance()->
-				ParseUnloadSeriesUseRapidJson(str, resource_data)) {
-		return RET_STATUS_FAILURE;
-	}
-	return RET_STATUS_SUCCESS; 
+	int ret = DataTransferController::GetInstance()->
+				ParseUnloadSeriesUseRapidJson(str, resource_data);
+				
+	return ret; 
 }
 
 JNIEXPORT jint JNICALL Java_SvrCallImageEngine_ProcessSeries
@@ -79,9 +73,8 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_ProcessSeries
   d.Parse(str);
 
 	std::string resource_data("");
-	if (DataTransferController::GetInstance()->
-				ParseImageOperationDataUseRapidJson(str, resource_data)) {
-		return RET_STATUS_FAILURE;
-	}
-	return RET_STATUS_SUCCESS;  
+	int ret = DataTransferController::GetInstance()->
+				ParseImageOperationDataUseRapidJson(str, resource_data);
+
+	return ret;  
 }
