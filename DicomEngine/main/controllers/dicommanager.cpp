@@ -13,7 +13,7 @@
  */
 //#define _GINKGO_TRACE
 
-#define USE_V364_MY_DCMTK  // 187服务器和本地的DCMTK的版本不一致，导致它们的接口不一样。
+//#define USE_V364_MY_DCMTK  // 187服务器和本地的DCMTK的版本不一致，导致它们的接口不一样。
 
 
 //para la comprobacion de si esta correcto el fichero
