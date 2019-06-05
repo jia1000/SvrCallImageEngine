@@ -3,6 +3,7 @@
 #include "data_transfer_control.h"
 #include "image_process.h"
 #include "common_utils.h"
+#include "global_define.h"
 
 #include <algorithm>
 

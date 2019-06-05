@@ -2,16 +2,19 @@
 
 #include "image_process.h"
 #include "common_utils.h"
-
-#include <algorithm>
-//#include "json/json.h"
-#include <fstream> // ifstream, ifstream::in
+#include "global_define.h"
 
 #include "api/studycontextmy.h"
 #include "./DicomEngine/api/studycontextmy.h"
 #include "./DicomEngine/main/controllers/dicommanager.h"
 #include "./DicomEngine/api/dicom/dicomdataset.h"
 #include "./DicomEngine/api/dicom/dcmdictionary.h"
+
+#include <algorithm>
+#include <fstream> // ifstream, ifstream::in
+#include <unistd.h>   // 创建文件夹 access 依赖的头文件
+#include <sys/stat.h> // 创建文件夹 mkdir  依赖的头文件
+#include <sstream>
 
 #include "dcmtk/config/osconfig.h"
 #include "dcmtk/dcmdata/dctk.h"
@@ -20,15 +23,11 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcdict.h"
 
-#include <unistd.h>   // 创建文件夹 access 依赖的头文件
-#include <sys/stat.h> // 创建文件夹 mkdir  依赖的头文件
-#include <sstream>
-
 // only once
 //static DW::IO::IDicomReader* reader = NULL;
 static bool is_create_mpr_render = false;
 static bool is_create_vr_render  = false;
-static bool is_create_cpr_render  = false;
+static bool is_create_cpr_render = false;
 
 const std::string dicom_files_dir("C:\\ztest2\\dicom_test");
 const std::string nii_file_data_path("C:\\ztest2\\1203_0000.nii");

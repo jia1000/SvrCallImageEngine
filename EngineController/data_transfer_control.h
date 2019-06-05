@@ -17,7 +17,7 @@
 
 #include <iostream> 
 
-#include "global_define.h"
+
 
 class ImageProcessBase;
 

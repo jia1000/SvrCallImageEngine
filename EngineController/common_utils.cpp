@@ -1,6 +1,6 @@
 
 #include "common_utils.h"
-#include "image_process.h"
+#include "global_define.h"
 
 
 int GetJsonDataInt(const Json::Value& root, const std::string key, int& data)
