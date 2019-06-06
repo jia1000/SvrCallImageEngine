@@ -1,11 +1,11 @@
 #include <jni.h>
 #include <jsoncpp/json/json.h>
 #include <string.h>
-#include "SvrCallImageEngine.h"
+#include "com_deepwise_cta_component_rebuild_SvrCallImageEngine.h"
 
 #include "EngineController/data_transfer_control.h"
 
-JNIEXPORT jint JNICALL Java_SvrCallImageEngine_LoadSeries
+JNIEXPORT jint JNICALL Java_com_deepwise_cta_component_rebuild_SvrCallImageEngine_loadSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
@@ -17,7 +17,7 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_LoadSeries
 	return ret; 
 }
 
-JNIEXPORT jint JNICALL Java_SvrCallImageEngine_SwitchSeries
+JNIEXPORT jint JNICALL Java_com_deepwise_cta_component_rebuild_SvrCallImageEngine_switchSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
@@ -30,7 +30,7 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_SwitchSeries
 	return ret;	 
 }
 
-JNIEXPORT jint JNICALL Java_SvrCallImageEngine_UnloadSeries
+JNIEXPORT jint JNICALL Java_com_deepwise_cta_component_rebuild_SvrCallImageEngine_unloadSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  
@@ -43,7 +43,7 @@ JNIEXPORT jint JNICALL Java_SvrCallImageEngine_UnloadSeries
 	return ret; 
 }
 
-JNIEXPORT jint JNICALL Java_SvrCallImageEngine_ProcessSeries
+JNIEXPORT jint JNICALL Java_com_deepwise_cta_component_rebuild_SvrCallImageEngine_processSeries
   (JNIEnv *env, jobject obj , jstring string)
 {
 	const char* str = env->GetStringUTFChars(string, 0);  

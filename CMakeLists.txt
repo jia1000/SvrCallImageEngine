@@ -1,13 +1,22 @@
 cmake_minimum_required(VERSION 2.8.12)
 set (CMAKE_CXX_STANDARD 11)
 
+# set dcmtk flag
+set(DCMTK_ENABLE 1)
+
 ## 依赖库的包含 ##########################################################
 # DCMTK dependencies
-find_package(DCMTK REQUIRED NO_MODULE)
+if(DCMTK_ENABLE)    
+    find_package(DCMTK REQUIRED NO_MODULE)
+endif(DCMTK_ENABLE)
+
 
 ## 依赖文件的包含 #######################################################
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
-include_directories(${DCMTK_INCLUDE_DIRS}/)
+if(DCMTK_ENABLE)
+    include_directories(${DCMTK_INCLUDE_DIRS}/)
+endif(DCMTK_ENABLE)
+
 include_directories(./DicomEngine/)
 # jni.h文件的依赖
 #include_directories(/usr/local/include/jdk1.8.0_211/include/)
@@ -22,7 +31,10 @@ aux_source_directory(./DicomEngine/main/controllers 	DIRSRCSdicom_engine)
 
 ## 依赖库的链接 ##########################################################
 # 
-link_libraries(${DCMTK_LIBRARIES})
+if(DCMTK_ENABLE)
+    link_libraries(${DCMTK_LIBRARIES})
+endif(DCMTK_ENABLE)
+
 
 ## 生成库 ################################################################
 # 生成dicom_engine库
@@ -38,7 +50,7 @@ TARGET_LINK_LIBRARIES(controller  dicom_engine jsoncpp)
 
 # 生成SvrCallImageEngine库
 add_compile_options(-fPIC)
-add_library(SvrCallImageEngine SHARED SvrJava/SvrCallImageEngine.cpp SvrJava/SvrCallImageEngine.h)
+add_library(SvrCallImageEngine SHARED SvrJava/com_deepwise_cta_component_rebuild_SvrCallImageEngine.cpp)
 TARGET_LINK_LIBRARIES(SvrCallImageEngine  controller)
 
 # 指定生成目标

@@ -1,12 +1,14 @@
-class SvrCallImageEngine {
+package com.deepwise.cta.component.rebuild;
+
+public class SvrCallImageEngine {
 	static {
 		System.loadLibrary("SvrCallImageEngine");
 	}
 	
-	private native int LoadSeries(String str_json_data);
-	private native int SwitchSeries(String str_json_data);
-	private native int UnloadSeries(String str_json_data);
-	private native int ProcessSeries(String str_json_data);
+	private native int loadSeries(String str_json_data);
+	private native int switchSeries(String str_json_data);
+	private native int unloadSeries(String str_json_data);
+	private native int processSeries(String str_json_data);
 
 	public static void main(String args[]) {
 		System.out.println("begin...............................................");
@@ -22,7 +24,7 @@ class SvrCallImageEngine {
 			json_data += "\"study_uid\":\"111\",";
 			json_data += "\"series_uid\":\"222\"";
 			json_data += "}";
-			new SvrCallImageEngine().LoadSeries(json_data);
+			new SvrCallImageEngine().loadSeries(json_data);
 		}
 		// 切换Series
 		if(opened)
@@ -32,7 +34,7 @@ class SvrCallImageEngine {
 			json_data += "\"study_uid\":\"333\",";
 			json_data += "\"series_uid\":\"444\"";
 			json_data += "}";
-			new SvrCallImageEngine().SwitchSeries(json_data);
+			new SvrCallImageEngine().switchSeries(json_data);
 		}
 		// 卸载Series
 		if(opened)
@@ -42,7 +44,7 @@ class SvrCallImageEngine {
 			json_data += "\"study_uid\":\"555\",";
 			json_data += "\"series_uid\":\"666\"";
 			json_data += "}";
-			new SvrCallImageEngine().UnloadSeries(json_data);
+			new SvrCallImageEngine().unloadSeries(json_data);
 		}
 		
 		if(opened)
@@ -60,7 +62,7 @@ class SvrCallImageEngine {
 			json_data += "\"window_level\":400,"; 		// 窗位
 			json_data += "\"last_variable\":777"; 		// 
 			json_data += "}";
-			new SvrCallImageEngine().ProcessSeries(json_data);
+			new SvrCallImageEngine().processSeries(json_data);
 		}
 		if(opened)
 		{
@@ -79,7 +81,7 @@ class SvrCallImageEngine {
 			json_data += "\"window_level\":400,"; 		// 窗位
 			json_data += "\"last_variable\":888"; 		// 
 			json_data += "}";
-			new SvrCallImageEngine().ProcessSeries(json_data);
+			new SvrCallImageEngine().processSeries(json_data);
 		}
 		if(opened)
 		{
@@ -96,7 +98,7 @@ class SvrCallImageEngine {
 			json_data += "\"window_level\":400,"; 		// 窗位
 			json_data += "\"last_variable\":999"; 		// 
 			json_data += "}";
-			new SvrCallImageEngine().ProcessSeries(json_data);
+			new SvrCallImageEngine().processSeries(json_data);
 		}
         System.out.println("end..................................................");
 	}

@@ -3,9 +3,10 @@
 # 进入Java文件所在路径， 得到.class .h 
 clear
 cd SvrJava
-javac SvrCallImageEngine.java
-javah -jni SvrCallImageEngine
-
+#javac SvrCallImageEngine.java
+#javah -jni SvrCallImageEngine
+javac ./com/deepwise/cta/component/rebuild/SvrCallImageEngine.java
+javah -jni com.deepwise.cta.component.rebuild.SvrCallImageEngine
 # 返回到批处理文件所在的路径
 cd ..
 
@@ -19,7 +20,8 @@ cd ..
 
 # 再次进入到Java文件所在的路径，执行java的调用
 cd SvrJava
-java -Djava.library.path=../build SvrCallImageEngine
+# java -Djava.library.path=../build SvrCallImageEngine
+java -Djava.library.path=../build com.deepwise.cta.component.rebuild.SvrCallImageEngine
 
 # 返回到批处理文件所在的路径
 cd ..
