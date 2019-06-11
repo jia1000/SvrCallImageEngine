@@ -3,6 +3,8 @@
 #include "image_process.h"
 #include "common_utils.h"
 #include "global_define.h"
+#include "dicom_data_info.h"
+#include "data_transfer_control.h"
 
 #include "api/studycontextmy.h"
 #include "./DicomEngine/api/studycontextmy.h"
@@ -73,10 +75,17 @@ void ImageProcessBase::SetDocument(const char* json_data)
 	}
 }
 
+
 bool ImageProcessBase::SaveDicomFile(
 	const std::string src_path_file, const std::string dst_path_file)
 {
 	//printf("SaveDicomFile()\n");
+
+	SeriesDataInfo data_info(src_path_file, false);
+
+	double thickeness = 1.1f;
+	data_info.GetTag(GKDCM_SliceThickness, thickeness);
+	printf("thickness : %.5f\n", thickeness);
 
 	GIL::DICOM::DicomDataset base;
 	GIL::DICOM::IDICOMManager*	pDICOMManager = new GIL::DICOM::DICOMManager();
@@ -215,7 +224,12 @@ int ImageMPRProcess::Excute(std::string& out_image_data)
 		SaveDicomFile(src_path_file, dst_file_path);
 	}
 
-#if 0	
+#if 1
+	SeriesDataInfo series_info(DataTransferController::series_process_paras.dicom_path , true);
+
+	int len = series_info.GetPixelDataLength();
+	printf("dicom lenght : %d\n", len);
+#else
 	// 暂时，先从本地读取Dicom文件
 	GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
 	const std::string path_file("C:\\ztest2\\dicom_test\\413");

@@ -18,6 +18,19 @@
 #include <iostream> 
 
 
+struct SeriesProcessParas
+{
+	std::string dicom_path;
+	std::string mask_path;
+	std::string curve_path;
+	std::string patient_id;
+	std::string study_uid;
+	std::string series_uid;
+	SeriesProcessParas()
+	{
+
+	}
+};
 
 class ImageProcessBase;
 
@@ -38,4 +51,6 @@ private:
 	static DataTransferController* instance;
 	
 	ImageProcessBase* image_process;
+public:
+	static SeriesProcessParas series_process_paras;
 };

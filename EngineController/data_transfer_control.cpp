@@ -12,6 +12,7 @@
 #include <chrono>
 
 DataTransferController* DataTransferController::instance = nullptr;
+SeriesProcessParas DataTransferController::series_process_paras;
 
 DataTransferController* DataTransferController::GetInstance()
 {
@@ -47,9 +48,20 @@ int DataTransferController::ParseLoadSeries(const char* json_data, std::string& 
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
 	printf("ret 2 \n");
-	std::string data("");
-	int ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, data);
-	printf("load series dicom path : %s\n", data.c_str());
+	int ret = RET_STATUS_FAILURE;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.dicom_path);
+	if(ret <= 0) return ret;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.mask_path);
+	if(ret <= 0) return ret;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.curve_path);
+	if(ret <= 0) return ret;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.patient_id);
+	if(ret <= 0) return ret;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.study_uid);
+	if(ret <= 0) return ret;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.series_uid);
+
+	printf("load series dicom path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
 
 	return ret;
 }
@@ -66,9 +78,10 @@ int DataTransferController::ParseSwitchSeries(const char* json_data, std::string
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
 	
-	std::string data("");
-	int ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, data);
-	printf("switch series dicom path : %s\n", data.c_str());
+	int ret = RET_STATUS_FAILURE;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.dicom_path);
+	if(ret <= 0) return ret;
+	printf("switch series dicom path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
 
 	return ret;
 }
@@ -85,9 +98,10 @@ int DataTransferController::ParseUnloadSeries(const char* json_data, std::string
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
 	
-	std::string data("");
-	int ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, data);
-	printf("unload series dicom path : %s\n", data.c_str());
+	int ret = RET_STATUS_FAILURE;
+	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.dicom_path);
+	if(ret <= 0) return ret;
+	printf("unload series dicom path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
 
 	return ret;
 }

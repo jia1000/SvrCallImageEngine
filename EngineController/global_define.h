@@ -15,6 +15,11 @@
 #pragma once
 //#define USE_JSONCPP   1
 #define JSON_KEY_DICOM_PATH				"dicom_path"
+#define JSON_KEY_MASK_PATH				"mask_path"
+#define JSON_KEY_CURVE_PATH				"curve_path"
+#define JSON_KEY_PATIENT_ID				"patient_id"
+#define JSON_KEY_STUDY_UID				"study_uid"
+#define JSON_KEY_SERIRES_UID			"series_uid"
 
 #define JSON_KEY_IMAGE_TYPE 			"image_type"
 #define JSON_KEY_VESSEL_NAME			"vessel_name"
