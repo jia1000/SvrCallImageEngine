@@ -22,7 +22,7 @@
 #include <map>
 
 const int POSITION_LENGHT = 3;
-typedef struct DicomInfo
+struct DicomInfo
 {
 	GIL::DICOM::DicomDataset base;
 	GIL::DICOM::TagPrivadoUndefined tagBinary;
@@ -41,6 +41,8 @@ public:
 
 	unsigned char* GetPixelDataBuffer();
 	unsigned int GetPixelDataLength();
+	static bool SaveDicomFile(const std::string src_path_file, const std::string dst_path_file);
+	
 private:
 	int ReadFolder();
 	int ReadFile(const std::string& path);

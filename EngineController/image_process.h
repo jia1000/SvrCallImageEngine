@@ -18,29 +18,25 @@
 #include <vector>
 
 #include "common_utils.h"
+#include "global_define.h"
 
 class ImageProcessBase
 {
 public:
-	ImageProcessBase(std::string str_paras);
+	ImageProcessBase();
 	virtual ~ImageProcessBase();
 
-	virtual int Excute(std::string& out_image_data);
-	void SetDocument(const char* json_data);
+	virtual int Excute(const char* json_data)
+	{
+		return RET_STATUS_SUCCESS;
+	}
+	virtual int ParseJsonData() 
+	{
+		return RET_STATUS_SUCCESS;
+	}
 
 protected:
-	bool SaveDicomFile(const std::string src_path_file, const std::string dst_path_file);
-	
-	virtual int ParseJsonData();
-
-	void SplitString(const std::string& src, std::vector<std::string>& v, const std::string& c);
-	void TryCreateDir(const std::string& dir);
-	
-	//int req_type;
-	std::string m_key1_str_req_type;	// 请求类型，如MPR VR CPR等
-	std::string m_key2_str_opertation;	// 不同图像操作类型，如， zoom rotate move等
-	std::string m_key3_str_paras;		// 不同图像操作类型的参数，参数含义会有不同。具体需要见产品设计
-	/// 窗口名称
+	// 窗口名称
 	std::string m_wnd_name;
 	Json::Value root;
 };
@@ -50,12 +46,12 @@ protected:
 class ImageMPRProcess : public ImageProcessBase
 {
 public:
-	ImageMPRProcess(std::string str_paras);
+	ImageMPRProcess();
 	~ImageMPRProcess();
-	virtual int Excute(std::string& out_image_data); // 图像缩放后数据，base64编码
+	virtual int Excute(const char* json_data); // 图像缩放后数据，base64编码
 
 private:
-	virtual int ParseJsonData();	
+	virtual int ParseJsonData(const char* json_data);	
 	
 	struct stMPRMIPImageParams
 	{
@@ -89,12 +85,12 @@ private:
 class ImageVRProcess : public ImageProcessBase
 {
 public:
-	ImageVRProcess(std::string str_paras);
+	ImageVRProcess();
 	~ImageVRProcess();
-	virtual int Excute(std::string& out_image_data); // 图像缩放后数据，base64编码
+	virtual int Excute(const char* json_data); // 图像缩放后数据，base64编码
 
 private:
-	virtual int ParseJsonData();
+	virtual int ParseJsonData(const char* json_data);
 	struct stVRImageParams
 	{
 		stVRImageParams()
@@ -131,12 +127,12 @@ private:
 class ImageCPRProcess : public ImageProcessBase
 {
 public:
-	ImageCPRProcess(std::string str_paras);
+	ImageCPRProcess();
 	~ImageCPRProcess();
-	virtual int Excute(std::string& out_image_data); // 图像缩放后数据，base64编码
+	virtual int Excute(const char* json_data); // 图像缩放后数据，base64编码
 
 private:
-	virtual int ParseJsonData();
+	virtual int ParseJsonData(const char* json_data);
 	std::string curve_id_;
 	struct stCPRImageParams
 	{

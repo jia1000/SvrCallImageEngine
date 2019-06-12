@@ -184,3 +184,36 @@ void SeriesDataInfo::GetTag(const std::string& tag, std::string& s)
         }
     }
 }
+
+bool SeriesDataInfo::SaveDicomFile(
+	const std::string src_path_file, const std::string dst_path_file)
+{
+	SeriesDataInfo data_info(src_path_file, false);
+
+	double thickeness = 1.1f;
+	data_info.GetTag(GKDCM_SliceThickness, thickeness);
+	//printf("thickness : %.5f\n", thickeness);
+
+	GIL::DICOM::DicomDataset base;
+	GIL::DICOM::IDICOMManager*	pDICOMManager = new GIL::DICOM::DICOMManager();
+	if(pDICOMManager) 
+	{
+		pDICOMManager->CargarFichero(src_path_file, base);
+		std::string str_tag("");
+		base.getTag(GKDCM_PatientName , str_tag);
+		//printf("patient name : %s(use DicomManager)\n", str_tag.c_str());
+
+		// modify one tag
+		GIL::DICOM::DicomDataset modify_base;		
+		modify_base.tags["0010|0010"] = "test 555";
+		pDICOMManager->ActualizarJerarquia(modify_base);
+		
+		// save dicom file
+		pDICOMManager->AlmacenarFichero(dst_path_file);
+	
+		delete pDICOMManager;
+		pDICOMManager = NULL;
+		return true;
+	}
+	return false;
+}

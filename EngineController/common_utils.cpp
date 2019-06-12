@@ -2,6 +2,8 @@
 #include "common_utils.h"
 #include "global_define.h"
 
+#include <unistd.h>   // 创建文件夹 access 依赖的头文件
+#include <sys/stat.h> // 创建文件夹 mkdir  依赖的头文件
 
 int GetJsonDataInt(const Json::Value& root, const std::string key, int& data)
 {	
@@ -63,4 +65,40 @@ int GetJsonDataFloat(const Json::Value& root, const std::string key, float& data
 		}		
 	}
 	return RET_STATUS_FAILURE;	
+}
+
+void SplitString(const std::string& src, std::vector<std::string>& v, const std::string& c)
+{
+	std::string::size_type pos1, pos2;
+	pos2 = src.find(c);
+	pos1 = 0;
+	while(std::string::npos != pos2)
+	{
+		v.push_back(src.substr(pos1, pos2 - pos1));
+		pos1 = pos2 + c.size();
+		pos2 = src.find(c, pos1);
+	}
+	if(pos1 != src.length()) 
+	{
+		v.push_back(src.substr(pos1) );
+	}
+}
+void TryCreateDir(const std::string& dir)
+{
+	std::vector<std::string> v;
+	SplitString(dir, v, "/");
+
+	std::string dst_dir_path("" );
+	for(auto iter = v.begin(); iter != v.end(); ++iter)
+	{
+		// 创建文件夹
+		dst_dir_path += *iter;
+		dst_dir_path += "/";
+		if( 0 != access(dst_dir_path.c_str(), 0))
+		{
+			printf("create folder: %s\n", dst_dir_path.c_str());
+			// 如果文件夹不存在，创建
+			mkdir(dst_dir_path.c_str(), 0755);
+		}
+	}
 }

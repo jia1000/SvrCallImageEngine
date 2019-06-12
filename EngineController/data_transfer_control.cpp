@@ -3,12 +3,10 @@
 #include "data_transfer_control.h"
 #include "image_process.h"
 #include "common_utils.h"
-#include "global_define.h"
 
 #include <algorithm>
 
 #include <fstream> // ifstream, ifstream::in
-//#include <io.h>
 #include <chrono>
 
 DataTransferController* DataTransferController::instance = nullptr;
@@ -23,31 +21,52 @@ DataTransferController* DataTransferController::GetInstance()
 
 DataTransferController::DataTransferController()
 {
-	image_process = NULL;
+	for (size_t i = 0; i < JSON_VALUE_REQUEST_TYPE_MAX; i++)
+	{		
+		switch (i)
+		{
+		case JSON_VALUE_REQUEST_TYPE_VR:
+			arr_image_process[i] = new ImageVRProcess();
+			break;
+		case JSON_VALUE_REQUEST_TYPE_MPR:
+			arr_image_process[i] = new ImageMPRProcess();
+			break;
+		case JSON_VALUE_REQUEST_TYPE_CPR:
+			arr_image_process[i] = new ImageCPRProcess();
+			break;
+		default:
+			break;
+		}				
+	}	
 }
 
 
 DataTransferController::~DataTransferController()
 {
 	instance = nullptr;
+
+	for (size_t i = 0; i < JSON_VALUE_REQUEST_TYPE_MAX; i++)
+	{
+		if (arr_image_process[i])
+		{
+			delete arr_image_process[i];
+			arr_image_process[i] = nullptr;
+		}		
+	}	
 }
 
-int DataTransferController::ParseLoadSeries(const char* json_data, std::string& js_data)
+int DataTransferController::ParseLoadSeries(const char* json_data)
 {
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
-	printf("ret 01 \n");
-
 	Json::Value root;
 	Json::Reader reader;
-
-	printf("ret 1 \n");
 
 	if (!reader.parse(json_data, root))
 	{
 		printf("fail to parse loadserires's json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
-	printf("ret 2 \n");
+	
 	int ret = RET_STATUS_FAILURE;
 	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.dicom_path);
 	if(ret <= 0) return ret;
@@ -66,7 +85,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data, std::string& 
 	return ret;
 }
 
-int DataTransferController::ParseSwitchSeries(const char* json_data, std::string& js_data)
+int DataTransferController::ParseSwitchSeries(const char* json_data)
 {
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
 	Json::Value root;
@@ -86,7 +105,7 @@ int DataTransferController::ParseSwitchSeries(const char* json_data, std::string
 	return ret;
 }
 
-int DataTransferController::ParseUnloadSeries(const char* json_data, std::string& js_data)
+int DataTransferController::ParseUnloadSeries(const char* json_data)
 {
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
 	Json::Value root;
@@ -106,7 +125,7 @@ int DataTransferController::ParseUnloadSeries(const char* json_data, std::string
 	return ret;
 }
 
-int DataTransferController::ParseImageOperationData(const char* json_data, std::string& js_data)
+int DataTransferController::ParseImageOperationData(const char* json_data)
 {
 	std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
@@ -126,41 +145,20 @@ int DataTransferController::ParseImageOperationData(const char* json_data, std::
 
 	// 获得关键性的参数
 	int key_name1 = 0;
-	std::string key_name3("");
-
 	int ret = GetJsonDataInt(root, JSON_KEY_IMAGE_TYPE, key_name1);
 	
 	if (ret <= 0)
 	{
 		return ret;
+	}		
+
+	if (key_name1 >= 0 && key_name1 < JSON_VALUE_REQUEST_TYPE_MAX)
+	{
+		if (arr_image_process[key_name1])
+		{
+			arr_image_process[key_name1]->Excute(json_data);
+		}		
 	}	
-
-	if(image_process) {
-		delete image_process;
-		image_process = NULL;
-	}
-
-	std::string out_image_data = "";
-
-	if (key_name1 == JSON_VALUE_REQUEST_TYPE_VR) {
-		image_process = new ImageVRProcess(key_name3);
-		image_process->SetDocument(json_data);
-		image_process->Excute(out_image_data);
-	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_MPR) {
-		image_process = new ImageMPRProcess(key_name3);
-		image_process->SetDocument(json_data);
-		image_process->Excute(out_image_data);
-	} else if (key_name1 == JSON_VALUE_REQUEST_TYPE_CPR) {
-		image_process = new ImageCPRProcess(key_name3);
-		image_process->SetDocument(json_data);
-		image_process->Excute(out_image_data);		
-	} else {	
-		printf("switch other..\n");	
-		return true;
-	} 
-
-	// 模拟再发送给浏览器	
 
 	return true;
 }
-

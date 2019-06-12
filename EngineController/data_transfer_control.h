@@ -14,6 +14,7 @@
 ****************************************************************************************************/
 
 #pragma once
+#include "global_define.h"
 
 #include <iostream> 
 
@@ -41,16 +42,16 @@ public:
 
 	static DataTransferController* GetInstance();
 
-	int ParseLoadSeries(const char* json_data, std::string& js_data);
-	int ParseSwitchSeries(const char* json_data, std::string& js_data);
-	int ParseUnloadSeries(const char* json_data, std::string& js_data);	
-	int ParseImageOperationData(const char* json_data, std::string& js_data);
+	int ParseLoadSeries(const char* json_data);
+	int ParseSwitchSeries(const char* json_data);
+	int ParseUnloadSeries(const char* json_data);	
+	int ParseImageOperationData(const char* json_data);
 	
 private:
 	DataTransferController();
 	static DataTransferController* instance;
 	
-	ImageProcessBase* image_process;
+	ImageProcessBase* arr_image_process[JSON_VALUE_REQUEST_TYPE_MAX];
 public:
 	static SeriesProcessParas series_process_paras;
 };

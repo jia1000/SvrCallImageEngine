@@ -14,8 +14,7 @@
 
 #include <algorithm>
 #include <fstream> // ifstream, ifstream::in
-#include <unistd.h>   // 创建文件夹 access 依赖的头文件
-#include <sys/stat.h> // 创建文件夹 mkdir  依赖的头文件
+
 #include <sstream>
 
 #include "dcmtk/config/osconfig.h"
@@ -43,9 +42,7 @@ const std::string series_name_cpr("series1");
 
 
 
-ImageProcessBase::ImageProcessBase(std::string str_paras)
-	: m_key3_str_paras(str_paras)
-	//, req_type(0)
+ImageProcessBase::ImageProcessBase()
 {
 }
 
@@ -54,101 +51,9 @@ ImageProcessBase::~ImageProcessBase()
 	
 }
 
-int ImageProcessBase::ParseJsonData()
-{
-	return RET_STATUS_SUCCESS;
-}
-
-int ImageProcessBase::Excute(std::string& out_image_data)
-{
-	return RET_STATUS_SUCCESS;
-}
-
-void ImageProcessBase::SetDocument(const char* json_data) 
-{ 
-	Json::Reader reader;
-
-	if (!reader.parse(json_data, root))
-	{
-		printf("fail to parse json.\n");
-		return ;
-	}
-}
-
-
-bool ImageProcessBase::SaveDicomFile(
-	const std::string src_path_file, const std::string dst_path_file)
-{
-	//printf("SaveDicomFile()\n");
-
-	SeriesDataInfo data_info(src_path_file, false);
-
-	double thickeness = 1.1f;
-	data_info.GetTag(GKDCM_SliceThickness, thickeness);
-	printf("thickness : %.5f\n", thickeness);
-
-	GIL::DICOM::DicomDataset base;
-	GIL::DICOM::IDICOMManager*	pDICOMManager = new GIL::DICOM::DICOMManager();
-	if(pDICOMManager) 
-	{
-		pDICOMManager->CargarFichero(src_path_file, base);
-		std::string str_tag("");
-		base.getTag(GKDCM_PatientName , str_tag);
-		//printf("patient name : %s(use DicomManager)\n", str_tag.c_str());
-
-		// modify one tag
-		GIL::DICOM::DicomDataset modify_base;		
-		modify_base.tags["0010|0010"] = "test 555";
-		pDICOMManager->ActualizarJerarquia(modify_base);
-		
-		// save dicom file
-		pDICOMManager->AlmacenarFichero(dst_path_file);
-	
-		delete pDICOMManager;
-		pDICOMManager = NULL;
-		return true;
-	}
-	return false;
-}
-void ImageProcessBase::SplitString(const std::string& src, std::vector<std::string>& v, const std::string& c)
-{
-	std::string::size_type pos1, pos2;
-	pos2 = src.find(c);
-	pos1 = 0;
-	while(std::string::npos != pos2)
-	{
-		v.push_back(src.substr(pos1, pos2 - pos1));
-		pos1 = pos2 + c.size();
-		pos2 = src.find(c, pos1);
-	}
-	if(pos1 != src.length()) 
-	{
-		v.push_back(src.substr(pos1) );
-	}
-}
-void ImageProcessBase::TryCreateDir(const std::string& dir)
-{
-	std::vector<std::string> v;
-	SplitString(dir, v, "/");
-
-	std::string dst_dir_path("" );
-	for(auto iter = v.begin(); iter != v.end(); ++iter)
-	{
-		// 创建文件夹
-		dst_dir_path += *iter;
-		dst_dir_path += "/";
-		if( 0 != access(dst_dir_path.c_str(), 0))
-		{
-			printf("create folder: %s\n", dst_dir_path.c_str());
-			// 如果文件夹不存在，创建
-			mkdir(dst_dir_path.c_str(), 0755);
-		}
-	}
-}
-
 //////////////////////////////////////////////////////////////////////////
-ImageMPRProcess::ImageMPRProcess(std::string str_paras)
-	: ImageProcessBase(str_paras)
+ImageMPRProcess::ImageMPRProcess()
+	: ImageProcessBase()
 {
 	m_wnd_name = "mpr1";
 }
@@ -156,8 +61,17 @@ ImageMPRProcess::ImageMPRProcess(std::string str_paras)
 ImageMPRProcess::~ImageMPRProcess()
 {
 }
-int ImageMPRProcess::ParseJsonData()
-{
+
+int ImageMPRProcess::ParseJsonData(const char* json_data)
+{	
+	Json::Reader reader;
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse json.\n");
+		return RET_STATUS_JSON_PARSE_FAIL;
+	}
+
 	int ret = RET_STATUS_FAILURE;
 	ret = GetJsonDataInt(root, "image_type", params.image_type);
 	if(ret <= 0) return ret;
@@ -181,9 +95,9 @@ int ImageMPRProcess::ParseJsonData()
 	return ret;
 }
 
-int ImageMPRProcess::Excute(std::string& out_image_data)
+int ImageMPRProcess::Excute(const char* json_data)
 {
-	int ret = ParseJsonData();
+	int ret = ParseJsonData(json_data);
 	if (ret <= 0 ) {
 		printf("ret mpr excute : %d\n", ret);
 		return ret;
@@ -221,7 +135,7 @@ int ImageMPRProcess::Excute(std::string& out_image_data)
 		dst_file_path += str_index;
 		dst_file_path += ".dcm";
 		//printf("path : %s\n", dst_file_path.c_str());
-		SaveDicomFile(src_path_file, dst_file_path);
+		SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
 	}
 
 #if 1
@@ -238,8 +152,7 @@ int ImageMPRProcess::Excute(std::string& out_image_data)
 	// 1.read dcm image from directory
 	
 	std::string::size_type sz;
-	double zoom_scale = std::stod(m_key3_str_paras, &sz);
-
+	
 	if (!reader) {
 		reader = new VtkDcmLoader();
 		reader->LoadDirectory(dicom_files_dir.c_str());	// only once
@@ -260,17 +173,6 @@ int ImageMPRProcess::Excute(std::string& out_image_data)
 		is_create_mpr_render = true;
 	}
 
-	if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_ZOOM) {
-		RenderFacade::Get()->Zoom(m_wnd_name, zoom_scale);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_ROTATE) {
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_MOVE) {
-		static int slice_index = 100;
-		slice_index += zoom_scale * 10;
-		float pos[3] = { slice_index, 255.0f, 189.0f};
-		RenderFacade::Get()->MoveTo(m_wnd_name, pos);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_SKIP) {
-	}
-
 	// 3.get imaging object through builder. then go render and get show buffer through imaging object
 	HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
 	BITMAP  bitmap ;
@@ -286,9 +188,8 @@ int ImageMPRProcess::Excute(std::string& out_image_data)
 	return true;
 }
 //////////////////////////////////////////////////////////////////////////
-ImageVRProcess::ImageVRProcess(std::string str_paras)
-	: ImageProcessBase(str_paras)
-	//, reader(NULL)
+ImageVRProcess::ImageVRProcess()
+	: ImageProcessBase()
 {
 	m_wnd_name = "vr";
 }
@@ -297,8 +198,16 @@ ImageVRProcess::~ImageVRProcess()
 {
 }
 
-int ImageVRProcess::ParseJsonData()
-{
+int ImageVRProcess::ParseJsonData(const char* json_data)
+{	
+	Json::Reader reader;
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse json.\n");
+		return RET_STATUS_JSON_PARSE_FAIL;
+	}
+
 	int ret = RET_STATUS_FAILURE;
 	ret = GetJsonDataInt(root, "image_type", params.image_type);
 	if(ret <= 0) return ret;
@@ -324,9 +233,9 @@ int ImageVRProcess::ParseJsonData()
 	return ret;
 }
 
-int ImageVRProcess::Excute(std::string& out_image_data)
+int ImageVRProcess::Excute(const char* json_data)
 {
-	int ret = ParseJsonData();
+	int ret = ParseJsonData(json_data);
 	if (ret <= 0 ) {
 		printf("ret vr excute : %d\n", ret);
 		return ret;
@@ -376,7 +285,7 @@ int ImageVRProcess::Excute(std::string& out_image_data)
 		dst_file_path += str_angle;
 		dst_file_path += ".dcm";
 		//printf("path : %s\n", dst_file_path.c_str());
-		SaveDicomFile(src_path_file, dst_file_path);
+		SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
 	}
 
 #if 0
@@ -388,8 +297,7 @@ int ImageVRProcess::Excute(std::string& out_image_data)
 	// 1.read dcm image from directory
 	
 	std::string::size_type sz;
-	double zoom_scale = std::stod(m_key3_str_paras, &sz);
-
+	
 	if (!reader) {
 		reader = new VtkDcmLoader();
 		reader->LoadDirectory(dicom_files_dir.c_str());	// only once
@@ -409,21 +317,7 @@ int ImageVRProcess::Excute(std::string& out_image_data)
 		RenderFacade::Get()->RenderControl(m_wnd_name);
 
 		is_create_vr_render = true;
-	}
-
-	if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_ZOOM) {
-		RenderFacade::Get()->Zoom(m_wnd_name, zoom_scale);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_ROTATE) {
-		float f[3] = { 0.0,1.0,0.0 };
-		zoom_scale *= 100;
-		RenderFacade::Get()->Rotate(m_wnd_name, zoom_scale, f);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_MOVE) {
-		static int slice_index = 100;
-		slice_index += zoom_scale * 10;
-		float pos[3] = { slice_index, 255.0f, 189.0f};
-		RenderFacade::Get()->MoveTo(m_wnd_name, pos);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_SKIP) {
-	}
+	}	
 
 	// 3.get imaging object through builder. then go render and get show buffer through imaging object
 	HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
@@ -438,8 +332,8 @@ int ImageVRProcess::Excute(std::string& out_image_data)
 }
 
 //////////////////////////////////////////////////////////////////////////
-ImageCPRProcess::ImageCPRProcess(std::string str_paras)
-	: ImageProcessBase(str_paras)
+ImageCPRProcess::ImageCPRProcess()
+	: ImageProcessBase()
 {
 	m_wnd_name = "cpr";
 }
@@ -448,8 +342,16 @@ ImageCPRProcess::~ImageCPRProcess()
 {
 }
 
-int ImageCPRProcess::ParseJsonData()
+int ImageCPRProcess::ParseJsonData(const char* json_data)
 {
+	Json::Reader reader;
+
+	if (!reader.parse(json_data, root))
+	{
+		printf("fail to parse json.\n");
+		return RET_STATUS_JSON_PARSE_FAIL;
+	}
+
 	int ret = RET_STATUS_FAILURE;
 	ret = GetJsonDataInt(root, "image_type"         	, params.image_type		);
 	if(ret <= 0) return ret;
@@ -472,9 +374,9 @@ int ImageCPRProcess::ParseJsonData()
 }
 
 
-int ImageCPRProcess::Excute(std::string& out_image_data)
+int ImageCPRProcess::Excute(const char* json_data)
 {	
-	int ret = ParseJsonData();
+	int ret = ParseJsonData(json_data);
 	if (ret <= 0 ) {
 		printf("ret cpr excute : %d\n", ret);
 		return ret;
@@ -507,15 +409,14 @@ int ImageCPRProcess::Excute(std::string& out_image_data)
 		dst_file_path += str_angle;
 		dst_file_path += ".dcm";
 		//printf("path : %s\n", dst_file_path.c_str());
-		SaveDicomFile(src_path_file, dst_file_path);
+		SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
 	}
 
 #if 0
 	// 1.read dcm image from directory
 
 	std::string::size_type sz;
-	double zoom_scale = std::stod(m_key3_str_paras, &sz);
-
+	
 	if (!reader) {
 		reader = new NiiImageLoader();
 		std::vector<const char*> files;
@@ -559,20 +460,6 @@ int ImageCPRProcess::Excute(std::string& out_image_data)
 		RenderFacade::Get()->RenderControl(m_wnd_name);
 
 		is_create_cpr_render = true;
-	}
-
-	if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_ZOOM) {
-		RenderFacade::Get()->Zoom(m_wnd_name, zoom_scale);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_ROTATE) {
-		float f[3] = { 0.0,1.0,0.0 };
-		zoom_scale *= 100;
-		RenderFacade::Get()->Rotate(m_wnd_name, zoom_scale, f);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_MOVE) {
-		static int slice_index = 100;
-		slice_index += zoom_scale * 10;
-		float pos[3] = { slice_index, 255.0f, 189.0f};
-		RenderFacade::Get()->MoveTo(m_wnd_name, pos);
-	} else if (m_key2_str_opertation == JSON_VALUE_IMAGE_OPERATION_SKIP) {
 	}
 
 	// 3.get imaging object through builder. then go render and get show buffer through imaging object
