@@ -47,8 +47,6 @@ private:
 	int ReadFolder();
 	int ReadFile(const std::string& path);
 	const std::string m_src_path;
-	//GIL::DICOM::DicomDataset base;
-	//GIL::DICOM::IDICOMManager*	pDICOMManager;
 
 	std::map<std::string, DicomInfo> m_bases;
 	unsigned char* m_pixel_data_buffer;

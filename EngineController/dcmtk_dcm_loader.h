@@ -18,6 +18,8 @@
 
 #include <vector>
 
+class VolData;
+
 class DcmtkDcmLoader // public IDicomReader
 {
 public:
@@ -30,5 +32,5 @@ public:
 	//VolData* GetData() ;//override;
 	void Close() ;//override;
 private:
-	
+	VolData* volume_data_;
 };

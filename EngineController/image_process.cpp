@@ -3,14 +3,16 @@
 #include "image_process.h"
 #include "common_utils.h"
 #include "global_define.h"
-#include "dicom_data_info.h"
+#include "series_data_info.h"
 #include "data_transfer_control.h"
 
 #include "api/studycontextmy.h"
-#include "./DicomEngine/api/studycontextmy.h"
-#include "./DicomEngine/main/controllers/dicommanager.h"
-#include "./DicomEngine/api/dicom/dicomdataset.h"
-#include "./DicomEngine/api/dicom/dcmdictionary.h"
+#include "api/studycontextmy.h"
+#include "main/controllers/dicommanager.h"
+#include "api/dicom/dicomdataset.h"
+#include "api/dicom/dcmdictionary.h"
+
+#include "dcmtk_dcm_loader.h"
 
 #include <algorithm>
 #include <fstream> // ifstream, ifstream::in
@@ -25,7 +27,8 @@
 #include "dcmtk/dcmdata/dcdict.h"
 
 // only once
-//static DW::IO::IDicomReader* reader = NULL;
+// static DW::IO::IDicomReader* reader = NULL;
+static DcmtkDcmLoader* reader = nullptr;
 static bool is_create_mpr_render = false;
 static bool is_create_vr_render  = false;
 static bool is_create_cpr_render = false;
@@ -47,8 +50,7 @@ ImageProcessBase::ImageProcessBase()
 }
 
 ImageProcessBase::~ImageProcessBase()
-{
-	
+{	
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -143,24 +145,24 @@ int ImageMPRProcess::Excute(const char* json_data)
 
 	int len = series_info.GetPixelDataLength();
 	printf("dicom lenght : %d\n", len);
-#else
+
 	// 暂时，先从本地读取Dicom文件
-	GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
-	const std::string path_file("C:\\ztest2\\dicom_test\\413");
-	my->ReadDicomFile(path_file);
+	// GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
+	// const std::string path_file("C:\\ztest2\\dicom_test\\413");
+	// my->ReadDicomFile(path_file);
 
 	// 1.read dcm image from directory
 	
 	std::string::size_type sz;
 	
 	if (!reader) {
-		reader = new VtkDcmLoader();
-		reader->LoadDirectory(dicom_files_dir.c_str());	// only once
-		VolData* vol_data = reader->GetData();
-		if (vol_data == NULL) return false;
-		ImageDataSource::Get()->AddVolData(series_name_mpr, vol_data);
+		reader = new DcmtkDcmLoader();
+		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
+		//VolData* vol_data = reader->GetData();
+		//if (vol_data == NULL) return false;
+		//ImageDataSource::Get()->AddVolData(series_name_mpr, vol_data);
 	}
-
+#else
 	if (!is_create_mpr_render) {
 		// 2.create all image control
 		RenderSource::Get()->CreateRenderControl(m_wnd_name, RenderControlType::MPR);	// only once

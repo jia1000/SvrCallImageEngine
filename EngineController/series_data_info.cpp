@@ -1,5 +1,5 @@
 
-#include "dicom_data_info.h"
+#include "series_data_info.h"
 
 #include <string.h>
 
@@ -38,7 +38,7 @@ unsigned char* SeriesDataInfo::GetPixelDataBuffer()
     m_pixel_data_buffer = new unsigned char[m_pixel_data_length];
     if (!m_pixel_data_buffer)
     {
-        printf("memory too large, can't asigned space.\n");
+        printf("memory too large, can't assigne space.\n");
         return nullptr;
     }
     
