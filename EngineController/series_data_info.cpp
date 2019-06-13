@@ -61,6 +61,8 @@ unsigned int SeriesDataInfo::GetPixelDataLength()
     int total_len = 0;
 	for (auto iter = m_bases.begin(); iter != m_bases.end(); iter++)
     {
+        int cur_len = iter->second.tagBinary.GetSize();
+        printf("cur _len : %d\n", cur_len);
         total_len += iter->second.tagBinary.GetSize();
     }
     
@@ -117,7 +119,7 @@ int SeriesDataInfo::ReadFile(const std::string& file_name)
                     {
                         status = false;
                     }   
-                    //printf("dicom_info.position[%d] : %f\n", i, dicom_info.position[i]);                 
+                    printf("dicom_info.position[%d] : %f\n", i, dicom_info.position[i]);                 
                 }
                 if (!status)
                 {

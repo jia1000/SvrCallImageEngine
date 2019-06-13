@@ -2,6 +2,8 @@ package com.deepwise.cta.component.rebuild;
 
 public class SvrCallImageEngine {
 	static {
+		// charls库是jpeg-ls的编解码库
+		System.loadLibrary("charls");		
 		System.loadLibrary("SvrCallImageEngine");
 	}
 	

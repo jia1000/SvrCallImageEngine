@@ -142,7 +142,7 @@ int ImageMPRProcess::Excute(const char* json_data)
 
 #if 1
 	SeriesDataInfo series_info(DataTransferController::series_process_paras.dicom_path , true);
-
+	printf("dicom_path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
 	int len = series_info.GetPixelDataLength();
 	printf("dicom lenght : %d\n", len);
 

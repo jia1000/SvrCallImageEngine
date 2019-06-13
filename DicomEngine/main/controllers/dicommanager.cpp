@@ -51,6 +51,12 @@
 #include <dcmtk/dcmpstat/dvpsgr.h>
 #include <dcmtk/ofstd/ofstring.h>
 #include <dcmtk/dcmdata/dcdatset.h>
+#include <dcmtk/dcmjpeg/djdecode.h>
+#include <dcmtk/dcmjpeg/djencode.h>
+#include <dcmtk/dcmjpls/djdecode.h>		//for JPEG-LS decode
+#include <dcmtk/dcmjpls/djencode.h>		//for JPEG-LS encode
+#include <dcmtk/dcmdata/dcrledrg.h>
+#include <dcmtk/dcmdata/dcrleerg.h>
 #include <api/dicom/dcmdictionary.h>
 //#include <main/utils/UtilString.h>
 //#include <main/utils/UtilNumber.h>
@@ -82,6 +88,20 @@ namespace GIL
 			m_pDCMSourceFile = NULL;
 			m_pDCMSourceDataset = NULL;
 			//m_pConv = NULL;
+
+			// 3种Dicom格式，都要编解码注册
+			DJEncoderRegistration::registerCodecs(
+				ECC_lossyYCbCr,
+				EUC_default, // UID generation (never create new UID's)
+				OFFalse, // verbose
+				0, 0, 0, true, ESS_444, true); // optimize huffman table
+			DJDecoderRegistration::registerCodecs();
+
+			DJLSEncoderRegistration::registerCodecs();		//JPEG-LS encoder registerCodecs
+			DJLSDecoderRegistration::registerCodecs();		//JPEG-LS decoder registerCodecs
+
+			// DcmRLEEncoderRegistration::registerCodecs();
+			// DcmRLEDecoderRegistration::registerCodecs();
 		}
 
 		DICOMManager::DICOMManager(DcmDataset* dataset, const std::string& defaultCharset) {
@@ -89,6 +109,20 @@ namespace GIL
 			m_pDCMSourceDataset = dataset;
 			//m_pConv = NULL;
 			FindCharset(defaultCharset);
+
+			// 3种Dicom格式，都要编解码注册
+			DJEncoderRegistration::registerCodecs(
+				ECC_lossyYCbCr,
+				EUC_default, // UID generation (never create new UID's)
+				OFFalse, // verbose
+				0, 0, 0, true, ESS_444, true); // optimize huffman table
+			DJDecoderRegistration::registerCodecs();
+
+			DJLSEncoderRegistration::registerCodecs();		//JPEG-LS encoder registerCodecs
+			DJLSDecoderRegistration::registerCodecs();		//JPEG-LS decoder registerCodecs
+
+			// DcmRLEEncoderRegistration::registerCodecs();
+			// DcmRLEDecoderRegistration::registerCodecs();
 		}
 
 		// Destructor
@@ -101,6 +135,16 @@ namespace GIL
 			//	delete m_pConv;
 			//	m_pConv = NULL;
 			//}
+
+			// 3种Dicom格式，都要编解码解注册
+			DJEncoderRegistration::cleanup();
+			DJDecoderRegistration::cleanup();
+
+			DJLSEncoderRegistration::cleanup();		//JPEG-LS encoder cleanup
+			DJLSDecoderRegistration::cleanup();		//JPEG-LS decoder cleanup
+
+			// DcmRLEEncoderRegistration::cleanup();
+			// DcmRLEDecoderRegistration::cleanup();
 		}
 
 		DcmDataset* DICOMManager::getSourceDataSet() {

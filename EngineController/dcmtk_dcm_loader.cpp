@@ -16,8 +16,8 @@ bool DcmtkDcmLoader::LoadDirectory(const char* dir)
 {
     SeriesDataInfo series_info(dir , true);
 
-	int len = series_info.GetPixelDataLength();
-	printf("dicom lenght : %d\n", len);
+	// int len = series_info.GetPixelDataLength();
+	// printf("dicom lenght : %d\n", len);
 
     int window_width = 0;
     series_info.GetTag(GKDCM_WindowWidth, window_width);
