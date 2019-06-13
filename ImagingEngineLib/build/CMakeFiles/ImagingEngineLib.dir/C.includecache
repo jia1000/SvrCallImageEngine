@@ -1,0 +1,26 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/thread/thd.h
+windows.h
+-
+pthread.h
+-
+
+/home/My_Demo_Test/ImagingEngineLib/thread/thd.c
+thread/thd.h
+/home/My_Demo_Test/ImagingEngineLib/thread/thread/thd.h
+string.h
+-
+stdio.h
+-
+stdlib.h
+-
+assert.h
+-
+
