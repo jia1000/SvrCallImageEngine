@@ -12,6 +12,7 @@
             },
             "includePath": [
                 "${workspaceFolder}/**",
+                "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/ImagingEngineLib/include",
                 "/opt/jdk1.8.0_151/include/", //添加头文件路径
                 "/opt/jdk1.8.0_151/include/linux/"
             ],

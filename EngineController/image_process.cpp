@@ -14,6 +14,11 @@
 
 #include "dcmtk_dcm_loader.h"
 
+// #include "data_source.h"
+// #include "render_source.h"
+// #include "render_facade.h"
+// #include "io/nii_loader.h"
+
 #include <algorithm>
 #include <fstream> // ifstream, ifstream::in
 
@@ -26,6 +31,7 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcdict.h"
 
+// using namespace DW::IO;
 // only once
 // static DW::IO::IDicomReader* reader = NULL;
 static DcmtkDcmLoader* reader = nullptr;
@@ -43,7 +49,9 @@ const std::string series_name_mpr("series1");
 const std::string series_name_vr("series1");
 const std::string series_name_cpr("series1");
 
-
+// using namespace DW;
+// using namespace DW::IMAGE;
+// using namespace DW::IO;
 
 ImageProcessBase::ImageProcessBase()
 {
@@ -152,17 +160,17 @@ int ImageMPRProcess::Excute(const char* json_data)
 	// my->ReadDicomFile(path_file);
 
 	// 1.read dcm image from directory
-	
 	std::string::size_type sz;
-	
+#else	
 	if (!reader) {
-		reader = new DcmtkDcmLoader();
+		reader = new DW::IO::DcmtkDcmLoader();
 		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
-		//VolData* vol_data = reader->GetData();
-		//if (vol_data == NULL) return false;
-		//ImageDataSource::Get()->AddVolData(series_name_mpr, vol_data);
+		
+		VolData* vol_data = reader->GetData();
+		if (vol_data == NULL) return false;
+		ImageDataSource::Get()->AddVolData(series_name_mpr, vol_data);
 	}
-#else
+
 	if (!is_create_mpr_render) {
 		// 2.create all image control
 		RenderSource::Get()->CreateRenderControl(m_wnd_name, RenderControlType::MPR);	// only once
@@ -176,12 +184,12 @@ int ImageMPRProcess::Excute(const char* json_data)
 	}
 
 	// 3.get imaging object through builder. then go render and get show buffer through imaging object
-	HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
-	BITMAP  bitmap ;
-	GetObject (hBitmap, sizeof (BITMAP), &bitmap);
+	// HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
+	// BITMAP  bitmap ;
+	// GetObject (hBitmap, sizeof (BITMAP), &bitmap);
 
-	std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
-	SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
+	// std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
+	// SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
 #ifdef USE_OPEN_CV
 	cv::Mat src = cv::imread(screen_shot_file_path.c_str());
 	out_image_data = Mat2Base64(src, "bmp");
@@ -296,13 +304,18 @@ int ImageVRProcess::Excute(const char* json_data)
 	//const std::string path_file(""C:\\ztest2\\dicom_test\\413");
 	//my->ReadDicomFile(path_file);
 
+	SeriesDataInfo series_info(DataTransferController::series_process_paras.dicom_path , true);
+	printf("dicom_path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
+	int len = series_info.GetPixelDataLength();
+	printf("dicom lenght : %d\n", len);
+
 	// 1.read dcm image from directory
 	
 	std::string::size_type sz;
 	
 	if (!reader) {
-		reader = new VtkDcmLoader();
-		reader->LoadDirectory(dicom_files_dir.c_str());	// only once
+		reader = new DcmtkDcmLoader();
+		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
 
 		VolData* vol_data = reader->GetData();
 		if (vol_data == NULL) return false;
@@ -322,12 +335,12 @@ int ImageVRProcess::Excute(const char* json_data)
 	}	
 
 	// 3.get imaging object through builder. then go render and get show buffer through imaging object
-	HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
-	BITMAP  bitmap ;
-	GetObject (hBitmap, sizeof (BITMAP), &bitmap);
+	// HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
+	// BITMAP  bitmap ;
+	// GetObject (hBitmap, sizeof (BITMAP), &bitmap);
 
-	std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
-	SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
+	// std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
+	// SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
 
 #endif
 	return true;

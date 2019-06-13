@@ -5,10 +5,43 @@ set (CMAKE_CXX_STANDARD 11)
 # DCMTK dependencies
 find_package(DCMTK REQUIRED NO_MODULE)
 
+#---ImagingEngine依赖--------------------------------------------------------------------
+# >>引用VTK/glog库
+find_package(VTK 8.0 REQUIRED)
+find_package(glog REQUIRED)
+find_package (Threads)
+
+vtk_module_config(VTK
+  vtkCommonCore
+  vtkIOImage
+  vtkIOXML
+  vtkInteractionWidgets
+  vtkRenderingVolume${VTK_RENDERING_BACKEND}
+)
+# >>添加头文件include路径，也就是 gcc -I xxx 的意思，或者vs ide中添加头文件包含目录
+include(${VTK_USE_FILE})
+# 添加头文件目录
+include_directories(
+	${PROJECT_SOURCE_DIR}/include
+	/usr/local/include/glog
+	)
+
+LINK_DIRECTORIES(
+
+	/usr/lib
+	/usr/local/vtk-8.0/lib
+
+	${PROJECT_SOURCE_DIR}/lib
+
+	)
+#-----------------------------------------------------------------------
+
+
 ## 依赖文件的包含 #######################################################
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 include_directories(${DCMTK_INCLUDE_DIRS})
 include_directories(./DicomEngine/)
+include_directories(./ImagingEngineLib/include)
 
 # jni.h文件的依赖
 #include_directories(/usr/local/include/jdk1.8.0_211/include/)
