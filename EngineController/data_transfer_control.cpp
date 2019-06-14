@@ -149,19 +149,19 @@ int DataTransferController::ParseImageOperationData(const char* json_data)
 	total_diff += span;
 
 	// 获得关键性的参数
-	int key_name1 = 0;
-	int ret = GetJsonDataInt(root, JSON_KEY_IMAGE_TYPE, key_name1);
+	int request_type = 0;
+	int ret = GetJsonDataInt(root, JSON_KEY_IMAGE_TYPE, request_type);
 	
 	if (ret <= 0)
 	{
 		return ret;
 	}		
 
-	if (key_name1 >= 0 && key_name1 < JSON_VALUE_REQUEST_TYPE_MAX)
+	if (request_type >= 0 && request_type < JSON_VALUE_REQUEST_TYPE_MAX)
 	{
-		if (arr_image_process[key_name1])
+		if (arr_image_process[request_type])
 		{
-			arr_image_process[key_name1]->Excute(json_data);
+			arr_image_process[request_type]->Excute(json_data);
 		}		
 	}	
 

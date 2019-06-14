@@ -35,10 +35,13 @@
 #define JSON_KEY_WINDOW_LEVEL			"window_level"
 #define JSON_KEY_ROTATION_DIRECTION		"rotation_direction"
 
+#define  RET_STATUS_DICOM_NOT_FIND_PIXELDATA  (-6)
+#define  RET_STATUS_DICOM_NOT_FILE          (-5)
 #define  RET_STATUS_JSON_PARSE_FAIL			(-4)
 #define  RET_STATUS_JSON_VALUE_TYPE_ERROR	(-3)
 #define  RET_STATUS_JSON_NAME_NOT_FOUND		(-2)
 #define  RET_STATUS_FAILURE    				(-1)
+#define  RET_STATUS_GAP    				    (0)
 #define  RET_STATUS_SUCCESS    				(1)
 
 //  第一级 "请求类型"    的枚举

@@ -4,6 +4,7 @@ public class SvrCallImageEngine {
 	static {
 		// charls库是jpeg-ls的编解码库
 		System.loadLibrary("charls");		
+		// System.loadLibrary("ImagingEngineLib");
 		System.loadLibrary("SvrCallImageEngine");
 	}
 	
@@ -19,9 +20,9 @@ public class SvrCallImageEngine {
 		if(opened)
 		{
 			String json_data = "{";
-			json_data += "\"dicom_path\":\"../build/\",";
-			json_data += "\"mask_path\":\"../build/\",";
-			json_data += "\"curve_path\":\"../build/\",";
+			json_data += "\"dicom_path\":\"../dicom_source/\",";
+			json_data += "\"mask_path\":\"../mask_source/\",";
+			json_data += "\"curve_path\":\"../curve_source/\",";
 			json_data += "\"patient_id\":\"zhangsan\",";
 			json_data += "\"study_uid\":\"111\",";
 			json_data += "\"series_uid\":\"222\"";
@@ -29,7 +30,7 @@ public class SvrCallImageEngine {
 			new SvrCallImageEngine().loadSeries(json_data);
 		}
 		// 切换Series
-		if(opened)
+		if(!opened)
 		{			
 			String json_data = "{";
 			json_data += "\"patient_id\":\"lilsi\",";
@@ -39,7 +40,7 @@ public class SvrCallImageEngine {
 			new SvrCallImageEngine().switchSeries(json_data);
 		}
 		// 卸载Series
-		if(opened)
+		if(!opened)
 		{
 			String json_data = "{";
 			json_data += "\"patient_id\":\"wangmazi\",";
@@ -49,7 +50,7 @@ public class SvrCallImageEngine {
 			new SvrCallImageEngine().unloadSeries(json_data);
 		}
 		
-		if(opened)
+		if(!opened)
 		{
 			// CPR 操作
 			String json_data = "{";
@@ -85,7 +86,7 @@ public class SvrCallImageEngine {
 			json_data += "}";
 			new SvrCallImageEngine().processSeries(json_data);
 		}
-		if(opened)
+		if(!opened)
 		{
 			// MPRMIP 操作
 			String json_data = "{";

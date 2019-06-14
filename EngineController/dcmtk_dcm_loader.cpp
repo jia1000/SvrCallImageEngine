@@ -39,8 +39,11 @@ bool DcmtkDcmLoader::LoadDirectory(const char* dir)
     int dimensions_y = 0;
     series_info.GetTag(GKDCM_Columns, dimensions_x);
 
+    // std::string patient_name = "";
+    // series_info.GetTag(GKDCM_PatientName, patient_name);
+    // printf("GKDCM_PatientName : %s\n", patient_name.c_str());
 
-    unsigned char* buffer = series_info.GetPixelDataBuffer();    
+    unsigned char* buffer = series_info.GetPixelDataBuffer();        
 
     volume_data_ = new VolData();
     volume_data_->SetSliceWidth(window_width);

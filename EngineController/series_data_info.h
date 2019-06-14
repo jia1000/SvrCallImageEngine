@@ -39,12 +39,15 @@ public:
 	void GetTag(const std::string& tag, double& d);
 	void GetTag(const std::string& tag, std::string& s);
 
+	int GetSeriesDicomFileCount();
+	void GetDicomDataSet(GIL::DICOM::DicomDataset& base);
+
 	unsigned char* GetPixelDataBuffer();
 	unsigned int GetPixelDataLength();
 	static bool SaveDicomFile(const std::string src_path_file, const std::string dst_path_file);
 	
 private:
-	int ReadFolder();
+	int ReadFolder(const std::string& path);
 	int ReadFile(const std::string& path);
 	const std::string m_src_path;
 

@@ -127,27 +127,27 @@ int ImageMPRProcess::Excute(const char* json_data)
 	//dst_dir_path += "/";
 		
 	int count_generate_image_number = 10;
-	for (int i = 0; i < count_generate_image_number; ++i) {
-		std::string dst_file_path = dst_dir_path;
+	// for (int i = 0; i < count_generate_image_number; ++i) {
+	// 	std::string dst_file_path = dst_dir_path;
 
-		std::stringstream ss_orientation;
-		ss_orientation << params.init_orientatioin;
-		std::string str_rule = ss_orientation.str();
+	// 	std::stringstream ss_orientation;
+	// 	ss_orientation << params.init_orientatioin;
+	// 	std::string str_rule = ss_orientation.str();
 
-		std::stringstream ss_index;
-		ss_index << i + 1;
-		std::string str_index = ss_index.str();
+	// 	std::stringstream ss_index;
+	// 	ss_index << i + 1;
+	// 	std::string str_index = ss_index.str();
 		
 
-		dst_file_path += str_rule;
-		dst_file_path += "_";
-		dst_file_path += str_index;
-		dst_file_path += ".dcm";
-		//printf("path : %s\n", dst_file_path.c_str());
-		SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
-	}
+	// 	dst_file_path += str_rule;
+	// 	dst_file_path += "_";
+	// 	dst_file_path += str_index;
+	// 	dst_file_path += ".dcm";
+	// 	//printf("path : %s\n", dst_file_path.c_str());
+	// 	SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
+	// }
 
-#if 1
+#if 0
 	SeriesDataInfo series_info(DataTransferController::series_process_paras.dicom_path , true);
 	printf("dicom_path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
 	int len = series_info.GetPixelDataLength();
@@ -265,54 +265,46 @@ int ImageVRProcess::Excute(const char* json_data)
 	//dst_dir_path += "/";
 
 	int angle = (int)params.rotation_angle;
-	for (int i = 0; i < params.output_image_number; ++i) {
-		std::string dst_file_path = dst_dir_path;
+	// for (int i = 0; i < params.output_image_number; ++i) {
+	// 	std::string dst_file_path = dst_dir_path;
 
-		//完整0/颅内1
-		std::stringstream ss_rule;
-		ss_rule << params.generate_rule;
-		std::string str_rule = ss_rule.str();
-		// 绘制方式：VR 0 ， MIP 1
-		std::stringstream ss_blend;
-		ss_blend << params.blend_mode;
-		std::string str_blend = ss_blend.str();
-		// 旋转方向： LEFT_TO_RIGHT 0,  HEAT_TO_FEET 1
-		std::stringstream ss_direction;
-		ss_direction << params.rotation_direction;
-		std::string str_direction = ss_direction.str();
-		// 旋转角度
-		std::stringstream ss_angle;
-		ss_angle << angle * i;
-		std::string str_angle = ss_angle.str();
+	// 	//完整0/颅内1
+	// 	std::stringstream ss_rule;
+	// 	ss_rule << params.generate_rule;
+	// 	std::string str_rule = ss_rule.str();
+	// 	// 绘制方式：VR 0 ， MIP 1
+	// 	std::stringstream ss_blend;
+	// 	ss_blend << params.blend_mode;
+	// 	std::string str_blend = ss_blend.str();
+	// 	// 旋转方向： LEFT_TO_RIGHT 0,  HEAT_TO_FEET 1
+	// 	std::stringstream ss_direction;
+	// 	ss_direction << params.rotation_direction;
+	// 	std::string str_direction = ss_direction.str();
+	// 	// 旋转角度
+	// 	std::stringstream ss_angle;
+	// 	ss_angle << angle * i;
+	// 	std::string str_angle = ss_angle.str();
 
-		dst_file_path += str_rule;
-		dst_file_path += "_";
-		dst_file_path += str_blend;
-		dst_file_path += "_";
-		dst_file_path += str_direction;
-		dst_file_path += "_";
-		dst_file_path += str_angle;
-		dst_file_path += ".dcm";
-		//printf("path : %s\n", dst_file_path.c_str());
-		SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
-	}
+	// 	dst_file_path += str_rule;
+	// 	dst_file_path += "_";
+	// 	dst_file_path += str_blend;
+	// 	dst_file_path += "_";
+	// 	dst_file_path += str_direction;
+	// 	dst_file_path += "_";
+	// 	dst_file_path += str_angle;
+	// 	dst_file_path += ".dcm";
+	// 	//printf("path : %s\n", dst_file_path.c_str());
+	// 	SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
+	// }
 
 #if 1
-	// 暂时，先从本地读取Dicom文件
-	//GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
-	//const std::string path_file(""C:\\ztest2\\dicom_test\\413");
-	//my->ReadDicomFile(path_file);
-
 	SeriesDataInfo series_info(DataTransferController::series_process_paras.dicom_path , true);
-	printf("dicom_path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
 	int len = series_info.GetPixelDataLength();
-	printf("dicom lenght : %d\n", len);
+	printf("dicom lenghtfff : %d\n", len);
 
-	// 1.read dcm image from directory
-	
+	// 1.read dcm image from directory	
 	std::string::size_type sz;
 	
-	printf("test1  --77777777777777777777777777777777777777777777\n");
 	if (!reader) {
 		reader = new DcmtkDcmLoader();
 		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
@@ -322,7 +314,6 @@ int ImageVRProcess::Excute(const char* json_data)
 		ImageDataSource::Get()->AddVolData(series_name_vr, vol_data);
 	}
 
-	printf("test2  ----77777777777777777777777777777777777777777777\n");
 	if (!is_create_vr_render) {
 		// 2.create all image control
 		RenderSource::Get()->CreateRenderControl(m_wnd_name, RenderControlType::VR);	// only once

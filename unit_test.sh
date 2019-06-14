@@ -1,7 +1,7 @@
 # 复制thirdparty相关文件到build文件夹
-cp thirdparty/1.dcm build/1.dcm
-cp thirdparty/2.dcm build/2.dcm
-cp thirdparty/3.dcm build/3.dcm
+# cp thirdparty/1.dcm build/1.dcm
+# cp thirdparty/2.dcm build/2.dcm
+# cp thirdparty/3.dcm build/3.dcm
 cp thirdparty/libcharls.so build/libcharls.so
 
 # 执行java的设置

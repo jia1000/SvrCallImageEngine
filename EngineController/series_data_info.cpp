@@ -1,6 +1,9 @@
 
 #include "series_data_info.h"
 
+#include "common_utils.h"
+#include "global_define.h"
+
 #include <string.h>
 
 SeriesDataInfo::SeriesDataInfo(const std::string path, bool is_folder)
@@ -12,7 +15,7 @@ SeriesDataInfo::SeriesDataInfo(const std::string path, bool is_folder)
     
     if (is_folder)
     {
-        ReadFolder();
+        ReadFolder(path);
     }
     else 
     {
@@ -51,6 +54,28 @@ unsigned char* SeriesDataInfo::GetPixelDataBuffer()
             cur_buf, 
             cur_len * sizeof(unsigned char));
         pos += cur_len;
+
+        // printf("cur_len : 0x%04x\n", cur_len);
+        // printf("hello buffer:\n");
+        // int count = 0;
+        // for (size_t i = 0; i < cur_len; i++)
+        // {
+        //     unsigned char c = *(cur_buf + i);
+        //     if (c != 0)
+        //     {
+        //         printf(" %02x ", c);
+        //         count++;
+        //     }            
+            
+        //     if (count % 16 == 15)
+        //     {
+        //         printf("\n");
+        //     }            
+        // }
+
+        // printf("count : %d\n", count);
+        
+
     }
 
     return m_pixel_data_buffer;
@@ -61,28 +86,33 @@ unsigned int SeriesDataInfo::GetPixelDataLength()
     int total_len = 0;
 	for (auto iter = m_bases.begin(); iter != m_bases.end(); iter++)
     {
-        int cur_len = iter->second.tagBinary.GetSize();
-        printf("cur _len : %d\n", cur_len);
+        // int cur_len = iter->second.tagBinary.GetSize();
+        // printf("cur _len : %d\n", cur_len);
         total_len += iter->second.tagBinary.GetSize();
     }
     
     return total_len;
 }
 
-int SeriesDataInfo::ReadFolder()
+int SeriesDataInfo::ReadFolder(const std::string& path)
 {
     // traversal the whole folder
     std::vector<std::string> vFiles;
-    vFiles.push_back("1.dcm");
-    vFiles.push_back("2.dcm");
-    vFiles.push_back("3.dcm");
+    ListDir(path, vFiles);
 
-    for (size_t i = 0; i < vFiles.size(); i++)
+    for (auto iter = vFiles.begin(); iter != vFiles.end();)
     {
-        ReadFile(vFiles.at(i));
+        int ret = ReadFile(*iter);
+        if (ret >= RET_STATUS_SUCCESS)
+        {
+            ++iter;
+        }
+        else {
+            iter = vFiles.erase(iter);            
+        }
     }
     
-    return 1;
+    return RET_STATUS_SUCCESS;
 }
 
 int SeriesDataInfo::ReadFile(const std::string& file_name) 
@@ -94,53 +124,62 @@ int SeriesDataInfo::ReadFile(const std::string& file_name)
         std::string file_path = m_src_path + file_name;
 		
         bool ret = pDICOMManager->CargarFichero(file_path, dicom_info.base);
-        if (ret)
+        
+        if (!ret)
         {
-            pDICOMManager->GetTag(0x7fe0, 0x0010, dicom_info.tagBinary); 
-            
-            // calculate position
-            char c = 0;
-            std::string tag("");
-            if(dicom_info.base.getTag(GKDCM_ImagePositionPatient, tag))
-            {
-                bool status = true;
-                std::stringstream istr(tag);
-                for (size_t i = 0; i < POSITION_LENGHT; i++)
-                {
-                    if (status && !istr.eof())
-                    {
-                        istr >> dicom_info.position[i];
-                        if (!istr.eof())
-                        {
-                            istr >> c;
-                        }                        
-                    }
-                    else 
-                    {
-                        status = false;
-                    }   
-                    printf("dicom_info.position[%d] : %f\n", i, dicom_info.position[i]);                 
-                }
-                if (!status)
-                {
-                    for (size_t i = 0; i < POSITION_LENGHT; i++)
-                    {
-                        dicom_info.position[i] = 0.0f;
-                    }
-                }  
-                
-            
-            }
+            printf("parse dicom error : %s\n", file_name.c_str());
+            return RET_STATUS_DICOM_NOT_FILE;
+        }
+        bool target = pDICOMManager->GetTag(0x7fe0, 0x0010, dicom_info.tagBinary); 
 
-            //
-            m_bases.insert(make_pair(file_name, dicom_info));
+        if (!target)
+        {
+            printf("parse fixel data error : %s\n", file_name.c_str());
+            return RET_STATUS_DICOM_NOT_FIND_PIXELDATA;
         }
         
+        // calculate position
+        char c = 0;
+        std::string tag("");
+        if(dicom_info.base.getTag(GKDCM_ImagePositionPatient, tag))
+        {
+            bool status = true;
+            std::stringstream istr(tag);
+            for (size_t i = 0; i < POSITION_LENGHT; i++)
+            {
+                if (status && !istr.eof())
+                {
+                    istr >> dicom_info.position[i];
+                    if (!istr.eof())
+                    {
+                        istr >> c;
+                    }                        
+                }
+                else 
+                {
+                    status = false;
+                }   
+                // printf("dicom_info.position[%d] : %f\n", (int)i, dicom_info.position[i]);                 
+            }
+            if (!status)
+            {
+                for (size_t i = 0; i < POSITION_LENGHT; i++)
+                {
+                    dicom_info.position[i] = 0.0f;
+                }
+            }  
+            
+        
+        }
+
+        //
+        m_bases.insert(make_pair(file_name, dicom_info));
+                
         delete pDICOMManager;
 		pDICOMManager = NULL;
     }
 
-    return 1;
+    return RET_STATUS_SUCCESS;
 }
 
 void SeriesDataInfo::GetTag(const std::string& tag, int& i)
@@ -182,8 +221,27 @@ void SeriesDataInfo::GetTag(const std::string& tag, std::string& s)
         GIL::DICOM::DicomDataset base = iter->second.base;
         if(base.getTag(tag , value))
         {
-            s = tag;
+            s = value;
         }
+    }
+}
+
+int SeriesDataInfo::GetSeriesDicomFileCount()
+{
+    int ret = 0;
+    auto iter = m_bases.begin();
+    if (iter != m_bases.end())
+    {
+        ret = iter->second.base.tags.size();
+    }
+    return ret;
+}
+void SeriesDataInfo::GetDicomDataSet(GIL::DICOM::DicomDataset& base)
+{
+    auto iter = m_bases.begin();
+    if (iter != m_bases.end())
+    {
+        base = iter->second.base;
     }
 }
 
