@@ -5,6 +5,9 @@
 #include <unistd.h>   // 创建文件夹 access 依赖的头文件
 #include <sys/stat.h> // 创建文件夹 mkdir  依赖的头文件
 
+#include <dirent.h>		//遍历文件夹下的文件 
+#include <sys/types.h>
+
 int GetJsonDataInt(const Json::Value& root, const std::string key, int& data)
 {	
 	const Json::Value& value = root[key];
@@ -101,4 +104,32 @@ void TryCreateDir(const std::string& dir)
 			mkdir(dst_dir_path.c_str(), 0755);
 		}
 	}
+}
+
+int ListDir(std::string path, std::vector<std::string>& files)
+{
+	DIR *dir = opendir(path.c_str());
+	struct dirent* pDir = NULL;
+
+	if (!dir)
+	{
+		printf("Effor! can't open this dir : %s", path.c_str());
+		return 0;
+	}
+	while (1)
+	{
+		pDir = readdir(dir);
+		if (!pDir)
+		{
+			break;
+		}
+		
+		if (DT_REG == pDir->d_type)
+		{
+			files.push_back(pDir->d_name);
+		}		
+	}
+	closedir(dir);
+
+	return 1;
 }
