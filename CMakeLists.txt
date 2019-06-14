@@ -71,8 +71,10 @@ TARGET_LINK_LIBRARIES(dicom_engine )
 aux_source_directory(./EngineController  DIRSRCS_Controller)
 add_library(controller  SHARED ${DIRSRCS_Controller})
 # 添加第三方依赖库的路径
-TARGET_LINK_LIBRARIES(controller  dicom_engine jsoncpp )
-
+TARGET_LINK_LIBRARIES(controller ${VTK_LIBRARIES})
+TARGET_LINK_LIBRARIES(controller dicom_engine)
+TARGET_LINK_LIBRARIES(controller jsoncpp)
+TARGET_LINK_LIBRARIES(controller ImagingEngineLib)
 # 生成SvrCallImageEngine库
 add_compile_options(-fPIC)
 add_library(SvrCallImageEngine SHARED SvrJava/com_deepwise_cta_component_rebuild_SvrCallImageEngine.cpp)

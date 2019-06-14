@@ -14,29 +14,29 @@
 
 #pragma once
 
-// #include "io/dcm_reader.h"
-// #include "data/vol_data.h"
+#include "io/dcm_reader.h"
+#include "data/vol_data.h"
 
 #include <vector>
 
-// using namespace DW::IMAGE;
+using namespace DW::IMAGE;
 
-// namespace DW {
-// 	namespace IO {
-		class DcmtkDcmLoader// : public IDicomReader
+namespace DW {
+	namespace IO {
+		class DcmtkDcmLoader : public IDicomReader
 		{
 		public:
 			DcmtkDcmLoader();
 			~DcmtkDcmLoader();
 
-			bool LoadDirectory(const char* dir) ;//override;
-			bool LoadFiles(std::vector<const char*> files) ;//override;
-			bool LoadDicomData(const char* dir) ;//override;
-			bool LoadVolumeMask(const char* file) ;//override ;
-			//VolData* GetData() override;
-			void Close() ;//override;
+			bool LoadDirectory(const char* dir) override;
+			bool LoadFiles(std::vector<const char*> files) override;
+			bool LoadDicomData(const char* dir) override;
+			bool LoadVolumeMask(const char* file) override ;
+			VolData* GetData() override;
+			void Close() override;
 		private:
-			// VolData* volume_data_;
+			VolData* volume_data_;
 		};
-// 	}
-// }
+	}
+}

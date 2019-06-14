@@ -4,6 +4,8 @@
 #include "image_process.h"
 #include "common_utils.h"
 
+#include "tools/logger.h"
+
 #include <algorithm>
 
 #include <fstream> // ifstream, ifstream::in
@@ -66,6 +68,9 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 		printf("fail to parse loadserires's json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
+
+	// initialize logger
+	CGLogger::InitGLog("", "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/");
 	
 	int ret = RET_STATUS_FAILURE;
 	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.dicom_path);

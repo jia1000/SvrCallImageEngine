@@ -14,10 +14,10 @@
 
 #include "dcmtk_dcm_loader.h"
 
-// #include "data_source.h"
-// #include "render_source.h"
-// #include "render_facade.h"
-// #include "io/nii_loader.h"
+#include "data_source.h"
+#include "render_source.h"
+#include "render_facade.h"
+#include "io/nii_loader.h"
 
 #include <algorithm>
 #include <fstream> // ifstream, ifstream::in
@@ -31,10 +31,9 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcdict.h"
 
-// using namespace DW::IO;
 // only once
-// static DW::IO::IDicomReader* reader = NULL;
-static DcmtkDcmLoader* reader = nullptr;
+static DW::IO::IDicomReader* reader = NULL;
+// static DcmtkDcmLoader* reader = nullptr;
 static bool is_create_mpr_render = false;
 static bool is_create_vr_render  = false;
 static bool is_create_cpr_render = false;
@@ -49,9 +48,9 @@ const std::string series_name_mpr("series1");
 const std::string series_name_vr("series1");
 const std::string series_name_cpr("series1");
 
-// using namespace DW;
-// using namespace DW::IMAGE;
-// using namespace DW::IO;
+using namespace DW;
+using namespace DW::IMAGE;
+using namespace DW::IO;
 
 ImageProcessBase::ImageProcessBase()
 {
@@ -161,7 +160,7 @@ int ImageMPRProcess::Excute(const char* json_data)
 
 	// 1.read dcm image from directory
 	std::string::size_type sz;
-#else	
+	
 	if (!reader) {
 		reader = new DW::IO::DcmtkDcmLoader();
 		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
@@ -298,7 +297,7 @@ int ImageVRProcess::Excute(const char* json_data)
 		SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
 	}
 
-#if 0
+#if 1
 	// 暂时，先从本地读取Dicom文件
 	//GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
 	//const std::string path_file(""C:\\ztest2\\dicom_test\\413");
@@ -313,6 +312,7 @@ int ImageVRProcess::Excute(const char* json_data)
 	
 	std::string::size_type sz;
 	
+	printf("test1  --77777777777777777777777777777777777777777777\n");
 	if (!reader) {
 		reader = new DcmtkDcmLoader();
 		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
@@ -322,17 +322,28 @@ int ImageVRProcess::Excute(const char* json_data)
 		ImageDataSource::Get()->AddVolData(series_name_vr, vol_data);
 	}
 
+	printf("test2  ----77777777777777777777777777777777777777777777\n");
 	if (!is_create_vr_render) {
 		// 2.create all image control
 		RenderSource::Get()->CreateRenderControl(m_wnd_name, RenderControlType::VR);	// only once
-		RenderFacade::Get()->ChangeSeries(series_name_vr);	
-		//RenderFacade::Get()->SetOrientation(wnd_mpr1_, AXIAL);
-		//float pos[3] = { 255.0f, 255.0f, 0};
-		RenderFacade::Get()->SetOrientation(m_wnd_name, CORONAL);
-		RenderFacade::Get()->RenderControl(m_wnd_name);
+		// RenderFacade::Get()->ChangeSeries(series_name_vr);	
+
+		// RenderFacade::Get()->SetOrientation(m_wnd_name, CORONAL);
+		// RenderFacade::Get()->RenderControl(m_wnd_name);
 
 		is_create_vr_render = true;
 	}	
+	printf("params.output_path : %s------------------------\n", params.output_path.c_str());
+	// RenderFacade::Get()->CreateVRRotationBatch(m_wnd_name, 
+	// 	params.output_path,// + "vr_lunei_left_right/",
+	// 	BlendMode::Composite,
+	// 	OrientationType::CORONAL,
+	// 	RotationDirection::LEFT_TO_RIGHT,
+	// 	30.0f,
+	// 	1.0f,
+	// 	12,
+	// 	-1,
+	// 	-1);
 
 	// 3.get imaging object through builder. then go render and get show buffer through imaging object
 	// HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
