@@ -12,7 +12,7 @@ set(INCLUDE_PATH ${PROJECT_SOURCE_DIR}/include)
 # 定义源文件路径变量
 set(SOURCE_PATH ${PROJECT_SOURCE_DIR}/src) 
 # 设置静态库输出路径
-set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../../thirdparty)
 
 
 #########################################################################################################
