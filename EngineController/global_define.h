@@ -35,6 +35,9 @@
 #define JSON_KEY_WINDOW_LEVEL			"window_level"
 #define JSON_KEY_ROTATION_DIRECTION		"rotation_direction"
 
+
+#define RET_STATUS_DICOM_NOT_SLICE          (-8)
+#define RET_STATUS_DICOM_NOT_TAGS           (-7)
 #define  RET_STATUS_DICOM_NOT_FIND_PIXELDATA  (-6)
 #define  RET_STATUS_DICOM_NOT_FILE          (-5)
 #define  RET_STATUS_JSON_PARSE_FAIL			(-4)

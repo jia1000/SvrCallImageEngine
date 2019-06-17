@@ -68,6 +68,15 @@ void GNC::GCS::StudyContextMy::ReadDicomFile(const std::string path_file)
 		modify_base.tags["0010|0010"] = "test 222";
 		pDICOMManager->ActualizarJerarquia(modify_base);
 
+		// remove one tag
+		GIL::DICOM::DicomDataset remove_base;	
+		remove_base.tags["0008|0020"] = "test";
+		remove_base.tags["0008|0021"] = "test";
+		remove_base.tags["0008|0022"] = "test";
+		remove_base.tags["0008|0023"] = "test";
+
+		pDICOMManager->RemoveTags(remove_base);
+		
 		// save dicom file
 		pDICOMManager->AlmacenarFichero(dst_path_file);
 

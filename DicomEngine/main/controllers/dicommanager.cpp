@@ -1107,6 +1107,33 @@ namespace GIL
 
 		}
 
+		int DICOMManager::RemoveTags(const DicomDataset& base)
+		{
+			DcmDataset* ds = getSourceDataSet();
+			if (ds == NULL) {
+				return 0;
+			}
+
+			for (ListaTags::const_iterator it = base.tags.begin(); it != base.tags.end(); ++it) {
+				std::string claveSecuencia = (*it).first;
+				
+				unsigned int sg = 0xffff;
+				unsigned int se = 0xffff;
+				int sn = 0;
+
+				sn = sscanf(claveSecuencia.c_str(), "%x|%x", &sg, &se);
+				if (sn < 2) {
+					std::cerr << "Formato invalido (" << claveSecuencia.c_str() << "). Solo se soporta (FFFF|FFFF) como formato de tag para secuencias" << std::endl;
+					continue;
+				}
+				DcmTag stag(sg, se);
+
+				OFCondition cond;
+				ds->remove(stag);				
+			}
+			return 1;
+		}
+		
 		int DICOMManager::InsertarJerarquia(const DicomDataset& base, DcmItem* itemPadre, DcmSequenceOfItems* seqPadre)
 		{
 

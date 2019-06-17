@@ -139,39 +139,36 @@ int SeriesDataInfo::ReadFile(const std::string& file_name)
         }
         
         // calculate position
-        char c = 0;
-        std::string tag("");
-        if(dicom_info.base.getTag(GKDCM_ImagePositionPatient, tag))
-        {
-            bool status = true;
-            std::stringstream istr(tag);
-            for (size_t i = 0; i < POSITION_LENGHT; i++)
-            {
-                if (status && !istr.eof())
-                {
-                    istr >> dicom_info.position[i];
-                    if (!istr.eof())
-                    {
-                        istr >> c;
-                    }                        
-                }
-                else 
-                {
-                    status = false;
-                }   
-                // printf("dicom_info.position[%d] : %f\n", (int)i, dicom_info.position[i]);                 
-            }
-            if (!status)
-            {
-                for (size_t i = 0; i < POSITION_LENGHT; i++)
-                {
-                    dicom_info.position[i] = 0.0f;
-                }
-            }  
-            
-        
-        }
-
+        // char c = 0;
+        // std::string tag("");
+        // if(dicom_info.base.getTag(GKDCM_ImagePositionPatient, tag))
+        // {
+        //     bool status = true;
+        //     std::stringstream istr(tag);
+        //     for (size_t i = 0; i < POSITION_LENGHT; i++)
+        //     {
+        //         if (status && !istr.eof())
+        //         {
+        //             istr >> dicom_info.position[i];
+        //             if (!istr.eof())
+        //             {
+        //                 istr >> c;
+        //             }                        
+        //         }
+        //         else 
+        //         {
+        //             status = false;
+        //         }   
+        //         // printf("dicom_info.position[%d] : %f\n", (int)i, dicom_info.position[i]);                 
+        //     }
+        //     if (!status)
+        //     {
+        //         for (size_t i = 0; i < POSITION_LENGHT; i++)
+        //         {
+        //             dicom_info.position[i] = 0.0f;
+        //         }
+        //     }
+        // }
         //
         m_bases.insert(make_pair(file_name, dicom_info));
                 
@@ -236,13 +233,131 @@ int SeriesDataInfo::GetSeriesDicomFileCount()
     }
     return ret;
 }
-void SeriesDataInfo::GetDicomDataSet(GIL::DICOM::DicomDataset& base)
+int SeriesDataInfo::GetDicomDataSet(GIL::DICOM::DicomDataset& base, const int slice_index = 0)
 {
-    auto iter = m_bases.begin();
-    if (iter != m_bases.end())
+    if (slice_index < 0 || slice_index >= m_bases.size())
     {
-        base = iter->second.base;
+        return RET_STATUS_DICOM_NOT_SLICE;
     }
+    
+    auto iter = m_bases.begin();
+    int index = 0;
+    for (; iter != m_bases.end(); ++iter, ++index)
+    {
+        if (index == slice_index)
+        {
+            base = iter->second.base;
+            return RET_STATUS_SUCCESS;
+        }        
+    }
+    
+    return RET_STATUS_DICOM_NOT_TAGS;
+}
+
+int SeriesDataInfo::GetDicomDicomParas(DicomParas& paras, const int slice_index)
+{
+    GIL::DICOM::DicomDataset data_set;
+    int ret = GetDicomDataSet(data_set, slice_index);
+
+    if (ret != RET_STATUS_SUCCESS)
+    {
+        return ret;
+    }
+    
+    // calculate position
+    char c = 0;
+    std::string tag("");
+    if(data_set.getTag(GKDCM_ImagePositionPatient, tag))
+    {
+        bool status = true;
+        std::stringstream istr(tag);
+        for (size_t i = 0; i < POSITION_LENGHT; i++)
+        {
+            if (status && !istr.eof())
+            {
+                istr >> paras.position[i];
+                if (!istr.eof())
+                {
+                    istr >> c;
+                }                        
+            }
+            else 
+            {
+                status = false;
+            }   
+            // printf("dicom_info.position[%d] : %f\n", (int)i, dicom_info.position[i]);                 
+        }
+        if (!status)
+        {
+            for (size_t i = 0; i < POSITION_LENGHT; i++)
+            {
+                paras.position[i] = 0.0f;
+            }
+        } 
+    }
+    
+    if(data_set.getTag(GKDCM_WindowWidth, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.window_width;
+    }
+    if(data_set.getTag(GKDCM_WindowCenter, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.window_level;
+    }
+    if(data_set.getTag(GKDCM_BitsAllocated, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.bits_per_pixel;
+    }
+    if(data_set.getTag(GKDCM_BitsStored, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.bits_stored;
+    }
+    if(data_set.getTag(GKDCM_Rows, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.height;
+    }
+    if(data_set.getTag(GKDCM_Columns, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.width;
+    }
+    if(data_set.getTag(GKDCM_BitsAllocated, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.bits_allocated;
+    }
+    if(data_set.getTag(GKDCM_BitsStored, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.bits_stored;
+    }
+
+    if(data_set.getTag(GKDCM_StudyID, tag))
+    {
+        paras.study_id = tag;
+    }
+    if(data_set.getTag(GKDCM_SeriesInstanceUID, tag))
+    {
+        paras.series_iuid = tag;
+    }
+    // if(data_set.getTag(GKDCM_ImageOrientationPatient, tag))
+    // {
+    //     paras.orientation = tag;
+    // }
+    if(data_set.getTag(GKDCM_SliceLocation, tag))
+    {
+        std::stringstream ss(tag);
+        ss >> paras.slice_location;
+    }
+
+    GetSpacing(slice_index, paras.spacing[0], paras.spacing[1], paras.spacing[2]);
+    
+    paras.slice_count = GetSeriesDicomFileCount();
 }
 
 bool SeriesDataInfo::SaveDicomFile(
@@ -276,4 +391,72 @@ bool SeriesDataInfo::SaveDicomFile(
 		return true;
 	}
 	return false;
+}
+
+bool SeriesDataInfo::GetSpacing(const int indice, 
+    double& x, double& y, double& z, 
+    bool isGetZAsThinkness)
+{
+    bool hasSpacing = false;
+    std::string spacing;
+    x=0.0f;
+    y=0.0f;
+    z=0.0f;
+    GIL::DICOM::DicomDataset tagsImage;
+    int ret =GetDicomDataSet(tagsImage, indice);
+    if (ret != RET_STATUS_SUCCESS)
+    {
+        return ret;
+    }
+
+    
+    if(tagsImage.getTag(GKDCM_PixelSpacing,spacing)) {
+        char c;
+        std::istringstream issl(spacing);
+        issl >> x;
+        if(!issl.eof()){
+            issl>>c;//la barra
+            issl>>y;
+        }
+        if(!issl.eof()){
+            issl>>c;//la barra
+            issl>>z;
+        }
+        hasSpacing = true;
+    }
+    else if(tagsImage.getTag(GKDCM_ImagerPixelSpacing,spacing)) {
+        char c;
+        std::istringstream issl(spacing);
+        issl >> x;
+        if(!issl.eof()){
+            issl>>c;//la barra
+            issl>>y;
+        }
+        if(!issl.eof()){
+            issl>>c;//la barra
+            issl>>z;
+        }
+        hasSpacing = true;
+    }
+    
+    if (x < std::numeric_limits<double>::epsilon()) {
+        x = 1.0f;
+        hasSpacing = false;
+    }
+    if (y < std::numeric_limits<double>::epsilon()) {
+        y = 1.0f;
+        hasSpacing = false;
+    }
+    if (z < std::numeric_limits<double>::epsilon()) {
+        if (isGetZAsThinkness) {
+            if(tagsImage.getTag(GKDCM_SliceThickness,spacing)) { //slice thickness
+                std::istringstream issl(spacing);
+                issl >> z;
+            }
+        }
+        else {
+            z = 1.0f;
+        }
+    }
+    return hasSpacing;
 }

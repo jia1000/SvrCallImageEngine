@@ -49,6 +49,9 @@ namespace GIL
 			/*Actualiza la jerarquia cargada*/
 			virtual int ActualizarJerarquia(DicomDataset& base);
 
+			/* remove certain tags */
+			virtual int RemoveTags(const DicomDataset& base);
+
 			/*actualiza los tags privados*/
 			virtual int UpdatePrivateTags(TipoPrivateTags& tags);
 
@@ -96,6 +99,8 @@ namespace GIL
 
 			/* Inserta la jerarquia en el dataset */
 			int InsertarJerarquia(const DicomDataset& base, DcmItem* itemPadre, DcmSequenceOfItems* seqPadre);
+
+			
 
 			/* Carga la jerarquia desde el dataset */
 			int CargarJerarquia(DicomDataset& base, unsigned int maximaLongitud, DcmElement * pElementoInicial = NULL, bool mustExistPixel = true);

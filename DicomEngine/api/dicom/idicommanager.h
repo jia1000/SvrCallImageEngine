@@ -54,6 +54,9 @@ namespace GIL {
 			/*Actualiza la jerarquia cargada*/
 			virtual int ActualizarJerarquia(DicomDataset& base)=0;
 
+			/* remove certain tags */
+			virtual int RemoveTags(const DicomDataset& base) = 0;
+
 			/*actualiza los tags privados*/
 			virtual int UpdatePrivateTags(TipoPrivateTags& tags)=0;
 
