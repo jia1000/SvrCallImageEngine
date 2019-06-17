@@ -44,7 +44,9 @@ bool DcmtkDcmLoader::LoadDirectory(const char* dir)
     volume_data_->GetPixelData()->SetDimensions(paras.height, paras.width, paras.slice_count);
 
     volume_data_->GetPixelData()->SetOrigin(0,0,0);//
-    volume_data_->GetPixelData()->SetSpacing();
+    volume_data_->GetPixelData()->SetSpacing(paras.spacing[0], paras.spacing[1], paras.spacing[2]);
+
+    printf("spacing : %.5f, %.5f, %.5f\n", paras.spacing[0], paras.spacing[1], paras.spacing[2]);
 
     volume_data_->SetSliceWidth(paras.width);
     volume_data_->SetSliceHeight(paras.height);

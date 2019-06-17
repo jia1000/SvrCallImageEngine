@@ -5,6 +5,7 @@
 #include "global_define.h"
 
 #include <string.h>
+#include <limits>
 
 SeriesDataInfo::SeriesDataInfo(const std::string path, bool is_folder)
 : m_src_path(path)
