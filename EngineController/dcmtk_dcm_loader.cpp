@@ -58,6 +58,8 @@ bool DcmtkDcmLoader::LoadDirectory(const char* dir)
     volume_data_->SetSeriesInstanceUID(paras.series_iuid);
     volume_data_->SetBoundingBox(0, 0, 0, paras.height - 1, paras.width - 1, paras.slice_count - 1);
     volume_data_->SetDefaultWindowWidthLevel(paras.window_width, paras.window_level);
+    printf("window_width : %d, window_level : %d\n", paras.window_width, paras.window_level);
+
 
 }
 

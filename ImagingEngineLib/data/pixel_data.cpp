@@ -47,7 +47,7 @@ RawPixelData::~RawPixelData()
 {
 	if (series_data_){
 		delete series_data_;
-		series_data_ = NULL;
+		// series_data_ = NULL;
 	}
 }
 
@@ -62,7 +62,7 @@ vtkImageData* RawPixelData::GetVtkImageData()
 	// ×ª»»µ½vtkImageData
 	if (vtk_series_data_){
 		vtk_series_data_->Delete();
-		vtk_series_data_ = NULL;
+		// vtk_series_data_ = NULL;
 	}
 	int dim[3] = { 0 };
 	double origin[3] = { 0.0 }, spacing[3] = { 0.0 };
@@ -105,7 +105,7 @@ VtkPixelData::~VtkPixelData()
 {
 	if (vtk_series_data_){
 		vtk_series_data_->Delete();
-		vtk_series_data_ = NULL;
+		// vtk_series_data_ = NULL;
 	}
 }
 

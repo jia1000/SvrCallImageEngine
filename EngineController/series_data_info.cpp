@@ -137,40 +137,8 @@ int SeriesDataInfo::ReadFile(const std::string& file_name)
         {
             printf("parse fixel data error : %s\n", file_name.c_str());
             return RET_STATUS_DICOM_NOT_FIND_PIXELDATA;
-        }
+        }       
         
-        // calculate position
-        // char c = 0;
-        // std::string tag("");
-        // if(dicom_info.base.getTag(GKDCM_ImagePositionPatient, tag))
-        // {
-        //     bool status = true;
-        //     std::stringstream istr(tag);
-        //     for (size_t i = 0; i < POSITION_LENGHT; i++)
-        //     {
-        //         if (status && !istr.eof())
-        //         {
-        //             istr >> dicom_info.position[i];
-        //             if (!istr.eof())
-        //             {
-        //                 istr >> c;
-        //             }                        
-        //         }
-        //         else 
-        //         {
-        //             status = false;
-        //         }   
-        //         // printf("dicom_info.position[%d] : %f\n", (int)i, dicom_info.position[i]);                 
-        //     }
-        //     if (!status)
-        //     {
-        //         for (size_t i = 0; i < POSITION_LENGHT; i++)
-        //         {
-        //             dicom_info.position[i] = 0.0f;
-        //         }
-        //     }
-        // }
-        //
         m_bases.insert(make_pair(file_name, dicom_info));
                 
         delete pDICOMManager;
@@ -226,17 +194,13 @@ void SeriesDataInfo::GetTag(const std::string& tag, std::string& s)
 
 int SeriesDataInfo::GetSeriesDicomFileCount()
 {
-    int ret = 0;
-    auto iter = m_bases.begin();
-    if (iter != m_bases.end())
-    {
-        ret = iter->second.base.tags.size();
-    }
+    int ret = m_bases.size();
     return ret;
 }
 int SeriesDataInfo::GetDicomDataSet(GIL::DICOM::DicomDataset& base, const int slice_index = 0)
 {
-    if (slice_index < 0 || slice_index >= m_bases.size())
+    int size = m_bases.size();
+    if (slice_index < 0 || slice_index >= size)
     {
         return RET_STATUS_DICOM_NOT_SLICE;
     }
@@ -359,6 +323,8 @@ int SeriesDataInfo::GetDicomDicomParas(DicomParas& paras, const int slice_index)
     GetSpacing(slice_index, paras.spacing[0], paras.spacing[1], paras.spacing[2]);
     
     paras.slice_count = GetSeriesDicomFileCount();
+
+    return RET_STATUS_SUCCESS;
 }
 
 bool SeriesDataInfo::SaveDicomFile(

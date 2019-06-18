@@ -20,9 +20,9 @@ public class SvrCallImageEngine {
 		if(opened)
 		{
 			String json_data = "{";
-			json_data += "\"dicom_path\":\"../dicom_source/\",";
-			json_data += "\"mask_path\":\"../mask_source/\",";
-			json_data += "\"curve_path\":\"../curve_source/\",";
+			json_data += "\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
+			json_data += "\"mask_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
+			json_data += "\"curve_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
 			json_data += "\"patient_id\":\"zhangsan\",";
 			json_data += "\"study_uid\":\"111\",";
 			json_data += "\"series_uid\":\"222\"";

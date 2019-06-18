@@ -126,7 +126,7 @@ int ImageMPRProcess::Excute(const char* json_data)
 	
 	//dst_dir_path += "/";
 		
-	int count_generate_image_number = 10;
+	// int count_generate_image_number = 10;
 	// for (int i = 0; i < count_generate_image_number; ++i) {
 	// 	std::string dst_file_path = dst_dir_path;
 
@@ -172,12 +172,11 @@ int ImageMPRProcess::Excute(const char* json_data)
 
 	if (!is_create_mpr_render) {
 		// 2.create all image control
-		RenderSource::Get()->CreateRenderControl(m_wnd_name, RenderControlType::MPR);	// only once
+		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::MPR);	// only once
 		RenderFacade::Get()->ChangeSeries(series_name_mpr);	
-		//RenderFacade::Get()->SetOrientation(wnd_mpr1_, AXIAL);
-		//float pos[3] = { 255.0f, 255.0f, 0};
-		RenderFacade::Get()->SetOrientation(m_wnd_name, SAGITTAL);
-		RenderFacade::Get()->RenderControl(m_wnd_name);
+		
+		// RenderFacade::Get()->SetOrientation(m_wnd_name, SAGITTAL);
+		// RenderFacade::Get()->RenderControl(m_wnd_name);
 
 		is_create_mpr_render = true;
 	}
@@ -264,7 +263,7 @@ int ImageVRProcess::Excute(const char* json_data)
 	
 	//dst_dir_path += "/";
 
-	int angle = (int)params.rotation_angle;
+	// int angle = (int)params.rotation_angle;
 	// for (int i = 0; i < params.output_image_number; ++i) {
 	// 	std::string dst_file_path = dst_dir_path;
 
@@ -303,7 +302,7 @@ int ImageVRProcess::Excute(const char* json_data)
 	printf("dicom lenghtfff : %d\n", len);
 
 	// 1.read dcm image from directory	
-	std::string::size_type sz;
+	// std::string::size_type sz;
 	
 	if (!reader) {
 		reader = new DcmtkDcmLoader();
@@ -313,28 +312,30 @@ int ImageVRProcess::Excute(const char* json_data)
 		if (vol_data == NULL) return false;
 		ImageDataSource::Get()->AddVolData(series_name_vr, vol_data);
 	}
-
+	
 	if (!is_create_vr_render) {
-		// 2.create all image control
-		RenderSource::Get()->CreateRenderControl(m_wnd_name, RenderControlType::VR);	// only once
-		// RenderFacade::Get()->ChangeSeries(series_name_vr);	
-
+		// 函数接口要改变
+		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::VR);	// only once
+		printf("10---------------\n");
+		RenderFacade::Get()->ChangeSeries(series_name_vr);	
+		printf("11---------------\n");
+		// 可以不调用下面的2个接口
 		// RenderFacade::Get()->SetOrientation(m_wnd_name, CORONAL);
 		// RenderFacade::Get()->RenderControl(m_wnd_name);
 
 		is_create_vr_render = true;
 	}	
 	printf("params.output_path : %s------------------------\n", params.output_path.c_str());
-	// RenderFacade::Get()->CreateVRRotationBatch(m_wnd_name, 
-	// 	params.output_path,// + "vr_lunei_left_right/",
-	// 	BlendMode::Composite,
-	// 	OrientationType::CORONAL,
-	// 	RotationDirection::LEFT_TO_RIGHT,
-	// 	30.0f,
-	// 	1.0f,
-	// 	12,
-	// 	-1,
-	// 	-1);
+	RenderFacade::Get()->CreateVRRotationBatch(m_wnd_name, 
+		params.output_path,// + "vr_lunei_left_right/",
+		BlendMode::Composite,
+		OrientationType::CORONAL,
+		RotationDirection::LEFT_TO_RIGHT,
+		30.0f,
+		1.0f,
+		12,
+		-1,
+		-1);
 
 	// 3.get imaging object through builder. then go render and get show buffer through imaging object
 	// HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
@@ -449,7 +450,7 @@ int ImageCPRProcess::Excute(const char* json_data)
 
 	if (!is_create_cpr_render) {
 		// 2.create all image control
-		RenderSource::Get()->CreateRenderControl(m_wnd_name, RenderControlType::STRETECHED_CPR);	// only once
+		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::STRETECHED_CPR);	// only once
 		//////////////////////////////////////////////////////////////////////////
 		// move mpr to specified locations
 		vector<string> curve_data = ReadTxt(nii_curve_data_path.c_str());

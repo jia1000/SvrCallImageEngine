@@ -75,13 +75,22 @@ TARGET_LINK_LIBRARIES(controller ${VTK_LIBRARIES})
 TARGET_LINK_LIBRARIES(controller dicom_engine)
 TARGET_LINK_LIBRARIES(controller jsoncpp)
 TARGET_LINK_LIBRARIES(controller ImagingEngineLib)
+
+# 开启调试信息
+set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g2 -ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
+
+# 开启所有警告
+set(CMAKE_CXX_FLAGS "-Wall")
+
 # 生成SvrCallImageEngine库
 add_compile_options(-fPIC)
 add_library(SvrCallImageEngine SHARED SvrJava/com_deepwise_cta_component_rebuild_SvrCallImageEngine.cpp)
 TARGET_LINK_LIBRARIES(SvrCallImageEngine  controller) 
 
 # 指定生成目标
-#add_executable(appexe app.cpp)
-#target_link_libraries (appexe  controller)
+add_executable(appexe main.cpp)
+target_link_libraries (appexe  controller)
 
 
