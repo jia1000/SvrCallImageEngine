@@ -1,7 +1,0 @@
-/home/My_Demo_Test/ImagingEngineLib/build/CMakeFiles/install/strip.dir
-/home/My_Demo_Test/ImagingEngineLib/build/CMakeFiles/edit_cache.dir
-/home/My_Demo_Test/ImagingEngineLib/build/CMakeFiles/ImagingEngineLib.dir
-/home/My_Demo_Test/ImagingEngineLib/build/CMakeFiles/rebuild_cache.dir
-/home/My_Demo_Test/ImagingEngineLib/build/CMakeFiles/list_install_components.dir
-/home/My_Demo_Test/ImagingEngineLib/build/CMakeFiles/install/local.dir
-/home/My_Demo_Test/ImagingEngineLib/build/CMakeFiles/install.dir
