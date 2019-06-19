@@ -26,6 +26,7 @@ const int SPACING_LENGHT = 3;
 
 struct DicomInfo
 {
+	std::string file_name;
 	GIL::DICOM::DicomDataset base;
 	GIL::DICOM::TagPrivadoUndefined tagBinary;
 	//double position[POSITION_LENGHT];
@@ -74,9 +75,11 @@ private:
 			double& x, double& y, double& z, 
 			bool isGetZAsThinkness = false);
 
+	int GetPosition(GIL::DICOM::DicomDataset& base, double position[POSITION_LENGHT]);
 	const std::string m_src_path;
 
-	std::map<std::string, DicomInfo> m_bases;
+	// Dicom数据，按照床位值，从大到小排序 
+	std::map<double, DicomInfo, std::greater<double>> m_bases;
 	unsigned char* m_pixel_data_buffer;
 	int m_pixel_data_length;	
 };

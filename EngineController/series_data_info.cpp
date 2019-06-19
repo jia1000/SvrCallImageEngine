@@ -90,10 +90,18 @@ int SeriesDataInfo::ReadFolder(const std::string& path)
             ++iter;
         }
         else {
+            // 如果读取dicom文件失败，需要从成员vFiles，删除。
             iter = vFiles.erase(iter);            
         }
     }
     
+    // 输出Dicom文件信息
+    int index = 0;
+    for (auto iter = m_bases.begin(); iter != m_bases.end();  ++iter, ++index)
+    {
+        //printf("%03d : %.5f, %s\n", index, iter->first, iter->second.file_name.c_str());
+    }
+
     return RET_STATUS_SUCCESS;
 }
 
@@ -104,23 +112,34 @@ int SeriesDataInfo::ReadFile(const std::string& file_name)
 	{
         DicomInfo dicom_info;        
         std::string file_path = m_src_path + file_name;
-		
+		dicom_info.file_name = file_name;
+
+        // query base_set
         bool ret = pDICOMManager->CargarFichero(file_path, dicom_info.base);
         
         if (!ret)
         {
+            delete pDICOMManager;
+		    pDICOMManager = NULL;
             printf("parse dicom error : %s\n", file_name.c_str());
             return RET_STATUS_DICOM_NOT_FILE;
         }
+        // query pixel_data
         bool target = pDICOMManager->GetTag(0x7fe0, 0x0010, dicom_info.tagBinary); 
 
         if (!target)
         {
+            delete pDICOMManager;
+		    pDICOMManager = NULL;
             printf("parse fixel data error : %s\n", file_name.c_str());
             return RET_STATUS_DICOM_NOT_FIND_PIXELDATA;
         }       
         
-        m_bases.insert(make_pair(file_name, dicom_info));
+        // calc patient_position
+        double position[POSITION_LENGHT] = {0.0f};
+        GetPosition(dicom_info.base, position);
+
+        m_bases.insert(std::make_pair(position[2], dicom_info));
                 
         delete pDICOMManager;
 		pDICOMManager = NULL;
@@ -209,38 +228,10 @@ int SeriesDataInfo::GetDicomDicomParas(DicomParas& paras, const int slice_index)
     {
         return ret;
     }
+    std::string tag("");
     
     // calculate position
-    char c = 0;
-    std::string tag("");
-    if(data_set.getTag(GKDCM_ImagePositionPatient, tag))
-    {
-        bool status = true;
-        std::stringstream istr(tag);
-        for (size_t i = 0; i < POSITION_LENGHT; i++)
-        {
-            if (status && !istr.eof())
-            {
-                istr >> paras.position[i];
-                if (!istr.eof())
-                {
-                    istr >> c;
-                }                        
-            }
-            else 
-            {
-                status = false;
-            }   
-            // printf("dicom_info.position[%d] : %f\n", (int)i, dicom_info.position[i]);                 
-        }
-        if (!status)
-        {
-            for (size_t i = 0; i < POSITION_LENGHT; i++)
-            {
-                paras.position[i] = 0.0f;
-            }
-        } 
-    }
+    GetPosition(data_set, paras.position);    
     
     if(data_set.getTag(GKDCM_WindowWidth, tag))
     {
@@ -306,6 +297,41 @@ int SeriesDataInfo::GetDicomDicomParas(DicomParas& paras, const int slice_index)
     paras.slice_count = GetSeriesDicomFileCount();
 
     return RET_STATUS_SUCCESS;
+}
+
+int SeriesDataInfo::GetPosition(GIL::DICOM::DicomDataset& base, double position[POSITION_LENGHT])
+{
+    char c = 0;
+    std::string tag("");
+    if(base.getTag(GKDCM_ImagePositionPatient, tag))
+    {
+        bool status = true;
+        std::stringstream istr(tag);
+        for (size_t i = 0; i < POSITION_LENGHT; i++)
+        {
+            if (status && !istr.eof())
+            {
+                istr >> position[i];
+                if (!istr.eof())
+                {
+                    istr >> c;
+                }                        
+            }
+            else 
+            {
+                status = false;
+            }   
+            // printf("dicom_info.position[%d] : %f\n", (int)i, dicom_info.position[i]);                 
+        }
+        if (!status)
+        {
+            for (size_t i = 0; i < POSITION_LENGHT; i++)
+            {
+                position[i] = 0.0f;
+            }
+        } 
+    }
+    return 1;
 }
 
 bool SeriesDataInfo::SaveDicomFile(
