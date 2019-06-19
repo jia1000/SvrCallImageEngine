@@ -20,6 +20,8 @@
 #include "common_utils.h"
 #include "global_define.h"
 
+#include "thirdparty/x2struct/x2struct.hpp"// json2struct header file
+
 class ImageProcessBase
 {
 public:
@@ -48,7 +50,7 @@ class ImageMPRProcess : public ImageProcessBase
 public:
 	ImageMPRProcess();
 	~ImageMPRProcess();
-	virtual int Excute(const char* json_data); // 图像缩放后数据，base64编码
+	virtual int Excute(const char* json_data);
 
 private:
 	virtual int ParseJsonData(const char* json_data);	
@@ -76,6 +78,11 @@ private:
 		std::string output_path;
 		int window_width;
 		int window_level;	
+
+		XTOSTRUCT(O(image_type, blend_mode, init_orientatioin, 
+		clip_percent, thickness, spacing_between_slices, 
+		output_path, window_width, window_level
+		));
 	};
 	stMPRMIPImageParams params;
 };
@@ -87,7 +94,7 @@ class ImageVRProcess : public ImageProcessBase
 public:
 	ImageVRProcess();
 	~ImageVRProcess();
-	virtual int Excute(const char* json_data); // 图像缩放后数据，base64编码
+	virtual int Excute(const char* json_data);
 
 private:
 	virtual int ParseJsonData(const char* json_data);
@@ -118,6 +125,12 @@ private:
 		std::string output_path;
 		int window_width;
 		int window_level;	
+
+		XTOSTRUCT(O(image_type, blend_mode, init_orientatioin, 
+		clip_percent, generate_rule,rotation_direction,
+		rotation_angle, output_image_number, output_path,
+		window_width, window_level
+		));
 	};
 	stVRImageParams params;
 };
@@ -129,7 +142,7 @@ class ImageCPRProcess : public ImageProcessBase
 public:
 	ImageCPRProcess();
 	~ImageCPRProcess();
-	virtual int Excute(const char* json_data); // 图像缩放后数据，base64编码
+	virtual int Excute(const char* json_data); 
 
 private:
 	virtual int ParseJsonData(const char* json_data);
@@ -157,6 +170,11 @@ private:
 		std::string output_path;
 		int window_width;
 		int window_level;	
+
+		XTOSTRUCT(O(image_type, vessel_name, init_orientatioin, 
+		rotation_direction, rotation_angle, output_image_number, 
+		output_path, window_width, window_level
+		));
 	};
 	stCPRImageParams params;
 };

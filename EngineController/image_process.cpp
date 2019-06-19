@@ -38,12 +38,6 @@ static bool is_create_mpr_render = false;
 static bool is_create_vr_render  = false;
 static bool is_create_cpr_render = false;
 
-const std::string dicom_files_dir("C:\\ztest2\\dicom_test");
-const std::string nii_file_data_path("C:\\ztest2\\1203_0000.nii");
-const std::string nii_file_mask_path("C:\\ztest2\\1204_blood.nii");
-const std::string nii_curve_data_path("C:\\ztest2\\curve_data_nii_vessel.txt");
-const std::string screen_shot_file_path("C:\\ztest2\\screen_shot_temp.bmp");
-
 const std::string series_name_mpr("series1");
 const std::string series_name_vr("series1");
 const std::string series_name_cpr("series1");
@@ -73,35 +67,16 @@ ImageMPRProcess::~ImageMPRProcess()
 
 int ImageMPRProcess::ParseJsonData(const char* json_data)
 {	
-	Json::Reader reader;
-
-	if (!reader.parse(json_data, root))
+	try
+	{
+		x2struct::X::loadjson(json_data, params, false, true);
+	}catch(...)
 	{
 		printf("fail to parse json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
-
-	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataInt(root, "image_type", params.image_type);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "image_type", params.image_type);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "blend_mode", params.blend_mode);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "init_orientation", params.init_orientatioin);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(root, "clip_percent", params.clip_percent);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(root, "thickness", params.thickness	);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(root, "spacing_between_slices", params.spacing_between_slices);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataString(root, JSON_KEY_OUTPUT_PATH, params.output_path);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "window_width", params.window_width);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "window_level", params.window_level);
-	return ret;
+	
+	return RET_STATUS_SUCCESS;	
 }
 
 int ImageMPRProcess::Excute(const char* json_data)
@@ -208,37 +183,16 @@ ImageVRProcess::~ImageVRProcess()
 
 int ImageVRProcess::ParseJsonData(const char* json_data)
 {	
-	Json::Reader reader;
-
-	if (!reader.parse(json_data, root))
+	try
+	{
+		x2struct::X::loadjson(json_data, params, false, true);
+	}catch(...)
 	{
 		printf("fail to parse json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
-
-	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataInt(root, "image_type", params.image_type);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "blend_mode", params.blend_mode);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "init_orientation", params.init_orientatioin);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "generate_rule", params.generate_rule);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(root, "clip_percent", params.clip_percent);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "rotation_direction", params.rotation_direction);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(root, "rotation_angle", params.rotation_angle);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "output_image_number", params.output_image_number);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataString(root, JSON_KEY_OUTPUT_PATH, params.output_path);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "window_width", params.window_width);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "window_level", params.window_level);
-	return ret;
+	
+	return RET_STATUS_SUCCESS;
 }
 
 int ImageVRProcess::Excute(const char* json_data)
@@ -362,33 +316,16 @@ ImageCPRProcess::~ImageCPRProcess()
 
 int ImageCPRProcess::ParseJsonData(const char* json_data)
 {
-	Json::Reader reader;
-
-	if (!reader.parse(json_data, root))
+	try
+	{
+		x2struct::X::loadjson(json_data, params, false, true);
+	}catch(...)
 	{
 		printf("fail to parse json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
-
-	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataInt(root, "image_type"         	, params.image_type		);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataString(root, JSON_KEY_VESSEL_NAME , params.vessel_name		);	
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "init_orientation"     , params.init_orientatioin);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "rotation_direction"    , params.rotation_direction);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataFloat(root, "rotation_angle"      , params.rotation_angle	 );
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "output_image_number"   , params.output_image_number    );
-	if(ret <= 0) return ret;
-	ret = GetJsonDataString(root, JSON_KEY_OUTPUT_PATH , params.output_path		      );
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "window_width"         , params.window_width		);
-	if(ret <= 0) return ret;
-	ret = GetJsonDataInt(root, "window_level"         , params.window_level		);
-	return ret;
+	
+	return RET_STATUS_SUCCESS;	
 }
 
 
