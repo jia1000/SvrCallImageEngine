@@ -81,62 +81,21 @@ int ImageMPRProcess::ParseJsonData(const char* json_data)
 
 int ImageMPRProcess::Excute(const char* json_data)
 {
+	printf("Operation : %s\n", m_wnd_name.c_str());
 	int ret = ParseJsonData(json_data);
 	if (ret <= 0 ) {
 		printf("ret mpr excute : %d\n", ret);
 		return ret;
 	}
-	
-	printf("Dcm Loader....\n");
-
-	printf("Operation : %s\n", m_wnd_name.c_str());
-
-	std::string src_path_file("../10.dcm");
-	std::string dst_dir_path(params.output_path);
-	//dst_dir_path += m_wnd_name;
 
 	// 创建文件夹
+	std::string dst_dir_path(params.output_path);
 	printf("Save Image to  : %s\n", dst_dir_path.c_str());
 	TryCreateDir(dst_dir_path);
-	
-	//dst_dir_path += "/";
-		
-	// int count_generate_image_number = 10;
-	// for (int i = 0; i < count_generate_image_number; ++i) {
-	// 	std::string dst_file_path = dst_dir_path;
-
-	// 	std::stringstream ss_orientation;
-	// 	ss_orientation << params.init_orientatioin;
-	// 	std::string str_rule = ss_orientation.str();
-
-	// 	std::stringstream ss_index;
-	// 	ss_index << i + 1;
-	// 	std::string str_index = ss_index.str();
-		
-
-	// 	dst_file_path += str_rule;
-	// 	dst_file_path += "_";
-	// 	dst_file_path += str_index;
-	// 	dst_file_path += ".dcm";
-	// 	//printf("path : %s\n", dst_file_path.c_str());
-	// 	SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
-	// }
-
-#if 0
-	SeriesDataInfo series_info(DataTransferController::series_process_paras.dicom_path , true);
-	printf("dicom_path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
-	int len = series_info.GetPixelDataLength();
-	printf("dicom lenght : %d\n", len);
-
-	// 暂时，先从本地读取Dicom文件
-	// GNC::GCS::StudyContextMy* my = new GNC::GCS::StudyContextMy();
-	// const std::string path_file("C:\\ztest2\\dicom_test\\413");
-	// my->ReadDicomFile(path_file);
 
 	// 1.read dcm image from directory
-	std::string::size_type sz;
-	
 	if (!reader) {
+		printf("Dcm Loader....\n");
 		reader = new DW::IO::DcmtkDcmLoader();
 		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
 		
@@ -148,26 +107,11 @@ int ImageMPRProcess::Excute(const char* json_data)
 	if (!is_create_mpr_render) {
 		// 2.create all image control
 		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::MPR);	// only once
-		RenderFacade::Get()->ChangeSeries(series_name_mpr);	
-		
-		// RenderFacade::Get()->SetOrientation(m_wnd_name, SAGITTAL);
-		// RenderFacade::Get()->RenderControl(m_wnd_name);
+		RenderFacade::Get()->ChangeSeries(series_name_mpr);		
 
 		is_create_mpr_render = true;
 	}
 
-	// 3.get imaging object through builder. then go render and get show buffer through imaging object
-	// HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
-	// BITMAP  bitmap ;
-	// GetObject (hBitmap, sizeof (BITMAP), &bitmap);
-
-	// std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
-	// SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
-#ifdef USE_OPEN_CV
-	cv::Mat src = cv::imread(screen_shot_file_path.c_str());
-	out_image_data = Mat2Base64(src, "bmp");
-#endif
-#endif
 	return true;
 }
 //////////////////////////////////////////////////////////////////////////
@@ -197,69 +141,22 @@ int ImageVRProcess::ParseJsonData(const char* json_data)
 
 int ImageVRProcess::Excute(const char* json_data)
 {
+	printf("Operation : %s\n", m_wnd_name.c_str());
 	int ret = ParseJsonData(json_data);
 	if (ret <= 0 ) {
 		printf("ret vr excute : %d\n", ret);
 		return ret;
 	}
-	
-	printf("Dcm Loader....\n");
-
-	printf("Operation : %s\n", m_wnd_name.c_str());
-
-	std::string src_path_file("../10.dcm");
-	std::string dst_dir_path(params.output_path);
-	//dst_dir_path += m_wnd_name;
 
 	// 创建文件夹
+	std::string dst_dir_path(params.output_path);
 	printf("Save Image to  : %s\n", dst_dir_path.c_str());
 	TryCreateDir(dst_dir_path);
-	
-	//dst_dir_path += "/";
-
-	// int angle = (int)params.rotation_angle;
-	// for (int i = 0; i < params.output_image_number; ++i) {
-	// 	std::string dst_file_path = dst_dir_path;
-
-	// 	//完整0/颅内1
-	// 	std::stringstream ss_rule;
-	// 	ss_rule << params.generate_rule;
-	// 	std::string str_rule = ss_rule.str();
-	// 	// 绘制方式：VR 0 ， MIP 1
-	// 	std::stringstream ss_blend;
-	// 	ss_blend << params.blend_mode;
-	// 	std::string str_blend = ss_blend.str();
-	// 	// 旋转方向： LEFT_TO_RIGHT 0,  HEAT_TO_FEET 1
-	// 	std::stringstream ss_direction;
-	// 	ss_direction << params.rotation_direction;
-	// 	std::string str_direction = ss_direction.str();
-	// 	// 旋转角度
-	// 	std::stringstream ss_angle;
-	// 	ss_angle << angle * i;
-	// 	std::string str_angle = ss_angle.str();
-
-	// 	dst_file_path += str_rule;
-	// 	dst_file_path += "_";
-	// 	dst_file_path += str_blend;
-	// 	dst_file_path += "_";
-	// 	dst_file_path += str_direction;
-	// 	dst_file_path += "_";
-	// 	dst_file_path += str_angle;
-	// 	dst_file_path += ".dcm";
-	// 	//printf("path : %s\n", dst_file_path.c_str());
-	// 	SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
-	// }
-
-#if 1
-	SeriesDataInfo series_info(DataTransferController::series_process_paras.dicom_path , true);
-	int len = series_info.GetPixelDataLength();
-	printf("dicom lenghtfff : %d\n", len);
 
 	// 1.read dcm image from directory	
-	// std::string::size_type sz;
-	
 	if (!reader) {
 		reader = new DcmtkDcmLoader();
+		printf("Dcm Loader....\n");
 		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
 
 		VolData* vol_data = reader->GetData();
@@ -268,38 +165,21 @@ int ImageVRProcess::Excute(const char* json_data)
 	}
 	
 	if (!is_create_vr_render) {
-		// 函数接口要改变
+		// 2.create image control
 		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::VR);	// only once
-		printf("10---------------\n");
-		RenderFacade::Get()->ChangeSeries(series_name_vr);	
-		printf("11---------------\n");
-		// 可以不调用下面的2个接口
-		// RenderFacade::Get()->SetOrientation(m_wnd_name, CORONAL);
-		// RenderFacade::Get()->RenderControl(m_wnd_name);
-
+		RenderFacade::Get()->ChangeSeries(series_name_vr);
 		is_create_vr_render = true;
 	}	
+
 	printf("params.output_path : %s------------------------\n", params.output_path.c_str());
 	RenderFacade::Get()->CreateVRRotationBatch(m_wnd_name, 
 		params.output_path,// + "vr_lunei_left_right/",
 		BlendMode::Composite,
 		OrientationType::CORONAL,
 		RotationDirection::LEFT_TO_RIGHT,
-		30.0f,
-		1.0f,
-		12,
-		-1,
-		-1);
+		30.0f, 1.0f, 12, -1, -1
+		);
 
-	// 3.get imaging object through builder. then go render and get show buffer through imaging object
-	// HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
-	// BITMAP  bitmap ;
-	// GetObject (hBitmap, sizeof (BITMAP), &bitmap);
-
-	// std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
-	// SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
-
-#endif
 	return true;
 }
 
@@ -331,53 +211,26 @@ int ImageCPRProcess::ParseJsonData(const char* json_data)
 
 int ImageCPRProcess::Excute(const char* json_data)
 {	
+	printf("Operation : %s\n", m_wnd_name.c_str());
 	int ret = ParseJsonData(json_data);
 	if (ret <= 0 ) {
 		printf("ret cpr excute : %d\n", ret);
 		return ret;
 	}
 	
-	printf("Dcm Loader....\n");
-
-	printf("Operation : %s\n", m_wnd_name.c_str());
-
-	std::string src_path_file("../10.dcm");
-	std::string dst_dir_path(params.output_path);
-	//dst_dir_path += m_wnd_name;
-
 	// 创建文件夹
+	std::string dst_dir_path(params.output_path);
 	printf("Save Image to  : %s\n", dst_dir_path.c_str());
 	TryCreateDir(dst_dir_path);
 	
-	//dst_dir_path += "/";
-
-	int angle = (int)params.rotation_angle;
-	printf("output_image_number : %d\n", params.output_image_number);
-	for (int i = 0; i < params.output_image_number; ++i) {
-		std::string dst_file_path = dst_dir_path;
-		std::stringstream ss;
-		ss << angle * i;
-		std::string str_angle = ss.str();
-	
-		dst_file_path += params.vessel_name;
-		dst_file_path += "_";
-		dst_file_path += str_angle;
-		dst_file_path += ".dcm";
-		//printf("path : %s\n", dst_file_path.c_str());
-		SeriesDataInfo::SaveDicomFile(src_path_file, dst_file_path);
-	}
-
-#if 0
 	// 1.read dcm image from directory
-
-	std::string::size_type sz;
-	
 	if (!reader) {
+		printf("Dcm Loader....\n");
 		reader = new NiiImageLoader();
 		std::vector<const char*> files;
-		files.push_back(nii_file_data_path.c_str());
+		files.push_back(DataTransferController::series_process_paras.curve_path.c_str());
 		reader->LoadFiles(files);	// only once
-		reader->LoadVolumeMask(nii_file_mask_path.c_str());
+		reader->LoadVolumeMask(DataTransferController::series_process_paras.mask_path.c_str());
 
 		VolData* vol_data = reader->GetData();
 		if (vol_data == NULL) return false;
@@ -387,43 +240,34 @@ int ImageCPRProcess::Excute(const char* json_data)
 
 	if (!is_create_cpr_render) {
 		// 2.create all image control
-		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::STRETECHED_CPR);	// only once
-		//////////////////////////////////////////////////////////////////////////
-		// move mpr to specified locations
-		vector<string> curve_data = ReadTxt(nii_curve_data_path.c_str());
-		vector<Point3f> points;
-		auto it = curve_data.begin();
-		while (it != curve_data.end()){
-			vector<string> arr_data = Split(*it, ",");
-			if (arr_data.size() >= 3){
-				Point3f pnt;
-				pnt.x = atoi(arr_data[0].c_str());
-				pnt.y = atoi(arr_data[1].c_str());
-				pnt.z = atoi(arr_data[2].c_str()) - 1;
+		// RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::STRETECHED_CPR);	// only once
+		// // move mpr to specified locations
+		// vector<string> curve_data = ReadTxt(DataTransferController::series_process_paras.curve_path.c_str());
+		// vector<Point3f> points;
+		// auto it = curve_data.begin();
+		// while (it != curve_data.end()){
+		// 	vector<string> arr_data = Split(*it, ",");
+		// 	if (arr_data.size() >= 3){
+		// 		Point3f pnt;
+		// 		pnt.x = atoi(arr_data[0].c_str());
+		// 		pnt.y = atoi(arr_data[1].c_str());
+		// 		pnt.z = atoi(arr_data[2].c_str()) - 1;
 
-				points.push_back(pnt);
-			}
-			++it;
-		}
-		curve_id_ = CurveSource::Get()->CreateCurve(series_name_cpr, points);
+		// 		points.push_back(pnt);
+		// 	}
+		// 	++it;
+		// }
+		// curve_id_ = CurveSource::Get()->CreateCurve(series_name_cpr, points);
 
-		Vector3f vx, vy;
-		float ix, iy, iz;
+		// Vector3f vx, vy;
+		// float ix, iy, iz;
 		
-		RenderFacade::Get()->ChangeSeries(series_name_cpr);
-		RenderFacade::Get()->SetCPRCurveID(m_wnd_name, curve_id_);
-		RenderFacade::Get()->RenderControl(m_wnd_name);
+		// RenderFacade::Get()->ChangeSeries(series_name_cpr);
+		// RenderFacade::Get()->SetCPRCurveID(m_wnd_name, curve_id_);
+		// RenderFacade::Get()->RenderControl(m_wnd_name);
 
 		is_create_cpr_render = true;
 	}
 
-	// 3.get imaging object through builder. then go render and get show buffer through imaging object
-	//HBITMAP hBitmap = RenderFacade::Get()->GetImageBuffer(m_wnd_name);
-	//BITMAP  bitmap ;
-	//GetObject (hBitmap, sizeof (BITMAP), &bitmap);
-
-	//std::wstring ws_screenshot_file = StringToWString(screen_shot_file_path);
-	//SaveBitmapToFile(hBitmap, ws_screenshot_file.c_str());
-#endif
 	return true;
 }
