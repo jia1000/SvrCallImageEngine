@@ -16,8 +16,9 @@
 #pragma once
 #include "global_define.h"
 
-#include <iostream> 
+#include "thirdparty/x2struct/x2struct.hpp"// json2struct header file
 
+#include <iostream> 
 
 struct SeriesProcessParas
 {
@@ -29,11 +30,14 @@ struct SeriesProcessParas
 	std::string series_uid;
 	SeriesProcessParas()
 	{
-
 	}
+	XTOSTRUCT(O(dicom_path, mask_path, curve_path, 
+		patient_id, study_uid, series_uid
+		));
 };
 
 class ImageProcessBase;
+class SeriesDataInfo;
 
 class DataTransferController
 {
@@ -54,4 +58,5 @@ private:
 	ImageProcessBase* arr_image_process[JSON_VALUE_REQUEST_TYPE_MAX];
 public:
 	static SeriesProcessParas series_process_paras;
+	static SeriesDataInfo *series_info;
 };

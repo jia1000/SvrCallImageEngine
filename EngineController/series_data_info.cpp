@@ -26,8 +26,11 @@ SeriesDataInfo::SeriesDataInfo(const std::string path, bool is_folder)
 
 SeriesDataInfo::~SeriesDataInfo()
 {
-    
-    
+    if (m_pixel_data_buffer)
+    {
+        delete m_pixel_data_buffer;  
+        m_pixel_data_buffer = nullptr;      
+    }    
 }
 unsigned char* SeriesDataInfo::GetPixelDataBuffer()
 {    
@@ -55,28 +58,6 @@ unsigned char* SeriesDataInfo::GetPixelDataBuffer()
             cur_buf, 
             cur_len * sizeof(unsigned char));
         pos += cur_len;
-
-        // printf("cur_len : 0x%04x\n", cur_len);
-        // printf("hello buffer:\n");
-        // int count = 0;
-        // for (size_t i = 0; i < cur_len; i++)
-        // {
-        //     unsigned char c = *(cur_buf + i);
-        //     if (c != 0)
-        //     {
-        //         printf(" %02x ", c);
-        //         count++;
-        //     }            
-            
-        //     if (count % 16 == 15)
-        //     {
-        //         printf("\n");
-        //     }            
-        // }
-
-        // printf("count : %d\n", count);
-        
-
     }
 
     return m_pixel_data_buffer;

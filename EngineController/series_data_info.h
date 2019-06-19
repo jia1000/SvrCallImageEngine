@@ -46,9 +46,6 @@ struct DicomParas
 
 	std::string study_id;
 	std::string series_iuid; 
-	// std::string orientation;
-	// std::string pixel_spacing;
-	// std::string image_pixel_spacing;
 };
 
 class SeriesDataInfo
