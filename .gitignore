@@ -24,3 +24,5 @@
 /log
 /backup/
 /SvrJava/*.log
+/ImagingEngineLib/build/
+/SvrJava/com/deepwise/cta/component/rebuild/SvrCallImageEngine
