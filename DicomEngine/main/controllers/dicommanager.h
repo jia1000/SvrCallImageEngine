@@ -46,30 +46,30 @@ namespace GIL
 			/*Almacena la jerarquia cargada en un fichero*/
 			virtual bool AlmacenarFichero(const std::string& inputFile, IInspectCallBack* pICallback = NULL, bool debug = false);
 
-			/*Actualiza la jerarquia cargada*/
+			/*Updated the hierarchy loaded*/
 			virtual int ActualizarJerarquia(DicomDataset& base);
 
 			/* remove certain tags */
 			virtual int RemoveTags(const DicomDataset& base);
 
-			/*actualiza los tags privados*/
+			/*Updates the private tags*/
 			virtual int UpdatePrivateTags(TipoPrivateTags& tags);
 
-			/*anonimiza los tags privados*/
+			/*Anonymised Private tags*/
 			virtual void AnonimizarTagsPrivados();
 			
-			/*carga la MetaInfo*/
+			/*load MetaInfo*/
 			virtual int CargarMetaInfo(const std::string& inputFile, GIL::DICOM::TipoMetaInfo& tags);
 
 			//virtual int GenerateKeySeriesAndGSPS(std::vector<std::string>& inputFileList, DW::MODEL::AIResult* aiResult, const std::string& aiInfor, std::string destFolder, boolean isGenerateKeySeries, boolean isGenerateGSPS, std::list<string>& listOfFileToUpload, std::string& seriesUID);
 
-			/*carga los tags privados*/
+			/*load Private tags*/
 			virtual int LoadPrivateTags(GIL::DICOM::TipoPrivateTags& tags);
 
-			/* Obtiene la jerarquia de campos DICOM del fichero */
+			/* Obtains the hierarchy of DICOM file Fields */
 			virtual bool CargarFichero(const std::string& inputFile, GIL::DICOM::DicomDataset& jerarquia, bool cargarSoloTagsInfo = true, IInspectCallBack* pICallback = NULL);
 
-			/*Carga el fichero y responde a primitivas get tag, util para pillar tags especificos sin cargar toda la jerarquia*/
+			/*Load the file and responds to Primitive Get TAG, useful to catch specific tags without Loading the entire Hierarchy*/
 			virtual bool CargarFichero(const std::string&  inputFile, bool cargarSoloTagsInfo = true);
 			virtual bool GetTag(unsigned int grupo,unsigned int elemento, std::string & valor);
 			virtual bool GetTag(unsigned int grupo,unsigned int elemento, TagPrivadoUndefined& tagBinario);
@@ -91,27 +91,25 @@ namespace GIL
 //endregion
 
 //region "External helpers"
-			/*Comprueba el numero magico si es dicom*/
+			/*Check the magic number if DICOM*/
 			static bool EsDicom(const std::string& inputFile);
 
-			/* Crea un DCMElement parseando la cadena (g,e)=valor */
+			/* Creates a dcmelement parsing the string (G, e) = value */
 			static DcmElement* CrearElementoConValor(const char* s);
 
-			/* Inserta la jerarquia en el dataset */
+			/* Inserts the hierarchy in the dataset */
 			int InsertarJerarquia(const DicomDataset& base, DcmItem* itemPadre, DcmSequenceOfItems* seqPadre);
 
-			
-
-			/* Carga la jerarquia desde el dataset */
+			/* Load the hierarchy from the dataset */
 			int CargarJerarquia(DicomDataset& base, unsigned int maximaLongitud, DcmElement * pElementoInicial = NULL, bool mustExistPixel = true);
 
-			/*inserta los tags privados en el dataset*/
+			/*The Private tags inserted in the dataset*/
 			int InsertPrivateTags(TipoPrivateTags& tags);
 			
-			/*carga los tags privados*/
+			/*Private load tags*/
 			int PrivateCargarTagsPrivados(GIL::DICOM::TipoPrivateTags& tags);
 
-			/*devuelve el identificador de elemento donde se deben almacenar los tags privados*/
+			/*Returns the identifier of the element which must store the private tags*/
 			unsigned int GetElementIdentifier(GIL::DICOM::TipoPrivateTags& tags);
 
 //endregion

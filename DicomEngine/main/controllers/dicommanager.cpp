@@ -543,7 +543,7 @@ namespace GIL
 			return numInsertados;
 		}
 
-		/* Obtiene la jerarquia de campos DICOM del fichero */
+		/* Obtains the hierarchy of DICOM file Fields */
 		bool DICOMManager::CargarFichero(const std::string& inputFile, GIL::DICOM::DicomDataset& jerarquia, bool cargarSoloTagsInfo, IInspectCallBack* /*pICallback*/)
 		{
 			//comprobamos que es dicom(numero magico, si no el load file a veces casca estrepitosamente)
@@ -598,7 +598,7 @@ namespace GIL
 
 
 		/******************/
-		//esto es para cargar el fichero sin llevar todo a memoria, solo lo que nos interese con el gettag
+		//This is to load the file without any Memory, only what we are interested in gettag 
 		bool DICOMManager::CargarFichero(const std::string& inputFile, bool /*cargarSoloTagsInfo*/)
 		{
 			//comprobamos que es dicom(numero magico, si no el load file a veces casca estrepitosamente)
@@ -1270,7 +1270,7 @@ namespace GIL
 			return numTotalInsertados;
 		}
 
-		//----------------------CARGAR JERARQUIA-------------------------------------------------------
+		//----------------------Hierarchy load-------------------------------------------------------
 		int DICOMManager::CargarJerarquia(DicomDataset& base, unsigned int maximaLongitud, DcmElement * pElementoInicial, bool mustExistPixel) {
 			int numInsertados = 0;
 
@@ -1289,7 +1289,7 @@ namespace GIL
 			unsigned long elemCount = ds->card();
 
             bool hasPixel = false;
-			//si es nulo, queremos cargar toda la jerarquia
+			//If is Zero, we carry the entire Hierarchy
 			if(pElementoInicial == NULL) {
 				for (unsigned long i = 0; i < elemCount; i++) {
 					DcmElement *e = ds->getElement(i);
