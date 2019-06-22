@@ -1,0 +1,620 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="processing">
+      <UniqueIdentifier>{a05fee75-f331-4236-ae99-520e76abdef1}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render">
+      <UniqueIdentifier>{a4677a4f-5cea-48b1-86da-053460bc501a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="data">
+      <UniqueIdentifier>{b3b452ac-46fa-437b-af53-7d9abf178ea7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="builder">
+      <UniqueIdentifier>{7ba837e1-2c33-497d-a9f5-77dcaee9bd27}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="tools">
+      <UniqueIdentifier>{b94c2784-d725-4908-af91-50c3f2add837}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="io">
+      <UniqueIdentifier>{9c4296cf-9b2a-4b61-8abd-473261bdc53f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="actor">
+      <UniqueIdentifier>{3dabdcf1-ef1d-4eb3-9e24-03e1367e90dc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="batch">
+      <UniqueIdentifier>{a024fc58-4cc9-497d-a101-49d957d2fa21}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="filter">
+      <UniqueIdentifier>{170f167d-2115-4727-807a-5ccadae8a3a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="render\transfer_function">
+      <UniqueIdentifier>{6df8ed61-6609-4c84-b4b3-aaea2c100144}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include">
+      <UniqueIdentifier>{cf18851b-b4fd-4e43-94b1-d87c93b12e3a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\data">
+      <UniqueIdentifier>{5f570ba5-93db-4bae-b4b9-5804de8c24ae}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\data\IOD">
+      <UniqueIdentifier>{47709a7a-7154-4c93-a084-eec1e589630c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\render">
+      <UniqueIdentifier>{23051a41-bb55-46f4-ba7b-f9618c5bba0e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\render\transfer_function">
+      <UniqueIdentifier>{66baec15-dd27-4b91-8ffd-d8690ca7abbc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\builder">
+      <UniqueIdentifier>{9e42f0d7-5056-4ea1-8c48-ab48b036a4cb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\tools">
+      <UniqueIdentifier>{786e6a23-5ede-43f8-ace4-65769e3f0803}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\io">
+      <UniqueIdentifier>{f3f46fef-937e-4dc5-aa02-6c80c15b712a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\actor">
+      <UniqueIdentifier>{e87fa7d8-caf2-423f-93bc-e1423f90ee51}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\batch">
+      <UniqueIdentifier>{743a6b6b-90e0-4a07-89aa-e4a75daa61ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\filter">
+      <UniqueIdentifier>{1ffcf3e7-c15e-4c87-b7ec-fb9130150189}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\presentation">
+      <UniqueIdentifier>{7ee3f3b3-0b1c-4be8-903d-8545cf0790d6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\processing">
+      <UniqueIdentifier>{9939ccc5-13c9-45f9-abd4-c33b4f52207a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\sort">
+      <UniqueIdentifier>{a9e0bbdd-5cba-46cc-8a32-de26dc75c2c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\control">
+      <UniqueIdentifier>{054ed561-fb05-40aa-ba74-7916653a2c6d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\task">
+      <UniqueIdentifier>{7a767b24-11cd-4f64-9d1d-aad39cfff58d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="control">
+      <UniqueIdentifier>{e5ea0a7a-49bb-47f6-a800-3b624bd94e45}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\orientation">
+      <UniqueIdentifier>{dc1e9086-3e6a-4c0e-afde-7f318881eda2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="orientation">
+      <UniqueIdentifier>{2ea16bc2-c2a8-4448-acd7-ab358ac2445a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\bitmap">
+      <UniqueIdentifier>{f9bac753-8f25-4910-92c6-9e2cbda3234f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="bitmap">
+      <UniqueIdentifier>{b7b3a341-4e90-4ef0-a18a-af4a33d1c821}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\thread">
+      <UniqueIdentifier>{349dd77e-aaf1-42a5-8f18-be67b8265263}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="thread">
+      <UniqueIdentifier>{c9ae5776-d771-4d15-8b50-357b6f7fc9b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="__include\exception">
+      <UniqueIdentifier>{13a4239a-99ce-4d8b-a4c7-8a2b27a198f9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="exception">
+      <UniqueIdentifier>{2760c530-2f35-4d1a-8467-814c87f5f406}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="render\imaging_vr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="data\vol_data.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="builder\imaging_builder_vr.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\convert_vtk_image_data_to_rgba.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="data\show_buffer.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="data\data_loader.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="data\camera.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="render\render_param_vr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="render\renderer_cpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="data\curve_line.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="render\render_param_cpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="builder\imaging_builder_cpr.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="render\imaging_cpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="filter\spline_driven_image_slicer.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
+    <ClCompile Include="filter\frenet_serret_frame.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
+    <ClCompile Include="render\renderer_straightened_cpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="render\renderer_stretched_cpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\timer.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="data\aabb.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="render_manager.cpp" />
+    <ClCompile Include="data_source.cpp" />
+    <ClCompile Include="render\imaging_mpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="render\renderer_mpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="render\render_param_mpr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="builder\imaging_builder_mpr.cpp">
+      <Filter>builder</Filter>
+    </ClCompile>
+    <ClCompile Include="data\pixel_data.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\math.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\vtk_image_data_creator.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="render\renderer_vr.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="render\transfer_function.cpp">
+      <Filter>render\transfer_function</Filter>
+    </ClCompile>
+    <ClCompile Include="render\transfer_function_color.cpp">
+      <Filter>render\transfer_function</Filter>
+    </ClCompile>
+    <ClCompile Include="render\transfer_function_opacity.cpp">
+      <Filter>render\transfer_function</Filter>
+    </ClCompile>
+    <ClCompile Include="data\image_orientation.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="data\dicom_format_converter.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+    <ClCompile Include="render\renderer_mpr_vtk.cpp">
+      <Filter>render</Filter>
+    </ClCompile>
+    <ClCompile Include="data\orthogonal_plane.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="data\anatomical_plane.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="data\patient_orientation.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="curve_source.cpp" />
+    <ClCompile Include="render_source.cpp" />
+    <ClCompile Include="render_facade.cpp" />
+    <ClCompile Include="processing\image_process.cpp">
+      <Filter>processing</Filter>
+    </ClCompile>
+    <ClCompile Include="io\nii_loader.cpp">
+      <Filter>io</Filter>
+    </ClCompile>
+    <ClCompile Include="batch\batch_image_source.cpp">
+      <Filter>batch</Filter>
+    </ClCompile>
+    <ClCompile Include="batch\batch_generator_vr.cpp">
+      <Filter>batch</Filter>
+    </ClCompile>
+    <ClCompile Include="control\image_control_3d.cpp">
+      <Filter>control</Filter>
+    </ClCompile>
+    <ClCompile Include="processing\image_transform_opencv.cpp">
+      <Filter>processing</Filter>
+    </ClCompile>
+    <ClCompile Include="data\window_level.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="processing\voi_lut.cpp">
+      <Filter>processing</Filter>
+    </ClCompile>
+    <ClCompile Include="control\image_control_2d.cpp">
+      <Filter>control</Filter>
+    </ClCompile>
+    <ClCompile Include="orientation\orientation_marker.cpp">
+      <Filter>orientation</Filter>
+    </ClCompile>
+    <ClCompile Include="bitmap\bitmap.cpp">
+      <Filter>bitmap</Filter>
+    </ClCompile>
+    <ClCompile Include="bitmap\BasicBitmap.cpp">
+      <Filter>bitmap</Filter>
+    </ClCompile>
+    <ClCompile Include="batch\batch_generator_cpr.cpp">
+      <Filter>batch</Filter>
+    </ClCompile>
+    <ClCompile Include="batch\batch_generator_mpr.cpp">
+      <Filter>batch</Filter>
+    </ClCompile>
+    <ClCompile Include="thread\thd.c">
+      <Filter>thread</Filter>
+    </ClCompile>
+    <ClCompile Include="data\image_plane.cpp">
+      <Filter>data</Filter>
+    </ClCompile>
+    <ClCompile Include="filter\manual_orientation_markder_widget.cpp">
+      <Filter>filter</Filter>
+    </ClCompile>
+    <ClCompile Include="orientation\orientation_interpreter.cpp">
+      <Filter>orientation</Filter>
+    </ClCompile>
+    <ClCompile Include="bitmap\bitmap_info.cpp">
+      <Filter>bitmap</Filter>
+    </ClCompile>
+    <ClCompile Include="processing\stored_value_transform.cpp">
+      <Filter>processing</Filter>
+    </ClCompile>
+    <ClCompile Include="exception\iexception.cpp">
+      <Filter>exception</Filter>
+    </ClCompile>
+    <ClCompile Include="tools\configurations.cpp">
+      <Filter>tools</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\data\data_definition.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\imaging_3d.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\imaging_cpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\imaging_mpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\imaging_vr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\show_buffer.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\render_param.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\render_param_vr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\renderer_3d.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\data_convert.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\vol_data.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\vtk_include.h">
+      <Filter>__include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\builder\imaging_builder_3d.h">
+      <Filter>__include\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="include\builder\imaging_builder_vr.h">
+      <Filter>__include\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\convert_vtk_image_data_to_rgba.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\dcm_reader.h">
+      <Filter>__include\io</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\data_loader.h">
+      <Filter>__include\io</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\light.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\camera.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\logger.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\path.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="data\light.cpp">
+      <Filter>data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\IOD\general_image_iod.h">
+      <Filter>__include\data\IOD</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\IOD\image_plane_iod.h">
+      <Filter>__include\data\IOD</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\IOD\iod.h">
+      <Filter>__include\data\IOD</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\IOD\ct_imagel_iod.h">
+      <Filter>__include\data\IOD</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\render_mode.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\vector2.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\vector3.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\pick_3d.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\measure_3d.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\orientation_3d.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\annotation_storage.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\renderer_cpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\render_param_cpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\curve_line.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\builder\imaging_builder_cpr.h">
+      <Filter>__include\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="include\filter\spline_driven_image_slicer.h">
+      <Filter>__include\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="include\filter\frenet_serret_frame.h">
+      <Filter>__include\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\renderer_straightened_cpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\renderer_stretched_cpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\box3.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\timer.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\aabb.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\math.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data_source.h">
+      <Filter>__include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\renderer_mpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\render_param_mpr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\builder\imaging_builder_mpr.h">
+      <Filter>__include\builder</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\pixel_data.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\vtk_image_data_creator.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\image_overlay.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\patient_orientation.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\image_plane.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\image_orientation.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\transfer_function.h">
+      <Filter>__include\render\transfer_function</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\标头.h">
+      <Filter>__include\render\transfer_function</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\transfer_function_color.h">
+      <Filter>__include\render\transfer_function</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\transfer_function_opacity.h">
+      <Filter>__include\render\transfer_function</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\renderer_vr.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\transfer_function_template.h">
+      <Filter>__include\render\transfer_function</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\Image_slice.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\pixel_spacing_2d.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\string_util.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\dicom_format_converter.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\color4.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\txt_reader.h">
+      <Filter>__include\io</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render\renderer_mpr_vtk.h">
+      <Filter>__include\render</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\orthogonal_plane.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\curve_source.h">
+      <Filter>__include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\presentation\parameter_base.h">
+      <Filter>__include\presentation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render_source.h">
+      <Filter>__include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\render_facade.h">
+      <Filter>__include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\anatomocal_plane.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\annotation_facade.h">
+      <Filter>__include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\processing\image_process.h">
+      <Filter>__include\processing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\io\nii_loader.h">
+      <Filter>__include\io</Filter>
+    </ClInclude>
+    <ClInclude Include="include\sort\sort_by_position.h">
+      <Filter>__include\sort</Filter>
+    </ClInclude>
+    <ClInclude Include="include\control\image_control.h">
+      <Filter>__include\control</Filter>
+    </ClInclude>
+    <ClInclude Include="include\processing\image_transform.h">
+      <Filter>__include\processing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\batch\batch_image_source.h">
+      <Filter>__include\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\image_source.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\batch\batch_generator_vr.h">
+      <Filter>__include\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\batch\batch_generator.h">
+      <Filter>__include\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\control\image_control_3d.h">
+      <Filter>__include\control</Filter>
+    </ClInclude>
+    <ClInclude Include="include\processing\image_transform_opencv.h">
+      <Filter>__include\processing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\window_level.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\processing\voi_lut.h">
+      <Filter>__include\processing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\control\image_control_2d.h">
+      <Filter>__include\control</Filter>
+    </ClInclude>
+    <ClInclude Include="include\orientation\orientation_marker.h">
+      <Filter>__include\orientation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bitmap\bitmap.h">
+      <Filter>__include\bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bitmap\BasicBitmap.h">
+      <Filter>__include\bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="include\data\common.h">
+      <Filter>__include\data</Filter>
+    </ClInclude>
+    <ClInclude Include="include\batch\batch_generator_cpr.h">
+      <Filter>__include\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\batch\batch_generator_mpr.h">
+      <Filter>__include\batch</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\function.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thread\thread.h">
+      <Filter>__include\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="include\thread\thd.h">
+      <Filter>__include\thread</Filter>
+    </ClInclude>
+    <ClInclude Include="include\tools\configurations.h">
+      <Filter>__include\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="include\filter\manual_orientation_marker_widget.h">
+      <Filter>__include\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="include\orientation\orientation_interpreter.h">
+      <Filter>__include\orientation</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bitmap\ibitmap.h">
+      <Filter>__include\bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bitmap\ibitmap_info.h">
+      <Filter>__include\bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="include\bitmap\bitmap_info.h">
+      <Filter>__include\bitmap</Filter>
+    </ClInclude>
+    <ClInclude Include="include\processing\stored_value_transform.h">
+      <Filter>__include\processing</Filter>
+    </ClInclude>
+    <ClInclude Include="include\filter\image_data_clipper.h">
+      <Filter>__include\filter</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exception\iexception.h">
+      <Filter>__include\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exception\data_exception.h">
+      <Filter>__include\exception</Filter>
+    </ClInclude>
+    <ClInclude Include="include\exception\render_exception.h">
+      <Filter>__include\exception</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>
