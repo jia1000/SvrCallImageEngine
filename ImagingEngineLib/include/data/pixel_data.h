@@ -81,11 +81,18 @@ namespace DW {
 			void SetBitsPerPixel(BYTE bits)
 			{
 				bits_per_pixel_ = bits;
+				bytes_per_pixel_ = (bits + 7) / 8;
 			}
 			/// Get bits per pixel
 			BYTE GetBitsPerPixel()
 			{
 				return bits_per_pixel_;
+			}
+
+			/// Check if modality lut is applied to pixel data
+			bool IsModalityLutApplied()
+			{
+				return modality_lut_applied_;
 			}
 
 		protected:
@@ -94,20 +101,23 @@ namespace DW {
 			double Origin[3];
 			double Spacing[3];
 			BYTE bits_per_pixel_;
+			BYTE bytes_per_pixel_;
+			bool modality_lut_applied_;
 			vtkSmartPointer<vtkImageData> vtk_series_data_;
 		};
 
 		class RawPixelData : public IPixelData
 		{
 		public:
-			RawPixelData(UNITDATA3D*);
+			/// 输入的数据需要是经过ModalityLUT转换后的CT值
+			RawPixelData(char *);
 			~RawPixelData();
 			vtkImageData* GetVtkImageData() override;
-			UNITDATA3D* GetPixelData();
+			char* GetPixelData();
 			void *GetDataPointer(int x, int y, int z) override;
 
 		private:
-			UNITDATA3D* series_data_;			//3d pixel data of the series
+			char* series_data_;			//3d pixel data of the series
 		};
 
 		class VtkPixelData : public IPixelData

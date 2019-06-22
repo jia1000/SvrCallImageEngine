@@ -145,12 +145,14 @@ void MPRSlabBatchGenerator::Execute(BatchArgs *args)
 
 			// Notify batch image source to cache this buffer
 			if (this->GetCallback()){
-				string path = output_path + "\\" + str_ori + "_" + to_string(image_number) + ".bmp";
+				string path = output_path + str_ori + "_" + to_string(image_number) + ".bmp";
 				BufferResult *result = new BufferResult();
 				result->buffer_data = buffer;
 				result->image_plane = plane;
 				result->instance_number = image_number;
 				result->file_name = path;
+				result->step = spacing;
+				batch_args->GetWWWL(result->window_width, result->window_level);
 				this->GetCallback()->OnBatchOneGenerated(result, true);
 			}
 

@@ -18,8 +18,13 @@
 #define GOOGLE_GLOG_DLL_DECL
 #define GLOG_NO_ABBREVIATED_SEVERITIES
 
+#define LOG_LEVEL_DEBUG			9
+#define LOG_LEVEL_INFO			3
+#define LOG_LEVEL_ERROR			1
+
 #include <glog/logging.h>
 #include <glog/log_severity.h> 
+//#include "tools/configurations.h"
 
 using namespace std;
 
@@ -55,10 +60,10 @@ public:
 #ifdef _DEBUG
 		LOG(WARNING) << msg;	
 #else
-// 		wstring logLevel = Configurations::getInstance()->GetLogLevel();		
-// 		if (logLevel == "DEBUG") {
-// 			LOG(WARNING) << msg;
-// 		}
+		int log_level =	9;			//ConfigurationManager::Get()->GetLogLevel();	
+		if (log_level >= 9) {
+			LOG(WARNING) << msg;
+		}
 #endif // _DEBUG
 	}
 	

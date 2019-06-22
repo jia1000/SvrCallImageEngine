@@ -23,13 +23,17 @@ namespace DW {
 		class BatchImageSource : public IImageSource, public IBatchCallback
 		{
 		public:
-			BatchImageSource() {}
+			BatchImageSource();
+			~BatchImageSource();
+
 			/// 获取图像
 			BufferResult *GetImage(int index) override;
 			/// 添加缓存图像
 			void AddImage(BufferResult *buffer) override;
 			/// 获取缓存图像总数
 			int GetImageNumber() override;
+			/// 清空所有数据
+			void Destroy() override;
 
 			/// IBatchCallback implementation
 			void OnBatchOneGenerated(BufferResult* results, BYTE status) override;

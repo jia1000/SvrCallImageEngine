@@ -26,6 +26,7 @@ namespace DW {
 		public:
 			ImageTranformOpenCV();
 			~ImageTranformOpenCV();
+
 			/// 输入图像
 			void SetInput(ShowBuffer *buffer) override;
 			/// 返回变换后的图像
@@ -46,7 +47,7 @@ namespace DW {
 		private:
 			/// 输入的ShowBuffer对象
 			ShowBuffer *show_buffer_;
-			/// 输出的HBITMAP对象
+			/// 输出的BITMAP对象
 			IBitmap *image_buffer_;
 			/// 放缩比例
 			float scale_factor_;

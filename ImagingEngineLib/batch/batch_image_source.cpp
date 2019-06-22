@@ -12,6 +12,16 @@ using namespace DW::IMAGE;
 using namespace DW::Batch;
 
 
+BatchImageSource::BatchImageSource()
+{
+
+}
+
+BatchImageSource::~BatchImageSource()
+{
+	Destroy();
+}
+
 BufferResult *BatchImageSource::GetImage(int index)
 {
 	if (index < buffer_list_.size())
@@ -40,4 +50,14 @@ void BatchImageSource::OnBatchOneGenerated(BufferResult* results, BYTE status)
 void BatchImageSource::OnBatchAllGenerated(BYTE status)
 {
 	//TODO 通知前端生成完成
+}
+
+void BatchImageSource::Destroy()
+{
+	auto it = buffer_list_.begin();
+	while (it != buffer_list_.end()){
+		delete *it;
+		++it;
+	}
+	buffer_list_.clear();
 }

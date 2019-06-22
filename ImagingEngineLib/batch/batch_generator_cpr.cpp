@@ -81,12 +81,14 @@ void CPRRotationBatchGenerator::Execute(BatchArgs *args)
 			
 			// Notify batch image source to cache this buffer
 			if (this->GetCallback()){
-				string path = output_path + "\\" + curve_id + "_" + to_string(count_angle) + ".bmp";
+				string path = output_path + curve_id + "_" + to_string(count_angle) + ".bmp";
 				BufferResult *result = new BufferResult();
 				result->buffer_data = buffer;
 				result->image_plane = plane;
 				result->instance_number = i + 1;
 				result->file_name = path;
+				result->step = step_angle;
+				batch_args->GetWWWL(result->window_width, result->window_level);
 				this->GetCallback()->OnBatchOneGenerated(result, true);
 			}
 

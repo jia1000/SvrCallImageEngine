@@ -44,35 +44,52 @@ using namespace DW::IMAGE;
 using namespace DW::Render;
 using namespace DW::CV;
 
-int CPRRenderer::tmp_counter_ = 0;
 
 CPRRenderer::CPRRenderer()
+	: IThreedRenderer()
 {
-	render_window_ = vtkSmartPointer<vtkRenderWindow>::New();
 	is_first_render_ = true;
 	show_buffer_ = new ShowBuffer();
 	image_plane_ = new ImagePlane();
-	tmp_counter_++;
-	cpr_file_id = tmp_counter_;
 }
+
 CPRRenderer::~CPRRenderer()
 {
-
+	if (show_buffer_){
+		delete show_buffer_;
+		show_buffer_ = NULL;
+	}
+	if (image_plane_){
+		delete image_plane_;
+		image_plane_ = NULL;
+	}
 }
+
+void CPRRenderer::SetData(VolData* data)
+{
+	volume_data_ = data;
+	if (NULL == volume_data_){
+		CGLogger::Info("VolumeRenderer::SetData null");
+		return;
+	}
+	if (volume_data_->GetPixelData()){
+		volume_data_->GetPixelData()->GetSpacing(voxel_spacing_);
+	}
+}
+
 void CPRRenderer::Render()
 {
-	if (volume_data_ == NULL) return;
+	if (volume_data_ == NULL) {
+		CGLogger::Error("CPRRenderer::Render >> volume data is null.");
+		return;
+	}
 
 	DoRender();
 }
+
 ShowBuffer *CPRRenderer::GetShowBuffer()
 {
 	return show_buffer_;
-}
-
-void CPRRenderer::DoRender()
-{
-
 }
 
 vtkSmartPointer<vtkPolyData> CPRRenderer::SweepLine (VolCurve *curve,

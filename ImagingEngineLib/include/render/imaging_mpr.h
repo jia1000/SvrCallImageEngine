@@ -44,6 +44,8 @@ namespace DW {
 			void Rotate(float angle) override;
 			/// 绕着中心轴旋转一定角度
 			void Rotate3D(Vector3f axis, float angle) override;
+			/// 绕着中心轴和指定点旋转一定角度
+			void Rotate3D(Vector3f &axis, Point3f &point, float angle) override;
 			/// 窗宽窗位
 			void WindowWidthLevel(int width, int level) override;
 			void WindowWidthLevelOffset(int offset_width, int offset_level) override;

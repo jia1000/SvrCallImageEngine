@@ -36,6 +36,8 @@ namespace DW {
 			void GetOrigin(double origin[3]) override;
 			/// Gets image orientation in x/y/z coordinate 
 			void GetOrientation(double row_vector[3], double column_vector[3]) override;
+			/// Gets window width & level
+			void GetWindowLevel(int &ww, int &wl) override;
 
 		private:
 			/// Pointer to a output result of 2d image control

@@ -65,6 +65,19 @@ void Camera::Zoom(float factor)
 	}
 }
 
+void Camera::Move(float offset[3])
+{
+	if (vtk_camera_){
+
+		double viewFocus[4], viewPoint[3];
+		vtk_camera_->GetFocalPoint(viewFocus);
+		vtk_camera_->GetPosition(viewPoint);
+		vtk_camera_->SetFocalPoint(offset[0] + viewFocus[0], offset[1] + viewFocus[1], offset[2] + viewFocus[2]);
+		vtk_camera_->SetPosition(offset[0] + viewPoint[0], offset[1] + viewPoint[1], offset[2] + viewPoint[2]);
+
+	}
+}
+
 void Camera::SetVtkCamera(vtkSmartPointer<vtkCamera> camera) 
 {
 	vtk_camera_ = camera;
@@ -93,12 +106,12 @@ void Camera::SetCameraViewPlane(OrientationType ori)
 		break;
 
 	case OrientationType::SAGITTAL:
-		vtk_camera_->SetViewUp(0.0, 0.0, 1.0);
+		vtk_camera_->SetViewUp(0.0, 0.0, -1.0);
 		vtk_camera_->SetPosition(1.0, 0.0, 0.0);
 		break;
 
 	case OrientationType::CORONAL:
-		vtk_camera_->SetViewUp(0.0, 0.0, 1.0);
+		vtk_camera_->SetViewUp(0.0, 0.0, -1.0);
 		vtk_camera_->SetPosition(0.0, -1.0, 0.0);
 		break;
 	}

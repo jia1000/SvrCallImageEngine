@@ -25,6 +25,7 @@ ImageTranformOpenCV::ImageTranformOpenCV()
 	output_width_ = 512;
 	output_height_ = 512;
 	image_buffer_ = new DWBitmap();
+	dynamic_cast<DWBitmap *>(image_buffer_)->SetPixelType(0);
 }
 
 ImageTranformOpenCV::~ImageTranformOpenCV()

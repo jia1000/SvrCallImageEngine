@@ -88,7 +88,7 @@ namespace DW {
 			void SetOffScreenRendering(bool);
 		protected:
 			virtual void DoRender(vtkSmartPointer<vtkImageData> imagedata);
-			virtual void FitRenderingIntoViewport();
+			virtual void FitRenderingIntoViewport(float clip, bool zoom_after_clip);
 
 		protected:
 			bool is_off_screen_rendering_;

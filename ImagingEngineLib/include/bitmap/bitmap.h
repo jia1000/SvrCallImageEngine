@@ -73,12 +73,12 @@ namespace DW {
 			BITMAPINFO biInfo;
 		}BITMAPFILE;
 
-
+		/// 字节顺序保持RGB
 		typedef struct _LI_RGB  
-		{  
-			U8 b;  
-			U8 g;  
-			U8 r;  
+		{   
+			U8 r; 
+			U8 g; 
+			U8 b;   
 		}LI_RGB; 
 
 #pragma pack(pop)
@@ -99,6 +99,22 @@ namespace DW {
 			void SetBuffer(char *data, unsigned int width, unsigned int height, unsigned int comp) override;
 			const char *GetBuffer() override;
 
+			unsigned char GetPixelType() override;
+			unsigned char GetPlanarConfiguration() override;
+			const char *GetPhotometricInterpretation() override;
+			const char *GetRescaleIntercept() override;
+			const char *GetRescaleSlope() override;
+			const char *GetRescaleType() override;
+			unsigned short GetBitsAllocated() override;
+			unsigned short GetBitsStored() override;
+			unsigned short GetHighBit() override;
+			unsigned short GetPixelRepresentation() override;
+			bool IsTopDown() override;
+
+			void SetPixelType(unsigned char);
+			void DeepCopy(DWBitmap *src);
+			IBitmap *Clone() override;
+
 		private:
 			/// 宽度
 			unsigned int width_;
@@ -108,7 +124,10 @@ namespace DW {
 			unsigned int number_of_component_;
 			/// 像素数据
 			char *pixel_data_;
+			/// RGB像素格式
 			LI_RGB *pRGB;
+			/// 图像像素格式
+			unsigned char pixel_type_;
 			///// 实现Bitmap对象
 			//BasicBitmap *bitmap_impl_;
 			///// 实现Bitmap对象2

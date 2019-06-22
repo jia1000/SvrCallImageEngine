@@ -58,6 +58,11 @@ namespace DW {
 			/// Sets the plane thickness.
 			void SetThickness(double thickness);
 
+			/// Returns window width & level
+			void GetWindowLevel(int &ww, int &wl);
+			/// Sets window width & level
+			void SetWindowLevel(int &ww, int &wl);
+
 			///// Returns the plane center.
 			//Point3f GetCenter() const;
 			///// Modifies the origin so that the given point becomes the center.
@@ -116,6 +121,8 @@ namespace DW {
 			double column_length_;
 			/// Plane thickness.
 			double thickness_;
+			/// Window width & level
+			int ww_, wl_;
 
 		};
 

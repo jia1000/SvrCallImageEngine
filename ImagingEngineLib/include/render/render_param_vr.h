@@ -39,6 +39,15 @@ namespace DW {
 			/// Gets the blend mode to use.
 			BlendMode GetBlendMode();
 
+			/// Sets flag to update center after clipping
+			void SetUpdateCenterAfterClipping(bool update);
+			/// Sets flag to update center after clipping
+			bool GetUpdateCenterAfterClipping();
+			/// Sets clipping percent
+			void SetClipping(float clip);
+			/// Gets clipping percent
+			float GetClipping();
+
 		private:
 			/// The desired update rate which tells how quickly they need to render
 			/// When camera is still, the desired update rate should also be updated to a small value
@@ -47,6 +56,11 @@ namespace DW {
 			RenderMode rendering_mode_;
 			/// Blend mode: how the samples are combined to create a pixel.
 			BlendMode blend_mode_;
+			/// Indicates whether to update center after clipping operation
+			bool update_center_after_clipped_;
+			/// Clipping percent
+			float clipping_percent_;
+
 		};
 	}
 }

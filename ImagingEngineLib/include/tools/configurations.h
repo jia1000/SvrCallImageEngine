@@ -22,6 +22,8 @@ public:
 	virtual int GetNumberOfThreads() = 0;
 	/// VR / MIP
 	virtual string GetVRBlendMode() = 0;
+	/// Log level
+	virtual int GetLogLevel() = 0;
 };
 
 class ConfigurationManager
@@ -58,6 +60,11 @@ public:
 		return vr_blend_mode_;
 	}
 
+	int GetLogLevel()
+	{
+		return log_level_;
+	}
+
 private:
 	ConfigurationManager();
 
@@ -68,5 +75,6 @@ private:
 	string mpr_render_method_;
 	int threads_number_;
 	string vr_blend_mode_;
+	int log_level_;
 
 };

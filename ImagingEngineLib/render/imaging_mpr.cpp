@@ -11,7 +11,6 @@ using namespace DW::CV;
 MPRImaging::MPRImaging(string id)
 	: IThreedImaging(id)
 {
-	show_buffer_ = new ShowBuffer();
 	bounding_box_ = new BoundingBox();
 }
 
@@ -29,15 +28,20 @@ VolData* MPRImaging::GetData()
 void MPRImaging::SetData(VolData* data)
 {
 	volume_data_ = data;
-	bounding_box_->Update(0,0,0,data->GetSliceWidth()-1,data->GetSliceHeight()-1,data->GetSliceCount()-1);
+	if (volume_data_){
+		bounding_box_->Update(0,0,0,data->GetSliceWidth()-1,data->GetSliceHeight()-1,data->GetSliceCount()-1);
+	}
+	else{
+		bounding_box_->Update(0,0,0,0,0,0);
+	}
 }
 // »ñÈ¡Êä³öÏÔÊ¾Í¼Ïñ
 ShowBuffer* MPRImaging::GetShowBuffer()
 {
 	if (renderer_){
-		show_buffer_ = renderer_->GetShowBuffer();
+		return renderer_->GetShowBuffer();
 	}
-	return show_buffer_;
+	return NULL;
 }
 // äÖÈ¾Í¼Ïñ£¬»º´æµ½show_buffer_
 void MPRImaging::Render()
@@ -141,7 +145,12 @@ void MPRImaging::Rotate(float angle)
 
 void MPRImaging::Rotate3D(Vector3f axis, float angle) 
 {
-	// Not supported
+	// No implementation
+}
+
+void MPRImaging::Rotate3D(Vector3f &axis, Point3f &point, float angle) 
+{
+	// No implementation
 }
 
 void MPRImaging::WindowWidthLevel(int width, int level) 

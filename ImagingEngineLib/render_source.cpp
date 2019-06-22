@@ -27,6 +27,7 @@
 #include "control/image_control_3d.h"
 #include "processing/image_transform.h"
 #include "processing/image_transform_opencv.h"
+#include "processing/stored_value_transform.h"
 #include "tools/configurations.h"
 #include "tools/logger.h"
 
@@ -140,7 +141,9 @@ IImageControl *RenderSource::CreateTwodImageControl(string control_id, RenderCon
 	if (control){
 		IThreedImaging *imaging = CreateRenderControl(control_id, type);
 		control->SetInput(1, imaging);
-		control->SetTransform(new ImageTranformOpenCV());
+		//control->SetTransform(new ImageTranformOpenCV());
+		//TODO Êä³öStored Value??
+		control->SetTransform(new StoredValueTranform());
 	}
 	return control;
 }

@@ -70,6 +70,8 @@ namespace DW {
 
 		/// Change series data for all IThreedImaging objects
 		void ChangeSeries(string series_uid);
+		/// Unloads series data for specified series
+		void UnloadSeries(string series_uid);
 
 		/// Set image width and height for display
 		void SetImageSize(string control_id, int width, int height);
@@ -81,7 +83,7 @@ namespace DW {
 		void SetSlabThickness(string control_id, float thickness);
 
 		/// Create vr batch
-		void CreateVRRotationBatch(string control_id, 
+		int CreateVRRotationBatch(string control_id, 
 			string output, 
 			BlendMode mode, 
 			OrientationType init_ori, 
@@ -93,7 +95,7 @@ namespace DW {
 			int wl);
 
 		/// Create cpr batch
-		void CreateCPRRotationBatch(string control_id,
+		int CreateCPRRotationBatch(string control_id,
 			string output,
 			string curve_id,
 			OrientationType init_ori,
@@ -104,7 +106,7 @@ namespace DW {
 			int wl);
 
 		/// Create mpr batch
-		void CreateMPRSlabBatch(string control_id,
+		int CreateMPRSlabBatch(string control_id,
 			string output,
 			BlendMode mode,
 			OrientationType ori,

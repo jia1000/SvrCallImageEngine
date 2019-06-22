@@ -10,8 +10,6 @@ using namespace DW::CV;
 VRImaging::VRImaging(string id)
 	: IThreedImaging(id)
 {
-	//show_buffer_ = new ShowBuffer();
-	//show_buffer_->InitBufferData(512, 512, 32);
 	bounding_box_ = new BoundingBox();
 }
 
@@ -28,7 +26,12 @@ VolData* VRImaging::GetData()
 void VRImaging::SetData(VolData* data)
 {
 	volume_data_ = data;
-	bounding_box_->Update(0,0,0,data->GetSliceWidth()-1,data->GetSliceHeight()-1,data->GetSliceCount()-1);
+	if (volume_data_){
+		bounding_box_->Update(0,0,0,data->GetSliceWidth()-1,data->GetSliceHeight()-1,data->GetSliceCount()-1);
+	}
+	else{
+		bounding_box_->Update(0,0,0,0,0,0);
+	}
 }
 
 ShowBuffer* VRImaging::GetShowBuffer()
@@ -126,6 +129,37 @@ void VRImaging::Rotate(float angle)
 }
 
 void VRImaging::Rotate3D(Vector3f axis, float angle) 
+{
+	if (renderer_){
+		Camera* camera = renderer_->GetCamera();
+		if (camera){
+			Vector3f axis_x(1.0f, 0.0f, 0.0f);
+			Vector3f axis_y(0.0f, 1.0f, 0.0f);
+			Vector3f axis_z(0.0f, 0.0f, 1.0f);
+			if (axis == axis_x){
+				camera->RotateX(angle);
+			}
+			else if (axis == axis_y){
+				camera->RotateY(angle);
+			}
+			else if (axis == axis_z){
+				//camera->RotateZ(angle);
+
+				// Roll image through opencv
+				roll_angle_ += angle;
+
+				return;
+			}
+			else{
+				camera->RotateWXYZ(angle, axis[0], axis[1], axis[2]);
+			}
+
+			renderer_->Render();
+		}
+	}
+}
+
+void VRImaging::Rotate3D(Vector3f &axis, Point3f &point, float angle) 
 {
 	if (renderer_){
 		Camera* camera = renderer_->GetCamera();

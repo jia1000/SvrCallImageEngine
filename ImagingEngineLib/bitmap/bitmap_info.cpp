@@ -61,3 +61,9 @@ void BitmapDcmInfo::GetOrientation(double row_vector[3], double column_vector[3]
 	column_vector[1] = col_v[1];
 	column_vector[2] = col_v[2];
 }
+
+void BitmapDcmInfo::GetWindowLevel(int &ww, int &wl)
+{
+	ww = buffer_result_->window_width;
+	wl = buffer_result_->window_level;
+}

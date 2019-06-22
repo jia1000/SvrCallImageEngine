@@ -120,6 +120,9 @@ namespace DW {
 			vector<Vector3f> binormal_vectors_;
 			/// 法向量之间关联性
 			bool using_consistent_normal_;
+			/// 标识从头到脚排序
+			bool head_to_feet_;
+
 		};
 
 	}

@@ -19,55 +19,65 @@ using namespace DW::IMAGE;
 using namespace DW::Render;
 
 MPRRendererVtk::MPRRendererVtk()
+	: IThreedRenderer()
 {
 	is_first_render_ = true;
 	render_mode_ = RenderMode::MPR;
 	show_buffer_ = new ShowBuffer();
 	image_plane_ = new ImagePlane();
-	vtk_render_window_ = vtkSmartPointer<vtkRenderWindow>::New();
-	vtk_image_actor_ = vtkSmartPointer<vtkImageActor>::New();
-	vtk_renderer_ =	vtkSmartPointer<vtkRenderer>::New();
-	vtk_renderer_->AddActor(vtk_image_actor_);
-	vtk_renderer_->SetBackground(0, 0, 0);
-	vtk_render_window_->AddRenderer(vtk_renderer_);
 
 	is_off_screen_rendering_ = true;
-	vtk_render_window_->SetOffScreenRendering(1);
-	
 	
 	vtk_image_reslice_ = vtkSmartPointer<vtkImageSlabReslice>::New();
-	//vtk_image_reslice_->SetOutputDimensionality(2);
-	//vtk_image_reslice_->SetResliceAxes(resliceAxes);
-	//vtk_image_reslice_->SetInterpolationModeToLinear();
 }
+
 MPRRendererVtk::~MPRRendererVtk()
 {
-
+	if (show_buffer_){
+		delete show_buffer_;
+		show_buffer_ = NULL;
+	}
+	if (image_plane_){
+		delete image_plane_;
+		image_plane_ = NULL;
+	}
+	vtk_image_reslice_->Delete();
 }
+
 void MPRRendererVtk::Render()
 {
-	if (volume_data_ == NULL) return;
+	if (volume_data_ == NULL) {
+		CGLogger::Error("MPRRendererVtk::Render >> volume data is null.");
+		return;
+	}
 
 	DoRender();
 }
+
 ShowBuffer *MPRRendererVtk::GetShowBuffer()
 {
-	/// Convert vtkImageData to Showbuffer object
-	BufferTransform();
-
 	return show_buffer_;
 }
+
 void MPRRendererVtk::SetData(VolData* data)
 {
 	volume_data_ = data;
+	if (NULL == volume_data_){
+		vtk_image_reslice_->RemoveAllInputs();
+
+		CGLogger::Info("MPRRendererVtk::SetData null");
+		return;
+	}
+
+	if (volume_data_->GetPixelData()){
+		volume_data_->GetPixelData()->GetSpacing(voxel_spacing_);
+	}
 	/// Workaround for vtkSmartVolumeMapper bug (https://gitlab.kitware.com/vtk/vtk/issues/17328)
 	volume_data_->GetPixelData()->GetVtkImageData()->Modified();
 #if VTK_MAJOR_VERSION > 5
 	vtk_image_reslice_->SetInputData(volume_data_->GetPixelData()->GetVtkImageData());
-	//vtk_image_actor_->SetInputData(volume_data_->GetPixelData()->GetVtkImageData());
 #else
 	vtk_image_reslice_->SetInput(volume_data_->GetPixelData()->GetVtkImageData());
-	//vtk_image_actor_->SetInput(volume_data_->GetPixelData()->GetVtkImageData());
 #endif
 	is_first_render_ = true;
 }
@@ -79,8 +89,6 @@ void MPRRendererVtk::DoRender()
 	MPRRenderParam* param_imp = dynamic_cast<MPRRenderParam *>(render_param_);
 	if (param_imp == NULL) return;
 
-	double spacing[3] = {0.0};
-	volume_data_->GetPixelData()->GetSpacing(spacing);
 	int data_height = volume_data_->GetSliceHeight();
 	// 获取图像中心点
 	Point3f center_point;
@@ -100,37 +108,28 @@ void MPRRendererVtk::DoRender()
 	vtkSmartPointer<vtkMatrix4x4> resliceAxes =
 		vtkSmartPointer<vtkMatrix4x4>::New();
 	resliceAxes->DeepCopy(axialElements);
-	//// 应用图像中心点
-	//resliceAxes->SetElement(0, 3, center_point.x);
-	//resliceAxes->SetElement(1, 3, center_point.y);
-	//resliceAxes->SetElement(2, 3, center_point.z);
 	vtk_image_reslice_->SetResliceAxes(resliceAxes);
 	vtk_image_reslice_->SetSlabThickness(param_imp->GetThickness());
-	vtk_image_reslice_->SetOutputSpacing(spacing[0], spacing[0], spacing[0]);
+	vtk_image_reslice_->SetOutputSpacing(voxel_spacing_[0], voxel_spacing_[0], voxel_spacing_[0]);
 
 	//////////////////////////////////////////////////////////////////////////
-	//// VolData数据场均是从头到脚，设置截取比例
-	//float clip = param_imp->GetClip();
-	//if (clip > 0.0f && clip < 1.0f - MathTool::kEpsilon){
-	//	int output_extent[6];
-	//	volume_data_->GetPixelData()->GetVtkImageData()->GetExtent(output_extent);
-	//	double z_length = volume_data_->GetSliceCount() * voxel_spacing_[2];
-	//	double clipped_length = z_length * param_imp->GetClip();
-	//	int zindex = volume_data_->GetSliceCount() * param_imp->GetClip();
-	//	output_extent[5] = output_extent[4] + zindex;
-	//	// set output extent
-	//	vtk_image_reslice_->SetOutputExtent(output_extent);
-	//}
-
+	// VolData数据场均是从头到脚（需要按照ImagePositionPatient排序），设置截取比例
 	int output_extent[6];
 	volume_data_->GetPixelData()->GetVtkImageData()->GetExtent(output_extent);
 	double output_origin[3];
-	volume_data_->GetPixelData()->GetVtkImageData()->GetOrigin(output_origin);
 	int output_image_width = param_imp->GetWidth();
 	int output_image_height = param_imp->GetHeight();
-	output_extent[1] = output_extent[0] + output_image_width;
-	output_extent[3] = output_extent[2] + output_image_height;
+	output_extent[1] = output_extent[0] + output_image_width - 1;
+	output_extent[3] = output_extent[2] + output_image_height - 1;
 	vtk_image_reslice_->SetOutputExtent(output_extent);
+	
+	// Refer to the following address for detailed explanation
+	// https://vtk.org/pipermail/vtkusers/2010-June/061035.html
+	output_origin[0] = -(double)output_image_width / 2.0 * voxel_spacing_[0];
+	output_origin[1] = -(double)output_image_height / 2.0 * voxel_spacing_[0];
+	output_origin[2] = 0.0;
+
+	vtk_image_reslice_->SetOutputOrigin(output_origin[0], output_origin[1], output_origin[2]);
 	//////////////////////////////////////////////////////////////////////////
 
 
@@ -157,8 +156,9 @@ void MPRRendererVtk::DoRender()
 	vtk_image_reslice_->SetOutputDimensionality(2);
 	vtk_image_reslice_->Update();
 
-	output_vtk_image_data_ = vtk_image_reslice_->GetOutput();
+	vtkSmartPointer<vtkImageData> tmp_vtk_data = vtk_image_reslice_->GetOutput();
 
+	//output_vtk_image_data_ = vtk_image_reslice_->GetOutput();
 	// attemp to modify center of the plane
 	//double output_origin[3];
 	//int output_extent[6];
@@ -176,6 +176,25 @@ void MPRRendererVtk::DoRender()
 	//// 设置新的Origin
 	//output_vtk_image_data_->SetOrigin (top_left_new[0], top_left_new[1], top_left_new[2]);
 
+	//////////////////////////////////////////////////////////////////////////
+	// 将vtkImageData转换为ShowBuffer
+	short *pdata = reinterpret_cast<short *>(tmp_vtk_data->GetScalarPointer());
+	int number_of_components = tmp_vtk_data->GetNumberOfScalarComponents();
+	int width = tmp_vtk_data->GetDimensions()[0];
+	int height = tmp_vtk_data->GetDimensions()[1];
+	int x, y;
+	int plane_size = width * height;
+	short *raw_data = new short [plane_size];
+	for (y=0; y<height; ++y){
+		for (x=0; x<width; ++x){
+			/*raw_data[y*width + x] = pdata[(height-1 - y) * width + x];*/
+			// 以下输出DICOM方向正确
+			raw_data[y*width + x] = pdata[y* width + x];
+		}
+	}
+	show_buffer_->SetBufferData(reinterpret_cast<char *>(raw_data), width, height, 16);
+	//////////////////////////////////////////////////////////////////////////
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// 以下设置输出图像平面信息
@@ -192,51 +211,50 @@ void MPRRendererVtk::DoRender()
 	// 左上角第一个像素在患者坐标系中的坐标
 	// 需要注意的是vtkImageData存储的坐标值可能基于世界坐标系，此时需要转换到患者坐标系
 	double left_top_origin[3];
-	output_vtk_image_data_->GetOrigin(left_top_origin);
+	tmp_vtk_data->GetOrigin(left_top_origin);
 	image_plane_->SetOrigin(left_top_origin[0], left_top_origin[1], left_top_origin[2]);
 	// 宽高
 	int extent[6];
-	output_vtk_image_data_->GetExtent(extent);
+	tmp_vtk_data->GetExtent(extent);
 	image_plane_->SetRowLength((extent[1] - extent[0]) * voxel_spacing_[0]);
 	image_plane_->SetColumnLength((extent[3] - extent[2]) * voxel_spacing_[0]);
 	//////////////////////////////////////////////////////////////////////////
-
-
+	
 	Timer::end("MPR::DoRender");
-	CGLogger::Info(Timer::summery());
+	CGLogger::Debug(Timer::summery());
 }
 
 void MPRRendererVtk::BufferTransform()
 {
-	if (output_vtk_image_data_ && show_buffer_){
+	//if (output_vtk_image_data_ && show_buffer_){
 
-		//原来的方法，用来对比生成的图像
-		int width = output_vtk_image_data_->GetDimensions()[0];
-		int height = output_vtk_image_data_->GetDimensions()[1];
-		// 从8位转换到32位
-		int slice = -1;
+	//	//原来的方法，用来对比生成的图像
+	//	int width = output_vtk_image_data_->GetDimensions()[0];
+	//	int height = output_vtk_image_data_->GetDimensions()[1];
+	//	// 从8位转换到32位
+	//	int slice = -1;
 
-		int ww, wl;
-		(dynamic_cast<MPRRenderParam *>(render_param_))->GetWindowWidthLevel(ww, wl);
-		// convert to 32 bits bitmap
-		vtkImageData *pTmpImageData = NULL;	
-		ConvertVtkImagedataToRGBA* convert = new ConvertVtkImagedataToRGBA();
-		if (false == convert->ConvertImageScalarsToRGBA(output_vtk_image_data_, &pTmpImageData, -1, ww, wl))
-		{
-			return;
-		}
+	//	int ww, wl;
+	//	(dynamic_cast<MPRRenderParam *>(render_param_))->GetWindowWidthLevel(ww, wl);
+	//	// convert to 32 bits bitmap
+	//	vtkImageData *pTmpImageData = NULL;	
+	//	ConvertVtkImagedataToRGBA* convert = new ConvertVtkImagedataToRGBA();
+	//	if (false == convert->ConvertImageScalarsToRGBA(output_vtk_image_data_, &pTmpImageData, -1, ww, wl))
+	//	{
+	//		return;
+	//	}
 
-		//// 写入磁盘文件
-		//vtkSmartPointer<vtkBMPWriter> writer = vtkSmartPointer<vtkBMPWriter>::New();
-		//writer->SetFileName(dump_file_name_.c_str());
-		//writer->SetInputData(pTmpImageData);
-		//writer->Write();
+	//	//// 写入磁盘文件
+	//	//vtkSmartPointer<vtkBMPWriter> writer = vtkSmartPointer<vtkBMPWriter>::New();
+	//	//writer->SetFileName(dump_file_name_.c_str());
+	//	//writer->SetInputData(pTmpImageData);
+	//	//writer->Write();
 
-		UNITDATASHOW* pdata = reinterpret_cast<UNITDATASHOW*>(pTmpImageData->GetScalarPointer());
-		int number_of_components = pTmpImageData->GetNumberOfScalarComponents();
+	//	UNITDATASHOW* pdata = reinterpret_cast<UNITDATASHOW*>(pTmpImageData->GetScalarPointer());
+	//	int number_of_components = pTmpImageData->GetNumberOfScalarComponents();
 
-		show_buffer_->SetBufferData(pdata, width, height, number_of_components * 8);
-	}
+	//	show_buffer_->SetBufferData(pdata, width, height, number_of_components * 8);
+	//}
 }
 
 void MPRRendererVtk::SetOffScreenRendering(bool flag)

@@ -38,47 +38,63 @@ using namespace DW::IMAGE;
 }
 
 
-RawPixelData::RawPixelData(UNITDATA3D* data)
+RawPixelData::RawPixelData(char* data)
 {
 	series_data_ = data;
+	modality_lut_applied_ = false;
 }
 
 RawPixelData::~RawPixelData()
 {
 	if (series_data_){
 		delete series_data_;
-		// series_data_ = NULL;
+		series_data_ = NULL;
+	}
+	if (vtk_series_data_){
+		vtk_series_data_->Delete();
 	}
 }
 
-UNITDATA3D* RawPixelData::GetPixelData()
+char* RawPixelData::GetPixelData()
 {
 	return series_data_;
 }
 
 vtkImageData* RawPixelData::GetVtkImageData()
 {
-	UNITDATA3D* pixel_data = this->GetPixelData();
-	// 转换到vtkImageData
-	if (vtk_series_data_){
-		vtk_series_data_->Delete();
-		// vtk_series_data_ = NULL;
-	}
-	int dim[3] = { 0 };
-	double origin[3] = { 0.0 }, spacing[3] = { 0.0 };
-	this->GetDimensions(dim);
-	this->GetOrigin(origin);
-	this->GetSpacing(spacing);
-	BYTE bits = this->GetBitsPerPixel();
+	if (vtk_series_data_ == NULL){
+		//TODO 通过Importer创建vtkImageData
+		short* pixel_data = reinterpret_cast<short *>( this->GetPixelData() );
+		// 转换到vtkImageData
+		int dim[3] = { 0 };
+		double origin[3] = { 0.0 }, spacing[3] = { 0.0 };
+		this->GetDimensions(dim);
+		this->GetOrigin(origin);
+		this->GetSpacing(spacing);
 
-	unsigned char* ptr = this->GetPixelData();
-	VtkImageDataCreator imageDataCreator;
-	imageDataCreator.SetOrigin(origin);
-	imageDataCreator.SetSpacing(spacing);
-	imageDataCreator.SetDimensions(dim);
-	imageDataCreator.SetNumberOfComponents(bits / 8);
-	vtk_series_data_ = imageDataCreator.Create(ptr);
-	
+		// VTK数据的Y轴是反着的，所以此处需要转换一下
+		short *raw_data_for_vtk = new short [dim[0] * dim[1] * dim[2]];
+		int  x, y, z, nz;
+		nz = dim[2];
+		int plane_size = dim[0] * dim[1];
+		for (z=0; z<nz; ++z){
+			for (y=0; y<dim[1]; ++y){
+				for (x=0; x<dim[0]; ++x){
+					raw_data_for_vtk[z*plane_size + y*dim[0] + x] = pixel_data[z*plane_size + (dim[1]-1 - y) * dim[0] + x];
+				}
+			}
+		}
+
+		VtkImageDataCreator imageDataCreator;
+		imageDataCreator.SetOrigin(origin);
+		imageDataCreator.SetSpacing(spacing);
+		imageDataCreator.SetDimensions(dim);
+		imageDataCreator.SetNumberOfComponents(1);	//bytes_per_pixel_
+		vtk_series_data_ = imageDataCreator.Create(raw_data_for_vtk);
+
+		delete raw_data_for_vtk;
+	}
+		
 	return vtk_series_data_;
 }
 
@@ -89,7 +105,7 @@ void *RawPixelData::GetDataPointer(int x, int y, int z)
 		y < this->Dimensions[1] &&
 		z < this->Dimensions[2])
 	{
-		return series_data_ + (x + y * Dimensions[0] + z * Dimensions[0] * Dimensions[1]) * (bits_per_pixel_ / 8);
+		return series_data_ + (x + y * Dimensions[0] + z * Dimensions[0] * Dimensions[1]) * bytes_per_pixel_;
 	}
 	return NULL;
 }
@@ -99,13 +115,13 @@ VtkPixelData::VtkPixelData(vtkImageData* data)
 	, scalar_type_(data->GetScalarType())
 {
 	vtk_series_data_ = data;
+	modality_lut_applied_ = true;
 }
 
 VtkPixelData::~VtkPixelData()
 {
 	if (vtk_series_data_){
 		vtk_series_data_->Delete();
-		// vtk_series_data_ = NULL;
 	}
 }
 

@@ -2,10 +2,14 @@
 
 # Requires version
 cmake_minimum_required (VERSION 2.8)
+
+add_definitions(-std=c++11)
+
+
 # project name
 project (ImagingEngineLib)
 
-# 设置编译器选项：O3优化，显示所有警告q
+# 设置编译器选项：O3优化，显示所有警告
 set(CMAKE_C_FLAGS "$ENV{CFLAGS} -O3 -Wall") 
 # 定义头文件的路径变量
 set(INCLUDE_PATH ${PROJECT_SOURCE_DIR}/include)
@@ -20,7 +24,6 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/../../thirdparty)
 find_package(VTK 8.0 REQUIRED)
 find_package(glog REQUIRED)
 find_package (Threads)
-
 vtk_module_config(VTK
   vtkCommonCore
   vtkIOImage
@@ -41,12 +44,9 @@ include_directories(
 	)
 
 LINK_DIRECTORIES(
-
 	/usr/lib
 	/usr/local/vtk-8.0/lib
-
 	${PROJECT_SOURCE_DIR}/lib
-
 	)
 #########################################################################################################
 
@@ -83,6 +83,7 @@ aux_source_directory(./render SRC_LIST)
 aux_source_directory(./tools SRC_LIST) 
 aux_source_directory(./bitmap SRC_LIST) 
 aux_source_directory(./thread SRC_LIST) 
+aux_source_directory(./exception SRC_LIST) 
 
 # >>给编译器添加库目录，也就是 gcc -L xxx 的意思，或者vs ide中添加库的包含目录
 #link_directories()
@@ -109,12 +110,10 @@ set(CMAKE_BUILD_TYPE Debug)
 # >>链接到输出的lib库
 # 给目标添加依赖库，类似与gcc -l lib_name，此指令有两个用处，一个是给可执行target_name 添加库依赖，二是给库target_name 添加库依赖
 target_link_libraries(ImagingEngineLib ${CMAKE_THREAD_LIBS_INIT})
-
 target_link_libraries(ImagingEngineLib ${VTK_LIBRARIES})
-
 target_link_libraries(ImagingEngineLib libuuid.so)
-
-target_link_libraries(ImagingEngineLib /usr/local/lib/libglog.a)
+target_link_libraries(ImagingEngineLib /usr/local/lib/libgflags.so)
+target_link_libraries(ImagingEngineLib /usr/local/lib/libglog.so)
 
 #########################################################################################################
 

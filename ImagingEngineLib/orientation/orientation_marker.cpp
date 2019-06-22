@@ -33,8 +33,8 @@ OrientationMarker::OrientationMarker(vtkRenderer *renderer)
 		PatientOrientation::kHeadLabel,
 		PatientOrientation::kFeetLabel);
 
-	//cube_actor_->SetXFaceTextRotation(90);
-	//cube_actor_->SetYFaceTextRotation(180);
+	cube_actor_->SetXFaceTextRotation(180);
+	cube_actor_->SetYFaceTextRotation(180);
 	cube_actor_->SetZFaceTextRotation(-90);
 	cube_actor_->SetFaceTextScale(0.65);
 
@@ -146,8 +146,8 @@ void OrientationMarker::SetOrientationText(string right, string left, string pos
 	cube_actor_->SetXMinusFaceText(left.c_str());
 	cube_actor_->SetYPlusFaceText(posterior.c_str());
 	cube_actor_->SetYMinusFaceText(anterior.c_str());
-	cube_actor_->SetZPlusFaceText(superior.c_str());
-	cube_actor_->SetZMinusFaceText(inferior.c_str());
+	cube_actor_->SetZPlusFaceText(inferior.c_str());
+	cube_actor_->SetZMinusFaceText(superior.c_str());
 }
 
 void OrientationMarker::SetEnabled(bool enable)

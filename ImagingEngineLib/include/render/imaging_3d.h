@@ -40,17 +40,13 @@ namespace DW {
 					delete bounding_box_;
 					bounding_box_ = NULL;
 				}
-				if (volume_data_){
-					delete volume_data_;
-					volume_data_ = NULL;
-				}
+				//if (volume_data_){
+				//	delete volume_data_;
+				//	volume_data_ = NULL;
+				//}
 				if (renderer_){
 					delete renderer_;
 					renderer_ = NULL;
-				}
-				if (show_buffer_){
-					delete show_buffer_;
-					show_buffer_ = NULL;
 				}
 			}
 			/// 获取图像类型
@@ -84,6 +80,8 @@ namespace DW {
 			virtual void Rotate(float angle) = 0;
 			/// 绕着指定中心轴旋转一定角度
 			virtual void Rotate3D(Vector3f axis, float angle) = 0;
+			/// 绕着中心轴和指定点旋转一定角度
+			virtual void Rotate3D(Vector3f &axis, Point3f &point, float angle) = 0;
 			/// 窗宽窗位
 			virtual void WindowWidthLevel(int width, int level) = 0;
 			virtual void WindowWidthLevelOffset(int offset_width, int offset_level) = 0;
@@ -124,8 +122,6 @@ namespace DW {
 			VolData* volume_data_;
 			/// 执行渲染的对象
 			IThreedRenderer* renderer_;
-			/// 用于UI显示的结果
-			ShowBuffer* show_buffer_;
 			// Imaging对象不再生成BITMAP对象，只提供ShowBuffer对象 [5/24/2019 Modified by zhangjian]
 			//HBITMAP image_buffer_;
 			/// 累计的放缩比率

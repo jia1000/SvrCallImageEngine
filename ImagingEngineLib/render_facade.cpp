@@ -22,6 +22,8 @@
 #include "control/image_control_3d.h"
 #include "tools/timer.h"
 #include "tools/logger.h"
+#include "exception/iexception.h"
+#include "exception/data_exception.h"
 
 using namespace DW;
 using namespace DW::IMAGE;
@@ -323,6 +325,21 @@ void RenderFacade::ChangeSeries(string series_uid)
 	}
 }
 
+void RenderFacade::UnloadSeries(string series_uid)
+{
+	if (current_series_uid_ == series_uid){
+		current_series_uid_ = "";
+		ImageDataSource::Get()->Destroy(series_uid);
+
+		vector<IThreedImaging *> imaging_list = RenderSource::Get()->GetRenderControls();
+		auto it = imaging_list.begin();
+		for (; it!=imaging_list.end(); ++it){
+			(*it)->SetData(NULL);
+			(*it)->GetRenderer()->SetData(NULL);
+		}
+	}
+}
+
 void RenderFacade::SetImageSize(string control_id, int width, int height)
 {
 	IImageControl *control = GetControl(control_id);
@@ -379,7 +396,7 @@ void RenderFacade::SetSlabThickness(string control_id, float thickness)
 
 }
 
-void RenderFacade::CreateVRRotationBatch(string control_id, 
+int RenderFacade::CreateVRRotationBatch(string control_id, 
 						   string output, 
 						   BlendMode mode, 
 						   OrientationType init_ori, 
@@ -391,42 +408,60 @@ void RenderFacade::CreateVRRotationBatch(string control_id,
 						   int wl)
 {
 	IImageControl *control = GetControl(control_id);
-	if (control == NULL) return;
+	if (control == NULL) return -1;
 
-	Timer::begin("CreateVRRotationBatch");
+	try
+	{
 
-	// Create batch image source
-	BatchImageSource *source = new BatchImageSource();
-	source->SetCallback(dynamic_cast<IImageSouceCallback *>(control));
-	control->SetInput(0, source);
+		Timer::begin("CreateVRRotationBatch");
 
-	IThreedImaging *imaging = reinterpret_cast<IThreedImaging *>(control->GetInput(1));
-	if (imaging){
-		VRRotationBatchGenerator generator;
-		generator.SetCallback(dynamic_cast<IBatchCallback *>(source));
-		VRRotationBatchArgs *args = new VRRotationBatchArgs();
-		args->SetOutputPath(output);
-		args->SetBlendMode(mode);
-		args->SetOrientation(init_ori);
-		args->SetImageNumber(image_number);
-		args->SetStep(step_angle);
-		args->SetDirection(direction);
-		args->SetClipPercent(clip_percent);
-		args->SetWWWL(ww, wl);
-		args->SetImaging(imaging);
-		generator.Execute(args);
+		CGLogger::Info("RenderFacade::CreateVRRotationBatch 1");
 
-		Timer::begin("CreateVRRotationBatch::SaveAsBitmap");
-		// create files on disk
-		control->SaveAsBitmap(output);
-		Timer::end("CreateVRRotationBatch::SaveAsBitmap");
+		// Create batch image source
+		BatchImageSource *source = new BatchImageSource();
+		source->SetCallback(dynamic_cast<IImageSouceCallback *>(control));
+		control->SetInput(0, source);
+
+		CGLogger::Info("RenderFacade::CreateVRRotationBatch 2");
+
+		IThreedImaging *imaging = reinterpret_cast<IThreedImaging *>(control->GetInput(1));
+		if (imaging){
+			VRRotationBatchGenerator generator;
+			generator.SetCallback(dynamic_cast<IBatchCallback *>(source));
+			VRRotationBatchArgs args;
+			args.SetOutputPath(output);
+			args.SetBlendMode(mode);
+			args.SetOrientation(init_ori);
+			args.SetImageNumber(image_number);
+			args.SetStep(step_angle);
+			args.SetDirection(direction);
+			args.SetClipPercent(clip_percent);
+			args.SetWWWL(ww, wl);
+			args.SetImaging(imaging);
+
+			CGLogger::Info("RenderFacade::CreateVRRotationBatch 3");
+
+			generator.Execute(&args);
+
+			CGLogger::Info("RenderFacade::CreateVRRotationBatch 4");
+
+			Timer::begin("CreateVRRotationBatch::SaveAsBitmap");
+			// create files on disk
+			control->SaveAsBitmap(output);
+			Timer::end("CreateVRRotationBatch::SaveAsBitmap");
+		}
+
+		Timer::end("CreateVRRotationBatch");
+		CGLogger::Debug(Timer::summery());
+
 	}
-
-	Timer::end("CreateVRRotationBatch");
-	CGLogger::Info(Timer::summery());
+	catch(exception *e)
+	{
+		CGLogger::Error("RenderFacade::CreateVRRotationBatch error.", e->what());
+	}
 }
 
-void RenderFacade::CreateCPRRotationBatch(string control_id,
+int RenderFacade::CreateCPRRotationBatch(string control_id,
 										  string output,
 										  string curve_id,
 										  OrientationType init_ori,
@@ -437,7 +472,7 @@ void RenderFacade::CreateCPRRotationBatch(string control_id,
 										  int wl)
 {
 	IImageControl *control = GetControl(control_id);
-	if (control == NULL) return;
+	if (control == NULL) return -1;
 
 	Timer::begin("CreateCPRRotationBatch");
 
@@ -468,10 +503,10 @@ void RenderFacade::CreateCPRRotationBatch(string control_id,
 	}
 
 	Timer::end("CreateCPRRotationBatch");
-	CGLogger::Info(Timer::summery());
+	CGLogger::Debug(Timer::summery());
 }
 
-void RenderFacade::CreateMPRSlabBatch(string control_id,
+int RenderFacade::CreateMPRSlabBatch(string control_id,
 									  string output,
 									  BlendMode mode,
 									  OrientationType ori,
@@ -482,7 +517,7 @@ void RenderFacade::CreateMPRSlabBatch(string control_id,
 									  int wl)
 {
 	IImageControl *control = GetControl(control_id);
-	if (control == NULL) return;
+	if (control == NULL) return -1;
 
 	Timer::begin("CreateMPRSlabBatch");
 	
@@ -497,6 +532,7 @@ void RenderFacade::CreateMPRSlabBatch(string control_id,
 		generator.SetCallback(dynamic_cast<IBatchCallback *>(source));
 		MPRSlabBatchArgs args;
 		args.SetOutputPath(output);
+		args.SetBlendMode(mode);
 		args.SetOrientation(ori);
 		args.SetClipPercent(clip_percent);
 		//args.SetStep(spacing);
@@ -513,5 +549,5 @@ void RenderFacade::CreateMPRSlabBatch(string control_id,
 	}
 
 	Timer::end("CreateMPRSlabBatch");
-	CGLogger::Info(Timer::summery());
+	CGLogger::Debug(Timer::summery());
 }

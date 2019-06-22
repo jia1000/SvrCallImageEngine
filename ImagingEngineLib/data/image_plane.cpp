@@ -16,6 +16,8 @@ ImagePlane::ImagePlane()
 	: row_length_(0.0), column_length_(0.0), thickness_(1.0)
 {
 	image_orientation_.SetRowAndColumnVectors(Vector3d(1.0, 0.0, 0.0), Vector3d(0.0, 1.0, 0.0));
+	ww_ = 400;
+	wl_ = 50;
 }
 
 const ImageOrientation& ImagePlane::GetImageOrientation() const
@@ -174,4 +176,17 @@ void ImagePlane::DeepCopy(ImagePlane *plane)
 		this->origin_.y = plane->origin_.y;
 		this->origin_.z = plane->origin_.z;
 	}
+}
+
+
+void ImagePlane::GetWindowLevel(int &ww, int &wl)
+{
+	ww = ww_;
+	wl = wl_;
+}
+
+void ImagePlane::SetWindowLevel(int &ww, int &wl)
+{
+	ww_ = ww;
+	wl_ = wl;
 }

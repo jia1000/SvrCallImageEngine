@@ -27,11 +27,20 @@ TwodImageControl::TwodImageControl(string control_id)
 	display_width_ = 512;
 	display_height_ = 512;
 	display_index_ = -1;
+	image_source_ = NULL;
+	imaging_ = NULL;
 }
 
 TwodImageControl::~TwodImageControl()
 {
-
+	if (image_source_){
+		delete image_source_;
+		image_source_ = NULL;
+	}
+	if (imaging_){
+		delete imaging_;
+		imaging_ = NULL;
+	}
 }
 
 string TwodImageControl::GetControlID()
@@ -47,9 +56,15 @@ void TwodImageControl::SetInput(int port, void *source)
 		port = port_;
 
 	if (port == 0){
+		if (image_source_){
+			delete image_source_;
+		}
 		image_source_ = reinterpret_cast<IImageSource *>(source);
 	}
 	else{
+		if (imaging_){
+			delete imaging_;
+		}
 		imaging_ = reinterpret_cast<IThreedImaging *>(source);
 	}
 }
@@ -100,7 +115,8 @@ IBitmap *TwodImageControl::GetOutput(int index)
 	BufferResult *result = image_source_->GetImage(index);
 	transform_->SetInput(result->buffer_data);
 	transform_->Update();
-	return transform_->GetOutput();
+
+	return transform_->GetOutput()->Clone();
 }
 
 IBitmapDcmInfo *TwodImageControl::GetOutputInfo()
@@ -194,9 +210,11 @@ void TwodImageControl::SaveAsBitmap(string output_dir)
 		transform_->SetInput(result->buffer_data);
 		transform_->Update();
 		bmp = transform_->GetOutput();
-		if (bmp){
+		//TODO 临时性做法，因为目前写bitmap不支持16位
+		if (bmp && bmp->GetNumberOfComponent() >= 3){
 			bmp->Save(result->file_name.c_str());
-			delete bmp;
+			//TODO 同一份内存
+			//delete bmp;
 		}
 
 		char left[4] = { '\0' };

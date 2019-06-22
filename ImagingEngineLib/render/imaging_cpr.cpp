@@ -11,8 +11,6 @@ using namespace DW::CV;
 CPRImaging::CPRImaging(string id)
 	: IThreedImaging(id)
 {
-	show_buffer_ = new ShowBuffer();
-	//show_buffer_->InitBufferData(512, 512, 32);
 	bounding_box_ = new BoundingBox();
 	rotation_angle_ = 0.0f;
 }
@@ -30,15 +28,20 @@ VolData* CPRImaging::GetData()
 void CPRImaging::SetData(VolData* data)
 {
 	volume_data_ = data;
-	bounding_box_->Update(0,0,0,data->GetSliceWidth()-1,data->GetSliceHeight()-1,data->GetSliceCount()-1);
+	if (volume_data_){
+		bounding_box_->Update(0,0,0,data->GetSliceWidth()-1,data->GetSliceHeight()-1,data->GetSliceCount()-1);
+	}
+	else{
+		bounding_box_->Update(0,0,0,0,0,0);
+	}
 }
 
 ShowBuffer* CPRImaging::GetShowBuffer()
 {
 	if (renderer_){
-		show_buffer_ = renderer_->GetShowBuffer();
+		return renderer_->GetShowBuffer();
 	}
-	return show_buffer_;
+	return NULL;
 }
 
 void CPRImaging::Render()
@@ -136,6 +139,13 @@ void CPRImaging::Rotate3D(Vector3f axis, float angle)
 		}
 	}
 }
+
+
+void CPRImaging::Rotate3D(Vector3f &axis, Point3f &point, float angle) 
+{
+	// No implementation
+}
+
 
 void CPRImaging::WindowWidthLevel(int width, int level)
 {

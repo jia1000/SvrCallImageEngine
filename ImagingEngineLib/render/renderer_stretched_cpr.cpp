@@ -266,14 +266,15 @@ void StretchedCPRRenderer::DoThreadWork(ThreadParam *param)
 			x[0] = (p[0] + param->direction[0] * distance_from_origin) / param->voxel_spacing[0];
 			x[1] = (p[1] + param->direction[1] * distance_from_origin) / param->voxel_spacing[1];
 			x[2] = (p[2] + param->direction[2] * distance_from_origin) / param->voxel_spacing[2];
-	
+
+			short val = -1024;
 			if (x[0] < MathTool::kEpsilon || x[0] > param->image_width - 1 || 
 				x[1] < MathTool::kEpsilon || x[1] > param->image_height - 1 || 
 				x[2] < MathTool::kEpsilon || x[2] > param->image_count - 1){
+					*(param->ptr + row * param->cols + col) = val;
 					continue;
 			}
 	
-			short val = 0;
 			param->owner->TrilinearInterpolation(val, x[0], x[1], x[2], param->volume_data);
 			*(param->ptr + row * param->cols + col) = val;
 	

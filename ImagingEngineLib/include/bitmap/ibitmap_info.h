@@ -29,6 +29,8 @@ namespace DW {
 			virtual void GetOrigin(double origin[3]) = 0;
 			/// Gets image orientation in x/y/z coordinate 
 			virtual void GetOrientation(double row_vector[3], double column_vector[3]) = 0;
+			/// Gets window width & level
+			virtual void GetWindowLevel(int &ww, int &wl) = 0;
 
 		};
 

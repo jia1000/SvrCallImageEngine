@@ -18,10 +18,19 @@
 
 using namespace DW::IMAGE;
 
+/// Curve线按照正常体位排序
+bool CurvePointCompare(Point3f first, Point3f second)
+{
+	float first_pos = first.z;
+	float second_pos = second.z;
+	return second_pos < first_pos;
+}
+
+
 VolCurve::VolCurve()
 {
 	using_consistent_normal_ = true;
-
+	head_to_feet_ = true;
 	curve_id_ = GenerateGUID();  
 }
 
@@ -70,6 +79,10 @@ void VolCurve::GetSamplePoint(int pos, float& x, float& y, float& z)
 	int point_count = sample_points_.size();
 	if(pos > point_count-1)
 		return;
+
+	if (!head_to_feet_){
+		pos = point_count-1 - pos;
+	}
 	x = sample_points_[pos].x;
 	y = sample_points_[pos].y;
 	z = sample_points_[pos].z;
@@ -139,6 +152,15 @@ void VolCurve::Update()
 #endif //  CURVE_PATIENT_COORDINATE
 
 		sample_points_.push_back(pnt);
+	}
+
+	// 按照头上脚下的顺序排序
+	//std::sort(sample_points_.begin(), sample_points_.end(), CurvePointCompare);
+	if (sample_points_[0].z > sample_points_[rows - 1].z){
+		head_to_feet_ = false;
+	}
+	else{
+		head_to_feet_ = true;
 	}
 
 	// CPR行列间距都为voxel_spacing_[0]

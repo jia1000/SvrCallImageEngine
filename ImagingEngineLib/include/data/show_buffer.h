@@ -81,6 +81,8 @@ namespace DW {
 			string file_name;
 			float step;
 			int instance_number;
+			int window_width;
+			int window_level;
 		};
 
 	}

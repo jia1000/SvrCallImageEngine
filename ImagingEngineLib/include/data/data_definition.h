@@ -27,6 +27,7 @@
 #include <stack>
 #include <stdint.h>
 #include <string>
+#include "tools/logger.h"
 
 #define UNITDATA3D			unsigned char
 #define UNITMARK3D			unsigned char
@@ -42,6 +43,27 @@ typedef int				BOOL;
 typedef unsigned long	DWORD;
 typedef unsigned short	WORD;
 #endif
+
+// Error code
+#define RET_STATUS_IE_SUCCESS							1
+#define RET_STATUS_IE_FAILURE							0
+#define RET_STATUS_IE_NOT_ENOUGH_MEMORY					1
+#define RET_STATUS_IE_IO_DISK_CANNOT_WRITE				1
+#define RET_STATUS_IE_IO_DISK_NO_SPACE					1
+#define RET_STATUS_IE_IO_FILE_EXIST						1
+#define RET_STATUS_IE_INPUT_INVALID_PARAM				1
+#define RET_STATUS_IE_DATA_SMALL_IMAGE_NUMBER			1
+#define RET_STATUS_IE_DATA_NOT_CT_IMAGE					1
+#define RET_STATUS_IE_DATA_NOT_SUPPORTED_CT_IMAGE		1
+#define RET_STATUS_IE_DATA_DIFFERENCT_SPACING			1
+#define RET_STATUS_IE_DATA_NOT_CONTINUOUS_POSITION		1
+#define RET_STATUS_IE_LIB_NOT_FOUND						1
+#define RET_STATUS_IE_LIB_WRONG_VERSION					1
+#define RET_STATUS_IE_EXCEPTION_NULL_POINTER			1
+#define RET_STATUS_IE_EXCEPTION_INVALID_POINTER			1
+#define RET_STATUS_IE_EXCEPTION_READONLY				1
+#define RET_STATUS_IE_EXCEPTION_NO_DATA					1
+
 
 using namespace std;
 

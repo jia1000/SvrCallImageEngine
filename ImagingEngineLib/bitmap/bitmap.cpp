@@ -55,7 +55,7 @@ int GenBmpFile(U8 *pData, U8 bitCountPerPix, int width, int height, const char *
 	U8 *pEachLinBuf = (U8*)malloc(bmppitch);  
 	memset(pEachLinBuf, 0, bmppitch);  
 	U8 BytePerPix = bitCountPerPix >> 3;  
-	U32 pitch = width * BytePerPix;  
+	U32 pitch = width * 3;  
 	if(pEachLinBuf)  
 	{  
 		int h,w;  
@@ -63,10 +63,12 @@ int GenBmpFile(U8 *pData, U8 bitCountPerPix, int width, int height, const char *
 		{  
 			for(w = 0; w < width; w++)  
 			{  
-				//copy by a pixel  
-				pEachLinBuf[w*BytePerPix+0] = pData[h*pitch + w*BytePerPix + 0];  
-				pEachLinBuf[w*BytePerPix+1] = pData[h*pitch + w*BytePerPix + 1];  
-				pEachLinBuf[w*BytePerPix+2] = pData[h*pitch + w*BytePerPix + 2];  
+				if (BytePerPix >= 3){
+					//copy by a pixel  
+					pEachLinBuf[w*3+0] = pData[h*pitch + w*BytePerPix + 2];  
+					pEachLinBuf[w*3+1] = pData[h*pitch + w*BytePerPix + 1];  
+					pEachLinBuf[w*3+2] = pData[h*pitch + w*BytePerPix + 0]; 
+				}				 
 			}  
 			fwrite(pEachLinBuf, bmppitch, 1, fp);  
 
@@ -156,6 +158,7 @@ DWBitmap::DWBitmap()
 	// Linux下需要初始化NULL
 	//bitmap_impl_ = NULL;
 	pRGB = NULL;
+	pixel_data_ = NULL;
 }
 
 DWBitmap::DWBitmap(char *data
@@ -183,6 +186,7 @@ DWBitmap::DWBitmap(char *data
 	//}
 	// Linux下需要初始化NULL
 	pRGB = NULL;
+	pixel_data_ = NULL;
 }
 
 DWBitmap::~DWBitmap()
@@ -191,6 +195,10 @@ DWBitmap::~DWBitmap()
 	//	delete bitmap_impl_;
 	//	bitmap_impl_ = NULL;
 	//}
+	if (pixel_data_){
+		delete pixel_data_;
+		pixel_data_ = NULL;
+	}
 }
 
 unsigned int DWBitmap::GetWidth()
@@ -211,7 +219,7 @@ unsigned int DWBitmap::GetNumberOfComponent()
 void DWBitmap::Save(const char *file_path)
 {
 	//生成BMP文件
-	GenBmpFile((U8*)pRGB, 24, width_, height_, file_path); 
+	GenBmpFile((U8*)pixel_data_, 24, width_, height_, file_path); 
 
 	//if (bitmap_impl_){
 	//	// BasicColor用于调色板
@@ -221,43 +229,150 @@ void DWBitmap::Save(const char *file_path)
 
 void DWBitmap::SetBuffer(char *data, unsigned int width, unsigned int height, unsigned int comp)
 {
-	//if (bitmap_impl_){
-	//	delete bitmap_impl_;
-	//	bitmap_impl_ = NULL;
-	//}
-	//pixel_data_ = data;
-
 	width_ = width;
 	height_ = height;
 	number_of_component_ = comp;
 	int size = width * height;
-	////TODO 判断通道数
-	//bitmap_impl_ = new BasicBitmap(width_, height_, BasicBitmap::A8R8G8B8, reinterpret_cast<void *>(data), 0);
-	if (pRGB){
-		delete pRGB;
-	}
-	pRGB = new LI_RGB[size];
-	int i, j;
-	for(i=0; i<size; ++i){
 
-		pRGB[i].b = (unsigned char)data[i * number_of_component_];
-		pRGB[i].g = (unsigned char)data[i * number_of_component_ + 1];
-		pRGB[i].r = (unsigned char)data[i * number_of_component_ + 2];
+	if (pixel_data_){
+		delete pixel_data_;
 	}
+	//TODO 判断通道数
+	if (comp == 2){
+		pixel_data_ = new char[size * number_of_component_];
+		memcpy(pixel_data_, data, size * number_of_component_);
+	}
+	else if (comp >= 3){
+		//LI_RGB *tmp_RGB = new LI_RGB[size];
+		pixel_data_ = new char[size * 3];
+		int i, j;
+		for(i=0; i<size; ++i){
 
-	//for(i=0; i<width_; ++i){
-	//	for(j=0; i<height_; ++j){
-	//		rgb_t color;
-	//		color.red = (unsigned char)data[i * width_ * 4 + j * 4];
-	//		color.green = (unsigned char)data[i * width_ * 4 + j * 4 +];
-	//		color.blue = (unsigned char)data[i * width_ * 4 + j * 4 + 2];
-	//		bitmap_impl_->set_pixel(i, j, color);
-	//	}
-	//}
+			pixel_data_[i * 3] = (unsigned char)data[i * number_of_component_];
+			pixel_data_[i * 3 + 1] = (unsigned char)data[i * number_of_component_ + 1];
+			pixel_data_[i * 3 + 2] = (unsigned char)data[i * number_of_component_ + 2];
+
+			//tmp_RGB[i].r = (unsigned char)data[i * number_of_component_];
+			//tmp_RGB[i].g = (unsigned char)data[i * number_of_component_ + 1];
+			//tmp_RGB[i].b = (unsigned char)data[i * number_of_component_ + 2];
+		}
+		//pixel_data_ = new char[size * 3];
+		//memcpy(pixel_data_, reinterpret_cast<char *>(tmp_RGB), size * 3);
+		//delete[] tmp_RGB;
+
+		number_of_component_ = 3;
+	}
 }
 
 const char *DWBitmap::GetBuffer()
 {
-	//return pixel_data_;
-	return (char *)pRGB;
+	return pixel_data_;
+	//return (char *)pRGB;
+}
+
+unsigned char DWBitmap::GetPlanarConfiguration()
+{
+	if (number_of_component_ == 3){
+		return 0;
+	}
+	return 0;
+}
+
+const char *DWBitmap::GetPhotometricInterpretation()
+{
+	if (number_of_component_ == 2)
+		return "MONOCHROME2";
+
+	return "RGB";
+}
+
+const char *DWBitmap::GetRescaleIntercept()
+{
+	return "0";
+}
+
+const char *DWBitmap::GetRescaleSlope()
+{
+	return "1";
+}
+
+const char *DWBitmap::GetRescaleType()
+{
+	return "HU";
+}
+
+unsigned char DWBitmap::GetPixelType()
+{
+	return pixel_type_;
+}
+
+unsigned short DWBitmap::GetBitsAllocated()
+{
+	if (number_of_component_ == 2)
+		return 16;
+
+	return 8;
+}
+
+unsigned short DWBitmap::GetBitsStored()
+{
+	if (number_of_component_ == 2)
+		return 16;
+
+	return 8;
+}
+
+unsigned short DWBitmap::GetHighBit()
+{
+	if (number_of_component_ == 2)
+		return 15;
+
+	return 7;
+}
+
+unsigned short DWBitmap::GetPixelRepresentation()
+{
+	//TODO 存储无符号值，viewer在解释pixeldata时没有加上偏移量，还未查到原因
+	return 1;		//Signed
+	//return 0;		//Unsigned
+}
+
+bool DWBitmap::IsTopDown()
+{
+	if (number_of_component_ == 2)
+		return true;
+
+	return false;
+}
+
+void DWBitmap::SetPixelType(unsigned char pixel)
+{
+	pixel_type_ = pixel;
+}
+
+void DWBitmap::DeepCopy(DWBitmap *src)
+{
+	width_ = src->width_;
+	height_ = src->height_;
+	pixel_type_ = src->pixel_type_;
+
+	if (pixel_data_){
+		delete pixel_data_;
+	}
+	memcpy(pixel_data_, src->pixel_data_, width_ * height_ * number_of_component_);
+}
+
+IBitmap *DWBitmap::Clone()
+{
+	DWBitmap *new_bmp = new DWBitmap();
+	new_bmp->width_ = width_;
+	new_bmp->height_ = height_;
+	new_bmp->number_of_component_ = number_of_component_;
+	new_bmp->pixel_type_ = pixel_type_;
+
+	int size = width_ * height_ * number_of_component_;
+	new_bmp->pixel_data_ = new char[size];
+	memcpy(new_bmp->pixel_data_, pixel_data_, size);
+
+	return new_bmp;
 }

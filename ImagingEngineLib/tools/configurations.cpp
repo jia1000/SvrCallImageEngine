@@ -13,10 +13,11 @@ ConfigurationManager *ConfigurationManager::instance_ = 0;
 
 ConfigurationManager::ConfigurationManager()
 {
-	vr_render_method_ = "SMART_RAYCASTING";
+	vr_render_method_ = "RAYCASTING_GPU";
 	mpr_render_method_ = "VTK_CPU";
 	threads_number_ = GetCpuCoreNumber();
 	vr_blend_mode_ = "MIP";
+	log_level_ = 9;
 }
 
 void ConfigurationManager::SetConfigReader(IConfigReader *reader)
@@ -31,5 +32,7 @@ void ConfigurationManager::SetConfigReader(IConfigReader *reader)
 			threads_number_ = config_reader_->GetNumberOfThreads();
 		if (config_reader_->GetVRBlendMode().length() > 0)
 			vr_blend_mode_ = config_reader_->GetVRBlendMode();
+		if (config_reader_->GetLogLevel() > 0)
+			log_level_ = config_reader_->GetLogLevel();
 	}
 }

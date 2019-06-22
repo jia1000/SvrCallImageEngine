@@ -29,7 +29,9 @@ namespace DW {
 		public:
 			CPRRenderer();
 			virtual ~CPRRenderer();
+
 			void Render() override;
+			void SetData(VolData* data) override;
 			ShowBuffer* GetShowBuffer() override;
 			/// get handler
 			IThreedPickHandler* GetThreedPickHandler() { return this; }
@@ -68,7 +70,7 @@ namespace DW {
 				VolData* data);
 
 		protected:
-			virtual void DoRender();
+			virtual void DoRender() {};
 			/// 计算生成CPR图像的宽高
 			virtual void CalculateImageSize(VolCurve* curve,
 				float direction[3],
@@ -102,11 +104,11 @@ namespace DW {
 
 		protected:
 			bool is_off_screen_rendering_;
-			/// 暂用于从pixeldata应用窗宽窗位后的输出结果
-			vtkSmartPointer<vtkImageData> output_vtk_image_data_;
-			/// 已经不使用了
-			vtkSmartPointer<vtkRenderWindow> render_window_;
-			vtkSmartPointer<vtkRenderer> vtk_renderer_;
+			///// 暂用于从pixeldata应用窗宽窗位后的输出结果
+			//vtkSmartPointer<vtkImageData> output_vtk_image_data_;
+			///// 已经不使用了
+			//vtkSmartPointer<vtkRenderWindow> render_window_;
+			//vtkSmartPointer<vtkRenderer> vtk_renderer_;
 			/// 行列分辨率
 			float dpi_x_, dpi_y_;
 			/// 第一个采样点与图像左右边界的距离
@@ -118,8 +120,7 @@ namespace DW {
 			/// 图像中心点(也是旋转中心点)，非图像几何中心点
 			/// 计算方法：曲线在图像上矩形范围的中心点
 			Point3f rotation_center_;
-			static int tmp_counter_;
-			int cpr_file_id;
+
 		};
 	}
 }

@@ -29,12 +29,23 @@ namespace DW {
 		class IThreedRenderer
 		{
 		public:
+			IThreedRenderer()
+			{
+				volume_data_ = NULL;
+				render_param_ = NULL;
+				show_buffer_ = NULL;
+				image_plane_ = NULL;
+				camera_ = NULL;
+				light_ = NULL;
+			}
 			/// 设置三维数据
 			virtual void SetData(VolData* data)
 			{
 				volume_data_ = data;
 				if (volume_data_ && volume_data_->GetPixelData()){
 					volume_data_->GetPixelData()->GetSpacing(voxel_spacing_);
+
+					CGLogger::Info("VolumeRenderer::SetData null");
 				}
 			}
 			virtual void Render() = 0;

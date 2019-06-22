@@ -36,6 +36,8 @@ namespace DW {
 			virtual void AddImage(BufferResult *buffer) = 0;
 			/// 获取缓存图像总数
 			virtual int GetImageNumber() = 0;
+			/// 清空所有数据
+			virtual void Destroy() = 0;
 
 		private:
 			IImageSouceCallback *image_changed_callback_;

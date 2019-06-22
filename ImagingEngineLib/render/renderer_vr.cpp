@@ -41,6 +41,7 @@
 using namespace DW::Render;
 
 VolumeRenderer::VolumeRenderer()
+	: IThreedRenderer()
 {
 	camera_ = new Camera();
 	render_mode_ = RenderMode::RAYCASTING;
@@ -88,8 +89,6 @@ VolumeRenderer::VolumeRenderer()
 	transfer_function_.SetGradientOpacity(100, 1.0);
 
 	/// Transfer function for MIP
-	//transfer_function_mip_.SetColor(0.0, 1.0f, 1.0f, 1.0f);
-	//transfer_function_mip_.SetColor(255.0, 1.0f, 1.0f, 1.0f);
 	int min_ctv = window_level_.GetWindowLevel() - 0.5 * window_level_.GetWindowWidth();
 	int max_ctv = window_level_.GetWindowLevel() + 0.5 * window_level_.GetWindowWidth();
 	transfer_function_mip_.SetColor(min_ctv, 0.0f, 0.0f, 0.0f);
@@ -137,34 +136,32 @@ VolumeRenderer::VolumeRenderer()
 
 VolumeRenderer::~VolumeRenderer()
 {
-
+	if (camera_){
+		delete camera_;
+		camera_ = NULL;
+	}
+	if (show_buffer_){
+		delete show_buffer_;
+		show_buffer_ = NULL;
+	}
+	if (image_plane_){
+		delete image_plane_;
+		image_plane_ = NULL;
+	}
+	vtk_volume_->Delete();
+	vtk_volume_mapper_->Delete();
+	vtk_volume_property_->Delete();
+	vtk_renderer_->Delete();
+	vtk_render_window_->Delete();
 }
 
 void VolumeRenderer::SetRenderParam(RenderParam* param)
 {
 	render_param_ = param;
-
-	//render_param_->GetCamera()->SetVtkCamera(vtk_renderer_->GetActiveCamera());
-
-	///// Set default display position: Coronal
-	//vtk_renderer_->GetActiveCamera()->SetViewUp(0, -1, 0);
-	//vtk_renderer_->GetActiveCamera()->Elevation(-90);
 }
 
 ShowBuffer* VolumeRenderer::GetShowBuffer()
 {
-	// 每次Render之后都更新到buffer，转换HBITMAP放在control层 [5/18/2019 Modified by zhangjian]
-	//// 在VR renderer类内部转换数据类型
-	//if (vtk_image_data_ && show_buffer_){
-	//	//原来的方法，用来对比生成的图像
-	//	int width = vtk_image_data_->GetDimensions()[0];
-	//	int height = vtk_image_data_->GetDimensions()[1];
-	//	// 从8位转换到32位
-	//	int slice = -1;
-	//	UNITDATASHOW* data_ptr = reinterpret_cast<UNITDATASHOW*>( vtk_image_data_->GetScalarPointer() );
-	//	int number_of_components = vtk_image_data_->GetNumberOfScalarComponents();
-	//	show_buffer_->SetBufferData(data_ptr, width, height, number_of_components * 8);
-	//}
 	return show_buffer_;
 }
 
@@ -173,9 +170,19 @@ void VolumeRenderer::SetData(VolData* data)
 	if (volume_data_ == data)
 		return;
 
+	is_first_render_ = true;
+
 	Timer::begin("VolumeRenderer::SetData");
 
 	volume_data_ = data;
+	if (NULL == volume_data_){
+		// 卸载数据
+		vtk_volume_mapper_->RemoveAllInputs();
+		vtk_volume_mapper_->RemoveAllClippingPlanes();
+
+		CGLogger::Info("VolumeRenderer::SetData null");
+	}
+
 	// Workaround for vtkSmartVolumeMapper bug (https://gitlab.kitware.com/vtk/vtk/issues/17328)
 	volume_data_->GetPixelData()->GetVtkImageData()->Modified();
 	vtkImageData *image_data = volume_data_->GetPixelData()->GetVtkImageData();
@@ -193,8 +200,7 @@ void VolumeRenderer::SetData(VolData* data)
 
 		int dims[3];
 		volume_data_->GetPixelData()->GetDimensions(dims);
-		double spacings[3];
-		volume_data_->GetPixelData()->GetSpacing(spacings);
+		volume_data_->GetPixelData()->GetSpacing(voxel_spacing_);
 
 		//////////////////////////////////////////////////////////////////////////
 		/// Using Creator to generate vtkImageData
@@ -224,7 +230,7 @@ void VolumeRenderer::SetData(VolData* data)
 		//////////////////////////////////////////////////////////////////////////
 		// Set volume mask data
 		vtkSmartPointer<vtkImageImport> image_import = vtkSmartPointer<vtkImageImport>::New();
-		image_import->SetDataSpacing(spacings);
+		image_import->SetDataSpacing(voxel_spacing_);
 		image_import->SetDataOrigin(0, 0, 0);
 		image_import->SetWholeExtent(0, dims[0] - 1, 0, dims[1] - 1, 0, dims[2] - 1);
 		image_import->SetDataExtentToWholeExtent();
@@ -249,7 +255,6 @@ void VolumeRenderer::SetData(VolData* data)
 		mapper_input_data->ShallowCopy(image_data);
 	}
 	
-
 #if VTK_MAJOR_VERSION > 5
 	vtk_volume_mapper_->SetInputData(mapper_input_data);
 #ifdef WIN32
@@ -263,7 +268,7 @@ void VolumeRenderer::SetData(VolData* data)
 	is_first_render_ = true;
 
 	Timer::end("VolumeRenderer::SetData");
-	CGLogger::Info(Timer::summery());
+	CGLogger::Debug(Timer::summery());
 }
 
 void VolumeRenderer::SetVolumeTransformation()
@@ -307,14 +312,17 @@ void VolumeRenderer::SetVolumeTransformation()
 
 void VolumeRenderer::Render()
 {
-	if (volume_data_ == NULL) return;
+	if (volume_data_ == NULL) {
+		CGLogger::Error("VolumeRenderer::Render >> volume data is null.");
+		return;
+	}
 
 	Timer::begin("VolumeRenderer::Render");
 
-	DoRender(volume_data_->GetPixelData()->GetVtkImageData());
+	DoRender(NULL);
 
 	Timer::end("VolumeRenderer::Render");
-	CGLogger::Info(Timer::summery());
+	CGLogger::Debug(Timer::summery());
 }
 
 //此版本从dr.wise客户端修改而来
@@ -322,8 +330,6 @@ void VolumeRenderer::DoRender(vtkSmartPointer<vtkImageData> imagedata)
 {
 	if (render_param_ == NULL) return;
 	VRRenderParam* param_imp = (VRRenderParam *)render_param_;
-	///// 深拷贝参数？
-	//camera_ = param_imp->GetCamera();
 	// get render parameters
 	int width = param_imp->GetWidth();
 	int height = param_imp->GetHeight();
@@ -332,20 +338,40 @@ void VolumeRenderer::DoRender(vtkSmartPointer<vtkImageData> imagedata)
 	// set desired update rate
 	vtk_render_window_->SetDesiredUpdateRate(param_imp->GetDesiredUpdateRate());
 
+	CGLogger::Info("VolumeRenderer::DoRender 1");
+
 	// The first render after data changed
 	if (is_first_render_){
 		is_first_render_ = false;
 		vtk_renderer_->ResetCamera();
+
+		float clip = param_imp->GetClipping();
 		// Set rendering to fit into view port
-		FitRenderingIntoViewport();
+		FitRenderingIntoViewport(clip, true);
+
+		if (param_imp->GetUpdateCenterAfterClipping() && camera_){
+			int image_count = volume_data_->GetSliceCount();
+			// 平移
+			float offset[3] = { 0.0f };
+			double actual_height = (double)(image_count - 1) * voxel_spacing_[2];
+			offset[2] = -(float)(actual_height / 2.0 - actual_height * clip / 2.0);
+			camera_->Move(offset);
+		}
+		
 	}
+
+	CGLogger::Info("VolumeRenderer::DoRender 2");
 
 	// Update orientation marker
 	orientation_marker_->Update();
 
-	//TODO needs 5 seconds to render mask data for the first time...
+	CGLogger::Info("VolumeRenderer::DoRender 3");
+
+	// Needs 5 seconds to render mask data for the first time...
 	vtk_render_window_->Render();
-	
+
+	CGLogger::Info("VolumeRenderer::DoRender 4");
+
 	/// Get screen shot from render window  
 	vtkSmartPointer<vtkWindowToImageFilter> windowToImageFilter = vtkSmartPointer<vtkWindowToImageFilter>::New();
 	windowToImageFilter->SetInput(vtk_render_window_);
@@ -353,17 +379,35 @@ void VolumeRenderer::DoRender(vtkSmartPointer<vtkImageData> imagedata)
 	windowToImageFilter->SetInputBufferTypeToRGBA(); //also record the alpha (transparency) channel
 	windowToImageFilter->ReadFrontBufferOff(); // read from the back buffer
 	windowToImageFilter->Update();
-	vtk_image_data_ = windowToImageFilter->GetOutput();
+	vtkSmartPointer<vtkImageData> tmp_vtk_data = windowToImageFilter->GetOutput();
+
+	CGLogger::Info("VolumeRenderer::DoRender 5");
+
 
 	//////////////////////////////////////////////////////////////////////////
 	// Convert to Buffer object
-	int image_width = vtk_image_data_->GetDimensions()[0];
-	int image_height = vtk_image_data_->GetDimensions()[1];
-	UNITDATASHOW* data_ptr = reinterpret_cast<UNITDATASHOW*>( vtk_image_data_->GetScalarPointer() );
-	int number_of_components = vtk_image_data_->GetNumberOfScalarComponents();
-	
-	show_buffer_->SetBufferData(data_ptr, image_width, image_height, number_of_components * 8);
+	long* data_ptr = reinterpret_cast<long *>( tmp_vtk_data->GetScalarPointer() );
+	int image_width = tmp_vtk_data->GetDimensions()[0];
+	int image_height = tmp_vtk_data->GetDimensions()[1];
+
+	int x, y;
+	int plane_size = image_width * image_height;
+	// 4通道RGBA位图
+	long *raw_data = new long [plane_size];
+	for (y=0; y<image_height; ++y){
+		for (x=0; x<image_width; ++x){
+			/*raw_data[y*image_width + x] = pdata[(image_height-1 - y) * image_width + x];*/
+			// 以下输出DICOM方向正确
+			raw_data[y*image_width + x] = data_ptr[(image_height-1 - y)* image_width + x];
+		}
+	}
+
+	CGLogger::Info("VolumeRenderer::DoRender 6");
+
+	show_buffer_->SetBufferData(reinterpret_cast<char *>(raw_data), image_width, image_height, 32);
 	//////////////////////////////////////////////////////////////////////////
+
+	CGLogger::Info("VolumeRenderer::DoRender 7");
 
 
 	//////////////////////////////////////////////////////////////////////////
@@ -388,6 +432,8 @@ void VolumeRenderer::DoRender(vtkSmartPointer<vtkImageData> imagedata)
 	image_plane_->SetRowLength(width * output_spacings[0]);
 	image_plane_->SetColumnLength(height * output_spacings[1]);
 	//////////////////////////////////////////////////////////////////////////
+
+	CGLogger::Info("VolumeRenderer::DoRender 8");
 
 }
 
@@ -611,11 +657,16 @@ void VolumeRenderer::ComputeWorldToDisplay(double x, double y, double z, double 
 	}
 }
 
-void VolumeRenderer::FitRenderingIntoViewport()
+void VolumeRenderer::FitRenderingIntoViewport(float clip, bool zoom_after_clip)
 {
 	// First we get the bounds of the current rendered item in world coordinates
 	double bounds[6];
 	vtk_volume_->GetBounds(bounds);
+
+	//TODO 需要计算分割结果的BOUNDING BOX，不然宽度方向还是过大，造成截取后不能放大到合适的比例
+	if (zoom_after_clip && clip > MathTool::kEpsilon && abs(clip - 1.0) > MathTool::kEpsilon){
+		bounds[5] = bounds[4] + (bounds[5] - bounds[4]) * clip;
+	}
 
 	double topCorner[3];
 	double bottomCorner[3];

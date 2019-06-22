@@ -46,6 +46,8 @@ namespace DW {
 			/// Zooms in on the scene with the given factor
 			/// @param zoom Factor factor that we want to apply to the camera
 			void Zoom(float factor);
+			/// Moves in direction
+			void Move(float offset[3]);
 			/// ªÒ»°vtkCamera
 			vtkSmartPointer<vtkCamera> GetVtkCamera();
 			/// …Ë÷√vtkCamera

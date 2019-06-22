@@ -31,8 +31,8 @@ namespace DW {
 			MPRRendererVtk();
 			virtual ~MPRRendererVtk();
 			void Render() override;
-			ShowBuffer* GetShowBuffer() override;
 			void SetData(VolData* data) override;
+			ShowBuffer* GetShowBuffer() override;
 
 			/// Convert world coordinate to display coordinate
 			void ComputeWorldToDisplay(Point3f& world_pos, Point3f& display_pos) override;
@@ -63,19 +63,19 @@ namespace DW {
 
 		protected:
 			bool is_off_screen_rendering_;
-			// 暂用于从pixeldata应用窗宽窗位后的输出结果
-			vtkSmartPointer<vtkImageData> output_vtk_image_data_;
-			vtkSmartPointer<vtkRenderWindow> vtk_render_window_;
-			vtkSmartPointer<vtkRenderer> vtk_renderer_;
-			vtkSmartPointer<vtkImageActor> vtk_image_actor_;
+			//// 暂用于从pixeldata应用窗宽窗位后的输出结果
+			//vtkSmartPointer<vtkImageData> output_vtk_image_data_;
+			//vtkSmartPointer<vtkRenderWindow> vtk_render_window_;
+			//vtkSmartPointer<vtkRenderer> vtk_renderer_;
+			//vtkSmartPointer<vtkImageActor> vtk_image_actor_;
 			vtkSmartPointer<vtkImageSlabReslice> vtk_image_reslice_;
 			// 旋转轴
 			Vector3f rotation_axis_;
 			// 图像中心点(也是旋转中心点)，非图像几何中心点
 			// 计算方法：曲线在图像上矩形范围的中心点
 			Point3f rotation_center_;
-			int mpr_file_id;
 			OrthogonalPlane current_view_plane_;
+
 		};
 	}
 }

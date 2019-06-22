@@ -20,30 +20,50 @@ using namespace DW::IMAGE;
 using namespace DW::Render;
 using namespace DW::CV;
 
-int MPRRenderer::tmp_counter_ = 0;
 
 MPRRenderer::MPRRenderer()
+	: IThreedRenderer()
 {
 	render_mode_ = RenderMode::MPR;
-	render_window_ = vtkSmartPointer<vtkRenderWindow>::New();
 	is_first_render_ = true;
 	show_buffer_ = new ShowBuffer();
 	image_plane_ = new ImagePlane();
-
-	tmp_counter_++;
-	mpr_file_id = tmp_counter_;
-	dump_file_name_ = "D:\\mpr_" + to_string(mpr_file_id) + ".bmp";
 }
+
 MPRRenderer::~MPRRenderer()
 {
-
+	if (show_buffer_){
+		delete show_buffer_;
+		show_buffer_ = NULL;
+	}
+	if (image_plane_){
+		delete image_plane_;
+		image_plane_ = NULL;
+	}
 }
+
 void MPRRenderer::Render()
 {
-	if (volume_data_ == NULL) return;
+	if (volume_data_ == NULL) {
+		CGLogger::Error("MPRRenderer::Render >> volume data is null.");
+		return;
+	}
 
 	DoRender();
 }
+
+void MPRRenderer::SetData(VolData* data)
+{
+	volume_data_ = data;
+	if (NULL == volume_data_){
+		CGLogger::Info("MPRRenderer::SetData null");
+		return;
+	}
+	if (volume_data_->GetPixelData()){
+		volume_data_->GetPixelData()->GetSpacing(voxel_spacing_);
+	}
+}
+
 ShowBuffer *MPRRenderer::GetShowBuffer()
 {
 	return show_buffer_;
@@ -105,6 +125,9 @@ void MPRRenderer::DoRender()
 	d /= r*sqrt(r);
 	height = fabs(d / voxel_spacing_[1]);
 	//////////////////////////////////////////////////////////////////////////
+
+	width = param_imp->GetWidth();
+	height = param_imp->GetHeight();
 	
 	// 初始化buffer
 	show_buffer_->InitBufferData(width, height, 16);
@@ -148,13 +171,16 @@ void MPRRenderer::DoRender()
 			y = (center_point.y + gR * row_vector[1] + gC * col_vector[1]) / voxel_spacing_[1];
 			z = (center_point.z + gR * row_vector[2] + gC * col_vector[2]) / voxel_spacing_[2];
 
-			short val = -1024;
-			short val_max = -1024;
-			
-			if (box->IsPointInBox(x, y, z)){
-				TrilinearInterpolation(x, y, z, val);
-				*(ptr + i * width + j) = val;
-			}			
+			if (x < MathTool::kEpsilon || x > image_width - 1 || 
+				y < MathTool::kEpsilon || y > image_height - 1 || 
+				z < MathTool::kEpsilon || z > image_count - 1){
+					continue;
+			}
+
+
+			short val = -1024;			
+			TrilinearInterpolation(x, y, z, val);
+			*(ptr + i * width + j) = val;
 		}
 	}
 
@@ -195,53 +221,53 @@ void MPRRenderer::DoRender()
 
 void MPRRenderer::BufferTransform()
 {
-	if (output_vtk_image_data_ && show_buffer_){
+	//if (output_vtk_image_data_ && show_buffer_){
 
-		//vtkSmartPointer<vtkImageData> formatted_image_data;
-		//vtkTransform *imageTransform = vtkTransform::New();
-		//imageTransform->PostMultiply();
-		///// Apply scale factor
-		//float scale_factor = render_param_->GetScale();
-		//imageTransform->Scale(scale_factor, scale_factor, scale_factor);
-		///// Apply translation
-		//float move_vector[3];
-		//render_param_->GetMove(move_vector);
-		//imageTransform->Translate(move_vector[0], move_vector[1], move_vector[2]);
-		//vtkTransformFilter *transform_filter = vtkTransformFilter::New(); 
-		//transform_filter->SetTransform(imageTransform);
-		//transform_filter->SetInputData(output_vtk_image_data_);
-		//transform_filter->Update();
-		//formatted_image_data = (vtkImageData *)transform_filter->GetOutput();
-		//if (formatted_image_data == NULL){
-		//	return;
-		//}
+	//	//vtkSmartPointer<vtkImageData> formatted_image_data;
+	//	//vtkTransform *imageTransform = vtkTransform::New();
+	//	//imageTransform->PostMultiply();
+	//	///// Apply scale factor
+	//	//float scale_factor = render_param_->GetScale();
+	//	//imageTransform->Scale(scale_factor, scale_factor, scale_factor);
+	//	///// Apply translation
+	//	//float move_vector[3];
+	//	//render_param_->GetMove(move_vector);
+	//	//imageTransform->Translate(move_vector[0], move_vector[1], move_vector[2]);
+	//	//vtkTransformFilter *transform_filter = vtkTransformFilter::New(); 
+	//	//transform_filter->SetTransform(imageTransform);
+	//	//transform_filter->SetInputData(output_vtk_image_data_);
+	//	//transform_filter->Update();
+	//	//formatted_image_data = (vtkImageData *)transform_filter->GetOutput();
+	//	//if (formatted_image_data == NULL){
+	//	//	return;
+	//	//}
 
-		// 原来的方法，用来对比生成的图像
-		int width = output_vtk_image_data_->GetDimensions()[0];
-		int height = output_vtk_image_data_->GetDimensions()[1];
+	//	// 原来的方法，用来对比生成的图像
+	//	int width = output_vtk_image_data_->GetDimensions()[0];
+	//	int height = output_vtk_image_data_->GetDimensions()[1];
 
-		int ww, wl;
-		(dynamic_cast<MPRRenderParam *>(render_param_))->GetWindowWidthLevel(ww, wl);
-		// convert to 32 bits bitmap
-		vtkImageData *pTmpImageData = NULL;	
-		ConvertVtkImagedataToRGBA* convert = new ConvertVtkImagedataToRGBA();
-		if (false == convert->ConvertImageScalarsToRGBA(output_vtk_image_data_, &pTmpImageData, -1, ww, wl))
-		{
-			return;
-		}
+	//	int ww, wl;
+	//	(dynamic_cast<MPRRenderParam *>(render_param_))->GetWindowWidthLevel(ww, wl);
+	//	// convert to 32 bits bitmap
+	//	vtkImageData *pTmpImageData = NULL;	
+	//	ConvertVtkImagedataToRGBA* convert = new ConvertVtkImagedataToRGBA();
+	//	if (false == convert->ConvertImageScalarsToRGBA(output_vtk_image_data_, &pTmpImageData, -1, ww, wl))
+	//	{
+	//		return;
+	//	}
 
-		//// 写入磁盘文件
-		//vtkSmartPointer<vtkBMPWriter> writer = vtkSmartPointer<vtkBMPWriter>::New();
-		//writer->SetFileName(dump_file_name_.c_str());
-		//writer->SetInputData(pTmpImageData);
-		//writer->Write();
+	//	//// 写入磁盘文件
+	//	//vtkSmartPointer<vtkBMPWriter> writer = vtkSmartPointer<vtkBMPWriter>::New();
+	//	//writer->SetFileName(dump_file_name_.c_str());
+	//	//writer->SetInputData(pTmpImageData);
+	//	//writer->Write();
 
-		UNITDATASHOW* pdata = reinterpret_cast<UNITDATASHOW*>(pTmpImageData->GetScalarPointer());
-		int number_of_components = pTmpImageData->GetNumberOfScalarComponents();
+	//	UNITDATASHOW* pdata = reinterpret_cast<UNITDATASHOW*>(pTmpImageData->GetScalarPointer());
+	//	int number_of_components = pTmpImageData->GetNumberOfScalarComponents();
 
-		show_buffer_->SetBufferData(pdata, width, height, number_of_components * 8);
+	//	show_buffer_->SetBufferData(pdata, width, height, number_of_components * 8);
 
-	}
+	//}
 }
 
 void MPRRenderer::SetOffScreenRendering(bool flag)
