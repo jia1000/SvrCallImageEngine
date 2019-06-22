@@ -27,10 +27,8 @@ include_directories(
 	)
 
 LINK_DIRECTORIES(
-
 	/usr/lib
 	/usr/local/vtk-8.0/lib
-
 	${PROJECT_SOURCE_DIR}/lib
 
 	)
@@ -55,6 +53,8 @@ link_directories(./thirdparty/)
 
 # 添加 DicomEngine 项目文件
 aux_source_directory(./DicomEngine/api 			DIRSRCSdicom_engine)
+aux_source_directory(./DicomEngine/io 			DIRSRCSdicom_engine)
+aux_source_directory(./DicomEngine/iod 			DIRSRCSdicom_engine)
 aux_source_directory(./DicomEngine/api/dicom 		DIRSRCSdicom_engine)
 aux_source_directory(./DicomEngine/main/controllers 	DIRSRCSdicom_engine)
 
@@ -65,7 +65,6 @@ link_libraries(${DCMTK_LIBRARIES})
 # 生成dicom_engine库
 add_library(dicom_engine  SHARED ${DIRSRCSdicom_engine})
 TARGET_LINK_LIBRARIES(dicom_engine ${DCMTK_LIBRARIES})
-TARGET_LINK_LIBRARIES(dicom_engine )
 
 # 生成controller库
 aux_source_directory(./EngineController  DIRSRCS_Controller)
@@ -74,6 +73,7 @@ add_library(controller  SHARED ${DIRSRCS_Controller})
 TARGET_LINK_LIBRARIES(controller ${VTK_LIBRARIES})
 TARGET_LINK_LIBRARIES(controller dicom_engine)
 TARGET_LINK_LIBRARIES(controller jsoncpp)
+TARGET_LINK_LIBRARIES(controller glog)
 TARGET_LINK_LIBRARIES(controller ImagingEngineLib)
 
 # 开启调试信息
