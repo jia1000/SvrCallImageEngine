@@ -37,7 +37,7 @@ bool DcmtkDcmLoader::LoadDirectory(const char* dir)
     volume_data_->SetBitsPerPixel(paras.bits_per_pixel);
     volume_data_->SetBitsStored(paras.bits_stored);
     volume_data_->SetSliceWidth(paras.window_width);
-    volume_data_->SetPixelData(new RawPixelData(buffer));
+    volume_data_->SetPixelData(new RawPixelData((char *)buffer));
     volume_data_->GetPixelData()->SetBitsPerPixel(paras.bits_per_pixel);
     volume_data_->GetPixelData()->SetDimensions(paras.height, paras.width, paras.slice_count);
     volume_data_->GetPixelData()->SetOrigin(0,0,0);//
