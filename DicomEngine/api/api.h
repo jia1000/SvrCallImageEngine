@@ -14,6 +14,8 @@
 #ifndef API_H
 #define API_H
 
+#define MONOLITIC
+
 	#if defined(_WINDOWS)
 		#pragma warning (disable : 4231)
 		#pragma warning (disable : 4275)
