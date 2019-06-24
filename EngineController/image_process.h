@@ -101,6 +101,7 @@ public:
 
 private:
 	virtual int ParseJsonData(const char* json_data);
+	std::string GeneraterDicomFileName(const int iamge_index);
 	void DoTestSC();//std::string output_path);
 	struct stVRImageParams
 	{

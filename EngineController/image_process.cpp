@@ -202,21 +202,32 @@ int ImageVRProcess::Excute(const char* json_data)
 
 void ImageVRProcess::DoTestSC()//std::string output_path)
 {
-	int angle = (int)params.rotation_angle;
 	for(int i = 0; i < params.output_image_number; ++i)
 	{
 		IBitmap *bmp = control_vr->GetOutput(i);
+		if(!bmp)
+		{
+			printf("get bitmap %d error\n", i);
+			continue;
+		}
 		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
+		if(!bmpInfo)
+		{
+			printf("get bitmap dcm info %d error\n", i);
+			continue;
+		}
 
-		std::string file_path = "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/10.dcm";
+		// std::string file_path = "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/10.dcm";
+		// GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
+		// GIL::DICOM::DICOMManager *pDICOMManager = new GIL::DICOM::DICOMManager();
+		// bool ret_2 = pDICOMManager->CargarFichero(file_path, *dataset, true, NULL);
+
 		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
-		GIL::DICOM::DICOMManager *pDICOMManager = new GIL::DICOM::DICOMManager();
-		bool ret_2 = pDICOMManager->CargarFichero(file_path, *dataset, true, NULL);
+		DataTransferController::series_info->GetDicomDataSet(*dataset, 0);
 
-		GIL::DICOM::SecondaryCaptureImageDcmGenerator *generator = 
-			new GIL::DICOM::SecondaryCaptureImageDcmGenerator(dataset);	
+		auto *generator = new GIL::DICOM::SecondaryCaptureImageDcmGenerator(dataset);	
 	
-		generator->SetTag(DCM_PatientID, "zhangjian");
+		// generator->SetTag(DCM_PatientID, "zhangjian");
 		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
 		double spacings[2];
 		double origins[3];
@@ -249,37 +260,44 @@ void ImageVRProcess::DoTestSC()//std::string output_path)
 		PixelDataSource *source = new PixelDataSource(bmp);
 		generator->SetPixelData(source);
 
-		//
-		std::string dst_file_path = params.output_path;
-
-		//完整0/颅内1
-		std::stringstream ss_rule;
-		ss_rule << params.generate_rule;
-		std::string str_rule = ss_rule.str();
-		// 绘制方式：VR 0 ， MIP 1
-		std::stringstream ss_blend;
-		ss_blend << params.blend_mode;
-		std::string str_blend = ss_blend.str();
-		// 旋转方向： LEFT_TO_RIGHT 0,  HEAT_TO_FEET 1
-		std::stringstream ss_direction;
-		ss_direction << params.rotation_direction;
-		std::string str_direction = ss_direction.str();
-		// 旋转角度
-		std::stringstream ss_angle;
-		ss_angle << angle * i;
-		std::string str_angle = ss_angle.str();
-
-		dst_file_path += str_rule;
-		dst_file_path += "_";
-		dst_file_path += str_blend;
-		dst_file_path += "_";
-		dst_file_path += str_direction;
-		dst_file_path += "_";
-		dst_file_path += str_angle;
-		dst_file_path += ".dcm";
-
+		std::string dst_file_path = GeneraterDicomFileName(i);
 		generator->Write(dst_file_path);
 	}
+}
+
+std::string ImageVRProcess::GeneraterDicomFileName(const int iamge_index)
+{
+	//
+	std::string dst_file_path = params.output_path;
+	int angle = (int)params.rotation_angle;
+	
+	//完整0/颅内1
+	std::stringstream ss_rule;
+	ss_rule << params.generate_rule;
+	std::string str_rule = ss_rule.str();
+	// 绘制方式：VR 0 ， MIP 1
+	std::stringstream ss_blend;
+	ss_blend << params.blend_mode;
+	std::string str_blend = ss_blend.str();
+	// 旋转方向： LEFT_TO_RIGHT 0,  HEAT_TO_FEET 1
+	std::stringstream ss_direction;
+	ss_direction << params.rotation_direction;
+	std::string str_direction = ss_direction.str();
+	// 旋转角度
+	std::stringstream ss_angle;
+	ss_angle << angle * iamge_index;
+	std::string str_angle = ss_angle.str();
+
+	dst_file_path += str_rule;
+	dst_file_path += "_";
+	dst_file_path += str_blend;
+	dst_file_path += "_";
+	dst_file_path += str_direction;
+	dst_file_path += "_";
+	dst_file_path += str_angle;
+	dst_file_path += ".dcm";
+
+	return dst_file_path;
 }
 
 //////////////////////////////////////////////////////////////////////////
