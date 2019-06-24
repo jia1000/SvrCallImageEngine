@@ -4,6 +4,7 @@
 #include "image_process.h"
 #include "common_utils.h"
 #include "series_data_info.h"
+#include "render_facade.h"
 
 #include "tools/logger.h"
 
@@ -75,6 +76,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 	printf("load series dicom path : %s\n", series_process_paras.dicom_path.c_str());
 	//
 	series_info = new SeriesDataInfo(series_process_paras.dicom_path, true);
+
 	return RET_STATUS_SUCCESS;
 }
 
@@ -88,14 +90,13 @@ int DataTransferController::ParseSwitchSeries(const char* json_data)
 	{
 		printf("fail to parse switchserires's json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
-	}
+	}	
 	
-	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, series_process_paras.dicom_path);
-	if(ret <= 0) return ret;
 	printf("switch series dicom path : %s\n", series_process_paras.dicom_path.c_str());
 
-	return ret;
+	DW::RenderFacade::Get()->ChangeSeries(series_process_paras.series_uid);
+	
+	return RET_STATUS_SUCCESS;
 }
 
 int DataTransferController::ParseUnloadSeries(const char* json_data)
@@ -110,9 +111,6 @@ int DataTransferController::ParseUnloadSeries(const char* json_data)
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}
 	
-	int ret = RET_STATUS_FAILURE;
-	ret = GetJsonDataString(root, JSON_KEY_DICOM_PATH, DataTransferController::series_process_paras.dicom_path);
-	if(ret <= 0) return ret;
 	printf("unload series dicom path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
 
 	//卸载序列时，释放资源
@@ -122,7 +120,9 @@ int DataTransferController::ParseUnloadSeries(const char* json_data)
 		series_info = nullptr;
 	}
 
-	return ret;
+	DW::RenderFacade::Get()->ChangeSeries(series_process_paras.series_uid);
+
+	return RET_STATUS_SUCCESS;
 }
 
 int DataTransferController::ParseImageOperationData(const char* json_data)

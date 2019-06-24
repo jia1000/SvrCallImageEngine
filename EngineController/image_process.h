@@ -22,6 +22,9 @@
 
 #include "thirdparty/x2struct/x2struct.hpp"// json2struct header file
 
+// class DW::Control::IImageControl;
+#include "control/image_control.h"
+
 class ImageProcessBase
 {
 public:
@@ -98,6 +101,7 @@ public:
 
 private:
 	virtual int ParseJsonData(const char* json_data);
+	void DoTestSC();//std::string output_path);
 	struct stVRImageParams
 	{
 		stVRImageParams()
@@ -133,6 +137,7 @@ private:
 		));
 	};
 	stVRImageParams params;
+	DW::Control::IImageControl *control_vr;
 };
 
 //////////////////////////////////////////////////////////////////////////

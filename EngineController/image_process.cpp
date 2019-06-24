@@ -11,6 +11,8 @@
 #include "main/controllers/dicommanager.h"
 #include "api/dicom/dicomdataset.h"
 #include "api/dicom/dcmdictionary.h"
+#include "DicomEngine/io/secondary_capture_image_generator.h"
+#include "img_source.h"
 
 #include "dcmtk_dcm_loader.h"
 
@@ -18,6 +20,7 @@
 #include "render_source.h"
 #include "render_facade.h"
 #include "io/nii_loader.h"
+
 
 #include <algorithm>
 #include <fstream> // ifstream, ifstream::in
@@ -112,11 +115,20 @@ int ImageMPRProcess::Excute(const char* json_data)
 		is_create_mpr_render = true;
 	}
 
+	printf("params.output_path : %s------------------------\n", params.output_path.c_str());	
+	RenderFacade::Get()->CreateMPRSlabBatch (m_wnd_name, 
+		params.output_path + "mpr/",
+		BlendMode::MaximumIntensity,
+		OrientationType::AXIAL,
+		0.35f, 25.0f, 5.0f,	2000, 400
+		);
+
 	return true;
 }
 //////////////////////////////////////////////////////////////////////////
 ImageVRProcess::ImageVRProcess()
 	: ImageProcessBase()
+	, control_vr(nullptr)
 {
 	m_wnd_name = "vr";
 }
@@ -137,7 +149,7 @@ int ImageVRProcess::ParseJsonData(const char* json_data)
 	}
 	
 	return RET_STATUS_SUCCESS;
-}
+} 
 
 int ImageVRProcess::Excute(const char* json_data)
 {
@@ -166,21 +178,108 @@ int ImageVRProcess::Excute(const char* json_data)
 	
 	if (!is_create_vr_render) {
 		// 2.create image control
-		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::VR);	// only once
+		control_vr = RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::VR);	// only once
 		RenderFacade::Get()->ChangeSeries(series_name_vr);
 		is_create_vr_render = true;
 	}	
-
+	
 	printf("params.output_path : %s------------------------\n", params.output_path.c_str());
 	RenderFacade::Get()->CreateVRRotationBatch(m_wnd_name, 
-		params.output_path,// + "vr_lunei_left_right/",
-		BlendMode::Composite,
+		params.output_path,
+		(BlendMode)params.blend_mode,
 		OrientationType::CORONAL,
-		RotationDirection::LEFT_TO_RIGHT,
-		30.0f, 1.0f, 12, -1, -1
+		(RotationDirection)params.rotation_direction,		
+		params.rotation_angle,
+		params.clip_percent,
+		params.output_image_number,
+		params.window_width,
+		params.window_level
 		);
 
+	DoTestSC();
 	return true;
+}
+
+void ImageVRProcess::DoTestSC()//std::string output_path)
+{
+	int angle = (int)params.rotation_angle;
+	for(int i = 0; i < params.output_image_number; ++i)
+	{
+		IBitmap *bmp = control_vr->GetOutput(i);
+		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
+
+		std::string file_path = "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/10.dcm";
+		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
+		GIL::DICOM::DICOMManager *pDICOMManager = new GIL::DICOM::DICOMManager();
+		bool ret_2 = pDICOMManager->CargarFichero(file_path, *dataset, true, NULL);
+
+		GIL::DICOM::SecondaryCaptureImageDcmGenerator *generator = 
+			new GIL::DICOM::SecondaryCaptureImageDcmGenerator(dataset);	
+	
+		generator->SetTag(DCM_PatientID, "zhangjian");
+		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
+		double spacings[2];
+		double origins[3];
+		double row_v[3], col_v[3];
+		bmpInfo->GetOrientation(row_v, col_v);
+		bmpInfo->GetOrigin(origins);
+		bmpInfo->GetPixelSpacings(spacings);
+		string str_spacing = to_string(spacings[0]) + "\\" + to_string(spacings[1]);
+		string str_ori = to_string(row_v[0]) + "\\" + to_string(row_v[1]) + "\\" + to_string(row_v[2])
+			+ "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[2]);
+		string str_origin = to_string(origins[0]) + "\\" + to_string(origins[1]) + "\\" + to_string(origins[2]);
+
+		int instance_number = bmpInfo->GetInstanceNumber();
+		generator->SetTag(DCM_ImageOrientationPatient, str_ori);
+		generator->SetTag(DCM_ImagePositionPatient, str_origin);
+		generator->SetTag(DCM_PixelSpacing, str_spacing);
+		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
+		int slice_count = DataTransferController::series_info->GetSeriesDicomFileCount();
+		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(slice_count));
+		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(slice_count) + "." + to_string(instance_number));
+		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
+		// Series Description
+		char deg[3] = {0};
+		deg[0] = 0xa1;
+		deg[1] = 0xe3;
+		char str[30] = {0};
+		sprintf(str,"%s", deg);
+		generator->SetTag(DCM_SeriesDescription, "Angle: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)));
+		
+		PixelDataSource *source = new PixelDataSource(bmp);
+		generator->SetPixelData(source);
+
+		//
+		std::string dst_file_path = params.output_path;
+
+		//完整0/颅内1
+		std::stringstream ss_rule;
+		ss_rule << params.generate_rule;
+		std::string str_rule = ss_rule.str();
+		// 绘制方式：VR 0 ， MIP 1
+		std::stringstream ss_blend;
+		ss_blend << params.blend_mode;
+		std::string str_blend = ss_blend.str();
+		// 旋转方向： LEFT_TO_RIGHT 0,  HEAT_TO_FEET 1
+		std::stringstream ss_direction;
+		ss_direction << params.rotation_direction;
+		std::string str_direction = ss_direction.str();
+		// 旋转角度
+		std::stringstream ss_angle;
+		ss_angle << angle * i;
+		std::string str_angle = ss_angle.str();
+
+		dst_file_path += str_rule;
+		dst_file_path += "_";
+		dst_file_path += str_blend;
+		dst_file_path += "_";
+		dst_file_path += str_direction;
+		dst_file_path += "_";
+		dst_file_path += str_angle;
+		dst_file_path += ".dcm";
+
+		generator->Write(dst_file_path);
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

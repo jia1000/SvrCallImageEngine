@@ -3,6 +3,7 @@
 # cp thirdparty/2.dcm build/2.dcm
 # cp thirdparty/3.dcm build/3.dcm
 cp thirdparty/libcharls.so build/libcharls.so
+cp thirdparty/libSvrCallImageEngine.so build/libSvrCallImageEngine.so
 
 # 执行java的设置
 #source /etc/profile

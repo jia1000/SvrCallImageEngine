@@ -47,6 +47,23 @@ int main(int argc, char** args)
 		json_data += "}";
 		processSeries(json_data);
 	}
+	if(!opened)
+	{
+		// MPRMIP 操作
+		std::string json_data = "{";
+		json_data += "\"image_type\":1,"; 			// 图像类型
+		json_data += "\"blend_mode\":1,"; 			// 绘制方式 : VR为0；  VRMIP为1
+		json_data += "\"init_orientation\":0,"; 	// 正位（起始位置）标识
+		json_data += "\"clip_percent\":0.35,"; 		// 截取比例;  
+		json_data += "\"thickness\":25.0,"; 		// 层厚
+		json_data += "\"spacing_between_slices\":5.0,";// 层间距
+		json_data += "\"output_path\":\"../build/mprmip1/\","; // 输出图像目录
+		json_data += "\"window_width\":2000,"; 		// 窗宽
+		json_data += "\"window_level\":400,"; 		// 窗位
+		json_data += "\"last_variable\":999"; 		// 
+		json_data += "}";
+		processSeries(json_data);
+	}
 	std::printf("end debug.\n");
 
 	return 0;
