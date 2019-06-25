@@ -55,6 +55,10 @@ namespace DW {
 			void SetBoundingBox(float xmin,float ymin,float zmin,float xmax,float ymax,float zmax);
 			/// 获取当前包围盒对象
 			BoundingBox* GetBoundingBox() { return bounding_box_; }
+			/// 设置分割结果包围盒的顶点
+			void SetMarkBoundingBox(float xmin,float ymin,float zmin,float xmax,float ymax,float zmax);
+			/// 获取当前分割结果包围盒对象
+			BoundingBox* GetMarkBoundingBox() { return mark_bounding_box_; }
 			/// 从数据指针中获取指定坐标位置的值
 			void *GetDataPointer(int x, int y, int z);
 			/// 设置获取数据修改标识
@@ -80,6 +84,7 @@ namespace DW {
 			string study_instance_uid_;			//study instance uid, stored in tag (0020,000D)
 			string series_instance_uid_;		//series instance uid, stored in tag (0020,000E)
 			BoundingBox *bounding_box_;			//
+			BoundingBox *mark_bounding_box_;			//
 			int volume_id_;						//
 			bool modified_;						//
 			int window_width_;					// default window width
@@ -95,6 +100,13 @@ namespace DW {
 		public:
 			BoundingBox() {}
 			~BoundingBox() {}
+
+			void SetSpacing(double spacings[3]){
+				int i;
+				for(i=0; i<3; ++i){
+					voxel_spacings[i] = spacings[i];
+				}
+			}
 
 			const float& operator[](const uint32_t index) const
 			{
@@ -118,17 +130,30 @@ namespace DW {
 				}
 			}
 
+			/// 得到患者坐标系的
 			void GetCornerPoints(Point3f& top_left, Point3f& bottom_right)
 			{
-				top_left.x = Xmin;
-				top_left.y = Ymin;
-				top_left.z = Zmin;
-				bottom_right.x = Xmax;
-				bottom_right.y = Ymax;
-				bottom_right.z = Zmax;
+				top_left.x = Xmin * voxel_spacings[0];
+				top_left.y = Ymin * voxel_spacings[1];
+				top_left.z = Zmin * voxel_spacings[2];
+				bottom_right.x = Xmax * voxel_spacings[0];
+				bottom_right.y = Ymax * voxel_spacings[1];
+				bottom_right.z = Zmax * voxel_spacings[2];
+			}
+
+			/// 得到患者坐标系的
+			void GetCornerPoints(double top_left[3], double bottom_right[3])
+			{
+				top_left[0] = Xmin * voxel_spacings[0];
+				top_left[1] = Ymin * voxel_spacings[1];
+				top_left[2] = Zmin * voxel_spacings[2];
+				bottom_right[0] = Xmax * voxel_spacings[0];
+				bottom_right[1] = Ymax * voxel_spacings[1];
+				bottom_right[2] = Zmax * voxel_spacings[2];
 			}
 
 		private:
+			double voxel_spacings[3];
 
 		};
 

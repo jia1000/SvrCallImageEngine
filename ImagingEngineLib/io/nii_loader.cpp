@@ -293,17 +293,43 @@ bool NiiImageLoader::LoadVolumeMask(const char* file)
 	//for(i=0; i<nz; ++i){
 	//	memcpy(mask_data + i * plane_size, image_buf + (nz-1 - i) * plane_size, plane_size);
 	//}
+
+	int x_min = 10000, x_max = 0, y_min = 10000, y_max = 0, z_min = 10000, z_max = 0, val = 0;
 	
 	int plane_size = width * height;
 	for (z=0; z<nz; ++z){
 		for (y=0; y<height; ++y){
 			for (x=0; x<width; ++x){
+				
 				// VolumeMask 不需要y轴坐标转换，因为Mask后续还会再做一次转换，与其这里就不做转换了。
 				/*mask_data[z*plane_size + y*width + x] = image_buf[(nz-1 - z)*plane_size + (height-1 - y) * width + x];*/
 				mask_data[z*plane_size + y*width + x] = image_buf[(nz-1 - z)*plane_size + y* width + x];
+
+				val =  mask_data[z*plane_size + y*width + x];
+				if (val > 0){
+					if (x_min > x){
+						x_min = x;
+					}
+					if (x_max < x){
+						x_max = x;
+					}
+					if (y_min > y){
+						y_min = y;
+					}
+					if (y_max < y){
+						y_max = y;
+					}
+					if (z_min > z){
+						z_min = z;
+					}
+					if (z_max < z){
+						z_max = z;
+					}
+				}
 			}
 		}
 	}
+
 
 	////////////////////////////////////////////////////////////////////////////
 	///// User VtkImageDataCreator ok
@@ -317,6 +343,7 @@ bool NiiImageLoader::LoadVolumeMask(const char* file)
 	////////////////////////////////////////////////////////////////////////////
 
 	volume_data_->SetMark(mask_data);
+	volume_data_->SetMarkBoundingBox(x_min, y_min, z_min, x_max, y_max, z_max);
 
 	return true;
 }

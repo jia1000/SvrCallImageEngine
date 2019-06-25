@@ -7,9 +7,9 @@ using namespace DW::IMAGE;
 VolData::VolData()
 {
 	bounding_box_ = new BoundingBox();
+	mark_bounding_box_ = new BoundingBox();
 	slice_width_ = 512;
 	slice_height_ = 512;
-	
 	series_mark_ = NULL;
 	pixel_data_ = NULL;
 }
@@ -75,6 +75,11 @@ void VolData::SetBoundingBox(float xmin,float ymin,float zmin,float xmax,float y
 {
 	bounding_box_->Update(xmin, ymin, zmin, xmax, ymax, zmax);
 }
+void VolData::SetMarkBoundingBox(float xmin,float ymin,float zmin,float xmax,float ymax,float zmax)
+{
+	mark_bounding_box_->Update(xmin, ymin, zmin, xmax, ymax, zmax);
+}
+
 void *VolData::GetDataPointer(int x, int y, int z)
 {
 	if (pixel_data_){
@@ -96,7 +101,10 @@ void VolData::Destroy() {
 		delete bounding_box_;
 		bounding_box_ = NULL;
 	}
-	delete this;
+	if (mark_bounding_box_){
+		delete mark_bounding_box_;
+		mark_bounding_box_ = NULL;
+	}
 }
 
 void VolData::GetDefaultWindowWidthLevel(int &width, int &level)

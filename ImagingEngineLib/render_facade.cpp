@@ -447,7 +447,7 @@ int RenderFacade::CreateVRRotationBatch(string control_id,
 
 			Timer::begin("CreateVRRotationBatch::SaveAsBitmap");
 			// create files on disk
-			// control->SaveAsBitmap(output);
+			control->SaveAsBitmap(output);
 			Timer::end("CreateVRRotationBatch::SaveAsBitmap");
 		}
 

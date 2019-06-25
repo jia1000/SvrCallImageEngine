@@ -1,8 +1,8 @@
 #include "render/imaging_vr.h"
-#include "render/renderer_raycasting_cpu.h"
 #include "data/vector3.h"
 #include "tools/math.h"
 #include "processing/image_process.h"
+#include "render/renderer_vr.h"
 
 using namespace DW::Render;
 using namespace DW::CV;

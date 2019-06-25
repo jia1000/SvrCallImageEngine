@@ -28,7 +28,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
-#include <vtkStructuredPointsReader.h>
+//#include <vtkStructuredPointsReader.h>
 #include <vtkTimerLog.h>
 #include <vtkVolumeProperty.h>
 #include <vtkDICOMImageReader.h>
@@ -54,12 +54,12 @@ VolumeRenderer::VolumeRenderer()
 	/// initialize vtk objects
 	vtk_render_window_ = vtkSmartPointer<vtkRenderWindow>::New();
 	vtk_renderer_ = vtkSmartPointer<vtkRenderer>::New();
-	vtk_volume_mapper_ = vtkSmartPointer<vtkSmartVolumeMapper>::New();
+	vtk_volume_mapper_ = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
 #if VTK_MAJOR_VERSION > 5
 #ifdef WIN32
 	//TODO Linux报错：没有InteractiveAdjustSampleDistancesOff成员函数
 	//// Workaround for vtkSmartVolumeMapper bug (https://gitlab.kitware.com/vtk/vtk/issues/17323)
-	vtk_volume_mapper_->InteractiveAdjustSampleDistancesOff(); 
+	//vtk_volume_mapper_->InteractiveAdjustSampleDistancesOff(); 
 #endif
 #endif
 	vtk_volume_property_ = vtkSmartPointer<vtkVolumeProperty>::New();
@@ -110,7 +110,7 @@ VolumeRenderer::VolumeRenderer()
 	vtk_volume_mapper_->SetBlendModeToComposite();
 	/// Set requested render mode
 #if VTK_MAJOR_VERSION > 5
-	vtk_volume_mapper_->SetRequestedRenderModeToRayCast();
+	//vtk_volume_mapper_->SetRequestedRenderModeToRayCast();
 #else
 	vtk_volume_mapper_->SetRequestedRenderMode(vtkSmartVolumeMapper::RayCastRenderMode);
 #endif
@@ -130,6 +130,7 @@ VolumeRenderer::VolumeRenderer()
 
 	orientation_marker_ = new OrientationMarker(vtk_renderer_);
 	orientation_marker_->SetEnabled(true);
+	vtk_mask_filter_ = vtkSmartPointer<vtkImageMask>::New();
 
 	SetOffScreenRendering(true);
 }
@@ -179,8 +180,10 @@ void VolumeRenderer::SetData(VolData* data)
 		// 卸载数据
 		vtk_volume_mapper_->RemoveAllInputs();
 		vtk_volume_mapper_->RemoveAllClippingPlanes();
+		vtk_mask_filter_->RemoveAllInputs();
 
 		CGLogger::Info("VolumeRenderer::SetData null");
+		return;
 	}
 
 	// Workaround for vtkSmartVolumeMapper bug (https://gitlab.kitware.com/vtk/vtk/issues/17328)
@@ -193,10 +196,9 @@ void VolumeRenderer::SetData(VolData* data)
 	vtkImageData *mapper_input_data = vtkImageData::New();
 	if (mark){
 
-		if (vtk_mask_filter_){
-			vtk_mask_filter_->Delete();
-		}
-		vtk_mask_filter_ = vtkSmartPointer<vtkImageMask>::New();
+		//if (vtk_mask_filter_){
+		//	vtk_mask_filter_->Delete();
+		//}
 
 		int dims[3];
 		volume_data_->GetPixelData()->GetDimensions(dims);
@@ -347,17 +349,8 @@ void VolumeRenderer::DoRender(vtkSmartPointer<vtkImageData> imagedata)
 
 		float clip = param_imp->GetClipping();
 		// Set rendering to fit into view port
-		FitRenderingIntoViewport(clip, true);
+		FitRenderingIntoViewport(clip, param_imp->GetUpdateCenterAfterClipping());
 
-		if (param_imp->GetUpdateCenterAfterClipping() && camera_){
-			int image_count = volume_data_->GetSliceCount();
-			// 平移
-			float offset[3] = { 0.0f };
-			double actual_height = (double)(image_count - 1) * voxel_spacing_[2];
-			offset[2] = -(float)(actual_height / 2.0 - actual_height * clip / 2.0);
-			camera_->Move(offset);
-		}
-		
 	}
 
 	CGLogger::Info("VolumeRenderer::DoRender 2");
@@ -442,14 +435,14 @@ void VolumeRenderer::SetRenderingMode(RenderMode mode)
 	switch (mode)
 	{
 	case RenderMode::SMART_RAYCASTING:
-		vtk_volume_mapper_->SetRequestedRenderModeToDefault(); 
+		//vtk_volume_mapper_->SetRequestedRenderModeToDefault(); 
 		break;
 	case RenderMode::RAYCASTING: 
-		vtk_volume_mapper_->SetRequestedRenderModeToRayCast(); 
+		//vtk_volume_mapper_->SetRequestedRenderModeToRayCast(); 
 		break;
 	case RenderMode::RAYCASTING_GPU: 
 #if VTK_MAJOR_VERSION > 5
-		vtk_volume_mapper_->SetRequestedRenderModeToGPU(); 
+		//vtk_volume_mapper_->SetRequestedRenderModeToGPU(); 
 #else
 		// vtk 5以下需要DXD库支持GPU
 		vtk_volume_mapper_->SetRequestedRenderMode(vtkSmartVolumeMapper::RayCastRenderMode);
@@ -657,23 +650,53 @@ void VolumeRenderer::ComputeWorldToDisplay(double x, double y, double z, double 
 	}
 }
 
-void VolumeRenderer::FitRenderingIntoViewport(float clip, bool zoom_after_clip)
+void VolumeRenderer::FitRenderingIntoViewport(float clip, bool update_after_clip)
 {
 	// First we get the bounds of the current rendered item in world coordinates
 	double bounds[6];
 	vtk_volume_->GetBounds(bounds);
+	BoundingBox *box = volume_data_->GetMarkBoundingBox();
+	box->SetSpacing(voxel_spacing_);
+	double top_left[3], bottom_right[3];
+	box->GetCornerPoints(top_left, bottom_right);
+	double whole_height = bounds[5] - bounds[4];
 
 	//TODO 需要计算分割结果的BOUNDING BOX，不然宽度方向还是过大，造成截取后不能放大到合适的比例
-	if (zoom_after_clip && clip > MathTool::kEpsilon && abs(clip - 1.0) > MathTool::kEpsilon){
-		bounds[5] = bounds[4] + (bounds[5] - bounds[4]) * clip;
+	if (update_after_clip && 
+		clip > MathTool::kEpsilon && abs(clip - 1.0) > MathTool::kEpsilon){
+		
+			bounds[5] = bounds[4] + (bounds[5] - bounds[4]) * clip;
 	}
 
 	double topCorner[3];
 	double bottomCorner[3];
 	for (int i = 0; i < 3; ++i)
 	{
-		topCorner[i] = bounds[i * 2];
-		bottomCorner[i] = bounds[i * 2 + 1];
+		//topCorner[i] = bounds[i * 2];
+		//bottomCorner[i] = bounds[i * 2 + 1];
+
+		if (bounds[i * 2] < top_left[i]){
+			topCorner[i] = top_left[i];
+		}
+		else{
+			top_left[i] = bounds[i * 2];
+		}
+
+		if (bounds[i * 2 + 1] > bottom_right[i]){
+			bottomCorner[i] = bottom_right[i];
+		}
+		else{
+			bottomCorner[i] = bounds[i * 2 + 1];
+		}
+	}
+
+	// 先平移再放缩
+	if (update_after_clip){
+
+		double clip_mark_height = bottomCorner[2] - topCorner[2];
+		float offset[3] = { 0.0f };		
+		offset[2] = -(float)((bounds[0] + whole_height / 2.0) - (topCorner[2] + clip_mark_height / 2.0));
+		camera_->Move(offset);
 	}
 
 	// Scaling the viewport to fit the current item bounds

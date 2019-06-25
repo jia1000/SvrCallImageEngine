@@ -7,7 +7,6 @@
 
 =========================================================================*/
 #include "render/renderer_cpr.h"
-#include "render/renderer_raycasting_cpu.h"
 #include <vtkWindowToImageFilter.h>
 #include <vtkBMPWriter.h>
 #include <vtkNew.h>
@@ -27,7 +26,7 @@
 #include <vtkRenderWindowInteractor.h>
 #include <vtkRenderer.h>
 #include <vtkSmartPointer.h>
-#include <vtkStructuredPointsReader.h>
+//#include <vtkStructuredPointsReader.h>
 #include <vtkTimerLog.h>
 #include <vtkVolumeProperty.h>
 #include <vtkDICOMImageReader.h>

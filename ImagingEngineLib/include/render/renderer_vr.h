@@ -101,7 +101,7 @@ namespace DW {
 			vtkSmartPointer<vtkRenderWindow> vtk_render_window_;
 			vtkSmartPointer<vtkRenderer> vtk_renderer_;
 			/// The main mapper for volume rendering.
-			vtkSmartPointer<vtkSmartVolumeMapper> vtk_volume_mapper_;
+			vtkSmartPointer<vtkGPUVolumeRayCastMapper> vtk_volume_mapper_;
 			/// Properties of volume rendering.
 			vtkSmartPointer<vtkVolumeProperty> vtk_volume_property_;
 			/// The volume actor.

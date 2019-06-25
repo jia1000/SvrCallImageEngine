@@ -8,7 +8,7 @@
 =========================================================================*/
 #include "data/curve_line.h"
 #include "vtk_include.h"
-#include "vtkPolyDataReader.h"
+//#include "vtkPolyDataReader.h"
 #include "vtkSplineFilter.h"
 #include "vtkParametricSpline.h"
 #include "vtkParametricFunctionSource.h"

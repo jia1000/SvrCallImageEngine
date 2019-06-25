@@ -61,7 +61,7 @@ VTK_MODULE_INIT(vtkRenderingOpenGL);
 #include"vtkTextActor.h"
 #include"vtkProperty2D.h"
 
-#include <vtkPolyDataReader.h>
+//#include <vtkPolyDataReader.h>
 #include <vtkProbeFilter.h>
 #include <vtkImageData.h>
 #include <vtkSplineFilter.h>
