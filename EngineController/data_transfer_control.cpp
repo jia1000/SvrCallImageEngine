@@ -21,14 +21,6 @@ using namespace DW::IMAGE;
 using namespace DW::IO;
 
 DataTransferController* DataTransferController::instance = nullptr;
-SeriesProcessParas DataTransferController::series_process_paras;
-// SeriesDataInfo* DataTransferController::series_info = nullptr;
-
-DW::IO::DcmtkDcmLoader* DataTransferController::dcm_loader = nullptr;
-SeriesDataInfo* DataTransferController::series_info = nullptr;
-
-ImageProcessBase* DataTransferController::arr_image_process[JSON_VALUE_REQUEST_TYPE_MAX] = {nullptr};
-DW::Control::IImageControl* DataTransferController::arr_image_control[JSON_VALUE_REQUEST_TYPE_MAX] = {nullptr};
 
 DataTransferController* DataTransferController::GetInstance()
 {
@@ -38,6 +30,8 @@ DataTransferController* DataTransferController::GetInstance()
 }
 
 DataTransferController::DataTransferController()
+ : dcm_loader(nullptr)
+ , series_info(nullptr)
 {
 	for (size_t i = 0; i < JSON_VALUE_REQUEST_TYPE_MAX; i++)
 	{		
@@ -57,6 +51,11 @@ DataTransferController::DataTransferController()
 			break;
 		}				
 	}	
+
+	for (size_t i = 0; i < JSON_VALUE_REQUEST_TYPE_MAX; i++)
+	{
+		arr_image_control[i] = nullptr;
+	}
  }
 
 DataTransferController::~DataTransferController()
@@ -124,6 +123,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 	static bool is_create_wnd = false;
 	if (is_create_wnd == false)
 	{
+		// only once
 		arr_image_control[JSON_VALUE_REQUEST_TYPE_VR] = RenderSource::Get()->CreateTwodImageControl(IMAGE_WINDOW_NAME_VR, RenderControlType::VR);
 		arr_image_control[JSON_VALUE_REQUEST_TYPE_MPR] = RenderSource::Get()->CreateTwodImageControl(IMAGE_WINDOW_NAME_MPR, RenderControlType::MPR);
 		arr_image_control[JSON_VALUE_REQUEST_TYPE_CPR] = RenderSource::Get()->CreateTwodImageControl(IMAGE_WINDOW_NAME_CPR, RenderControlType::STRETECHED_CPR);

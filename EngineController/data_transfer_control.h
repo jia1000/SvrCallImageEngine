@@ -65,23 +65,23 @@ public:
 
 	static DataTransferController* GetInstance();
 
-	static int ParseLoadSeries(const char* json_data);
-	static int ParseSwitchSeries(const char* json_data);
-	static int ParseUnloadSeries(const char* json_data);	
-	static int ParseImageOperationData(const char* json_data);
+	int ParseLoadSeries(const char* json_data);
+	int ParseSwitchSeries(const char* json_data);
+	int ParseUnloadSeries(const char* json_data);	
+	int ParseImageOperationData(const char* json_data);
 
-	static std::string GetDicomPath();
-	static std::string GetMaskPath();
-	static std::string GetCurvePath();
+	std::string GetDicomPath();
+	std::string GetMaskPath();
+	std::string GetCurvePath();
 
-	static std::string GetPatientid();
-	static std::string GetStudyuid();
-	static std::string GetSeriesuid();
+	std::string GetPatientid();
+	std::string GetStudyuid();
+	std::string GetSeriesuid();
 
-	static void SetSeriedIds(const struct SeriesIds& ids);
-	static void SetPatientid(const std::string& id);
-	static void SetStudyuid(const std::string& id);
-	static void SetSeriesuid(const std::string& id);
+	void SetSeriedIds(const struct SeriesIds& ids);
+	void SetPatientid(const std::string& id);
+	void SetStudyuid(const std::string& id);
+	void SetSeriesuid(const std::string& id);
 	
 	SeriesDataInfo* GerSeriresDataInfo() { return series_info; }
 	DW::Control::IImageControl* GetImageControl(int control_type) { return arr_image_control[control_type]; }
@@ -89,10 +89,10 @@ private:
 	DataTransferController();
 	static DataTransferController* instance;
 	
-	static ImageProcessBase* arr_image_process[JSON_VALUE_REQUEST_TYPE_MAX];
-	static DW::Control::IImageControl* arr_image_control[JSON_VALUE_REQUEST_TYPE_MAX];
+	ImageProcessBase* arr_image_process[JSON_VALUE_REQUEST_TYPE_MAX];
+	DW::Control::IImageControl* arr_image_control[JSON_VALUE_REQUEST_TYPE_MAX];
 
-	static SeriesProcessParas series_process_paras;
-	static DW::IO::DcmtkDcmLoader* dcm_loader;
-	static SeriesDataInfo *series_info;
+	SeriesProcessParas series_process_paras;
+	DW::IO::DcmtkDcmLoader* dcm_loader;
+	SeriesDataInfo *series_info;
 };

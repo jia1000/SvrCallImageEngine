@@ -14,7 +14,7 @@
 #include "DicomEngine/io/secondary_capture_image_generator.h"
 #include "img_source.h"
 
-#include "dcmtk_dcm_loader.h"
+// #include "dcmtk_dcm_loader.h"
 
 #include "data_source.h"
 #include "render_source.h"
