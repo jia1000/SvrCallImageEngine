@@ -35,6 +35,10 @@
 #define JSON_KEY_WINDOW_LEVEL			"window_level"
 #define JSON_KEY_ROTATION_DIRECTION		"rotation_direction"
 
+#define IMAGE_WINDOW_NAME_VR            "vr"
+#define IMAGE_WINDOW_NAME_MPR           "mpr1"
+#define IMAGE_WINDOW_NAME_CPR           "cpr"
+
 
 #define RET_STATUS_DICOM_NOT_SLICE          (-8)
 #define RET_STATUS_DICOM_NOT_TAGS           (-7)

@@ -49,6 +49,7 @@ using namespace DW;
 using namespace DW::IMAGE;
 using namespace DW::IO;
 
+//////////////////////////////////////////////////////////////////////////
 ImageProcessBase::ImageProcessBase()
 {
 }
@@ -61,7 +62,7 @@ ImageProcessBase::~ImageProcessBase()
 ImageMPRProcess::ImageMPRProcess()
 	: ImageProcessBase()
 {
-	m_wnd_name = "mpr1";
+	m_wnd_name = IMAGE_WINDOW_NAME_MPR;
 }
 
 ImageMPRProcess::~ImageMPRProcess()
@@ -100,17 +101,18 @@ int ImageMPRProcess::Excute(const char* json_data)
 	if (!reader) {
 		printf("Dcm Loader....\n");
 		reader = new DW::IO::DcmtkDcmLoader();
-		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
+		reader->LoadDirectory(DataTransferController::GetInstance()->GetDicomPath().c_str());	// only once
 		
 		VolData* vol_data = reader->GetData();
 		if (vol_data == NULL) return false;
-		ImageDataSource::Get()->AddVolData(DataTransferController::series_process_paras.series_uid, vol_data);
+		ImageDataSource::Get()->AddVolData(DataTransferController::GetInstance()->GetSeriesuid(), vol_data);
 	}
 
 	if (!is_create_mpr_render) {
 		// 2.create all image control
 		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::MPR);	// only once
-		RenderFacade::Get()->ChangeSeries(DataTransferController::series_process_paras.series_uid);		
+		// 在后端调用的“切换序列”命令里，已经执行了切换操作。此处可以去掉
+		// RenderFacade::Get()->ChangeSeries(DataTransferController::GetInstance()->GetSeriesuid());		
 
 		is_create_mpr_render = true;
 	}
@@ -130,7 +132,7 @@ ImageVRProcess::ImageVRProcess()
 	: ImageProcessBase()
 	, control_vr(nullptr)
 {
-	m_wnd_name = "vr";
+	m_wnd_name = IMAGE_WINDOW_NAME_VR;
 }
 
 ImageVRProcess::~ImageVRProcess()
@@ -164,28 +166,10 @@ int ImageVRProcess::Excute(const char* json_data)
 	std::string dst_dir_path(params.output_path);
 	printf("Save Image to  : %s\n", dst_dir_path.c_str());
 	TryCreateDir(dst_dir_path);
-
-	// 1.read dcm image from directory	
-	if (!reader) {
-		reader = new DcmtkDcmLoader();
-		printf("Dcm Loader....\n");
-	}
-
-	reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
-
-	VolData* vol_data = reader->GetData();
-	if (vol_data == NULL) return false;
-	ImageDataSource::Get()->AddVolData(DataTransferController::series_process_paras.series_uid, vol_data);
 	
-	
-	if (!is_create_vr_render) {
-		// 2.create image control
-		control_vr = RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::VR);	// only once
-		RenderFacade::Get()->ChangeSeries(DataTransferController::series_process_paras.series_uid);
-		is_create_vr_render = true;
-	}	
 	
 	printf("params.output_path : %s------------------------\n", params.output_path.c_str());
+	// 4. reconstruction VR
 	RenderFacade::Get()->CreateVRRotationBatch(m_wnd_name, 
 		params.output_path,
 		(BlendMode)params.blend_mode,
@@ -204,6 +188,12 @@ int ImageVRProcess::Excute(const char* json_data)
 
 void ImageVRProcess::DoTestSC()//std::string output_path)
 {
+	control_vr = DataTransferController::GetInstance()->GetImageControl(JSON_VALUE_REQUEST_TYPE_VR);
+	if (!control_vr)
+	{
+		return;
+	}
+	
 	for(int i = 0; i < params.output_image_number; ++i)
 	{
 		IBitmap *bmp = control_vr->GetOutput(i);
@@ -218,18 +208,19 @@ void ImageVRProcess::DoTestSC()//std::string output_path)
 			printf("get bitmap dcm info %d error\n", i);
 			continue;
 		}
-
-		// std::string file_path = "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/10.dcm";
-		// GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
-		// GIL::DICOM::DICOMManager *pDICOMManager = new GIL::DICOM::DICOMManager();
-		// bool ret_2 = pDICOMManager->CargarFichero(file_path, *dataset, true, NULL);
-
+		
 		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
-		DataTransferController::series_info->GetDicomDataSet(*dataset, 0);
+		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
+		if (!series_info)
+		{
+			return ;
+		}
+		
+		series_info->GetDicomDataSet(*dataset, 0);
 
 		auto *generator = new GIL::DICOM::SecondaryCaptureImageDcmGenerator(dataset);	
 	
-		// generator->SetTag(DCM_PatientID, "zhangjian");
+		generator->SetTag(DCM_PatientID, "test_patient_id");
 		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
 		double spacings[2];
 		double origins[3];
@@ -247,7 +238,7 @@ void ImageVRProcess::DoTestSC()//std::string output_path)
 		generator->SetTag(DCM_ImagePositionPatient, str_origin);
 		generator->SetTag(DCM_PixelSpacing, str_spacing);
 		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
-		int slice_count = DataTransferController::series_info->GetSeriesDicomFileCount();
+		int slice_count = series_info->GetSeriesDicomFileCount();
 		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(slice_count));
 		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(slice_count) + "." + to_string(instance_number));
 		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
@@ -306,7 +297,7 @@ std::string ImageVRProcess::GeneraterDicomFileName(const int iamge_index)
 ImageCPRProcess::ImageCPRProcess()
 	: ImageProcessBase()
 {
-	m_wnd_name = "cpr";
+	m_wnd_name = IMAGE_WINDOW_NAME_CPR;
 }
 
 ImageCPRProcess::~ImageCPRProcess()
@@ -347,21 +338,21 @@ int ImageCPRProcess::Excute(const char* json_data)
 		printf("Dcm Loader....\n");
 		reader = new NiiImageLoader();
 		std::vector<const char*> files;
-		files.push_back(DataTransferController::series_process_paras.curve_path.c_str());
+		files.push_back(DataTransferController::GetInstance()->GetCurvePath().c_str());
 		reader->LoadFiles(files);	// only once
-		reader->LoadVolumeMask(DataTransferController::series_process_paras.mask_path.c_str());
+		reader->LoadVolumeMask(DataTransferController::GetInstance()->GetMaskPath().c_str());
 
 		VolData* vol_data = reader->GetData();
 		if (vol_data == NULL) return false;
 		vol_data->SetDefaultWindowWidthLevel(820, 250);
-		ImageDataSource::Get()->AddVolData(DataTransferController::series_process_paras.series_uid, vol_data);
+		ImageDataSource::Get()->AddVolData(DataTransferController::GetInstance()->GetSeriesuid(), vol_data);
 	}
 
 	if (!is_create_cpr_render) {
 		// 2.create all image control
 		// RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::STRETECHED_CPR);	// only once
 		// // move mpr to specified locations
-		// vector<string> curve_data = ReadTxt(DataTransferController::series_process_paras.curve_path.c_str());
+		// vector<string> curve_data = ReadTxt(DataTransferController::GetInstance()->GetCurvePath().c_str());
 		// vector<Point3f> points;
 		// auto it = curve_data.begin();
 		// while (it != curve_data.end()){
@@ -381,7 +372,8 @@ int ImageCPRProcess::Excute(const char* json_data)
 		// Vector3f vx, vy;
 		// float ix, iy, iz;
 		
-		// RenderFacade::Get()->ChangeSeries(DataTransferController::series_process_paras.series_uid);
+		// 在后端调用的“切换序列”命令里，已经执行了切换操作。此处可以去掉
+		// // RenderFacade::Get()->ChangeSeries(DataTransferController::GetInstance()->GetSeriesuid);
 		// RenderFacade::Get()->SetCPRCurveID(m_wnd_name, curve_id_);
 		// RenderFacade::Get()->RenderControl(m_wnd_name);
 

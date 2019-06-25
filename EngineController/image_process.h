@@ -22,9 +22,10 @@
 
 #include "thirdparty/x2struct/x2struct.hpp"// json2struct header file
 
-// class DW::Control::IImageControl;
+// class DW::IO::DcmtkDcmLoader;
 #include "control/image_control.h"
 
+//////////////////////////////////////////////////////////////////////////
 class ImageProcessBase
 {
 public:
@@ -44,6 +45,7 @@ protected:
 	// ´°¿ÚÃû³Æ
 	std::string m_wnd_name;
 	Json::Value root;
+	
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -54,6 +56,8 @@ public:
 	ImageMPRProcess();
 	~ImageMPRProcess();
 	virtual int Excute(const char* json_data);
+
+	
 
 private:
 	virtual int ParseJsonData(const char* json_data);	
@@ -98,7 +102,7 @@ public:
 	ImageVRProcess();
 	~ImageVRProcess();
 	virtual int Excute(const char* json_data);
-
+	
 private:
 	virtual int ParseJsonData(const char* json_data);
 	std::string GeneraterDicomFileName(const int iamge_index);

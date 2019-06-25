@@ -5,16 +5,30 @@
 #include "common_utils.h"
 #include "series_data_info.h"
 #include "render_facade.h"
+#include "global_define.h"
 
+#include "data_source.h"
+#include "render_source.h"
+#include "render_facade.h"
 #include "tools/logger.h"
 
 #include <algorithm>
 
 #include <fstream> // ifstream, ifstream::in
 
+using namespace DW;
+using namespace DW::IMAGE;
+using namespace DW::IO;
+
 DataTransferController* DataTransferController::instance = nullptr;
 SeriesProcessParas DataTransferController::series_process_paras;
+// SeriesDataInfo* DataTransferController::series_info = nullptr;
+
+DW::IO::DcmtkDcmLoader* DataTransferController::dcm_loader = nullptr;
 SeriesDataInfo* DataTransferController::series_info = nullptr;
+
+ImageProcessBase* DataTransferController::arr_image_process[JSON_VALUE_REQUEST_TYPE_MAX] = {nullptr};
+DW::Control::IImageControl* DataTransferController::arr_image_control[JSON_VALUE_REQUEST_TYPE_MAX] = {nullptr};
 
 DataTransferController* DataTransferController::GetInstance()
 {
@@ -43,8 +57,7 @@ DataTransferController::DataTransferController()
 			break;
 		}				
 	}	
-}
-
+ }
 
 DataTransferController::~DataTransferController()
 {
@@ -66,7 +79,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 	static bool glog_loaded = false;
 	if(false == glog_loaded)
 	{
-		// CGLogger::InitGLog("", "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/");
+		CGLogger::InitGLog("", "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/");
 		glog_loaded = true;
 	}
 		
@@ -78,54 +91,88 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 		printf("fail to parse json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}	
-	printf("load series dicom path : %s\n", series_process_paras.dicom_path.c_str());
-	//
-	series_info = new SeriesDataInfo(series_process_paras.dicom_path, true);
+	printf("load series dicom path : %s\n", GetDicomPath().c_str());
+	
+	//卸载序列时，释放资源
+	if (series_info)
+	{
+		delete series_info;
+		series_info = nullptr;
+	}	
+	
+	series_info = new SeriesDataInfo(DataTransferController::GetInstance()->GetDicomPath(), true);
+
+    if (!series_info)
+    {
+        return false;
+    }
+
+
+	// 1.read dcm image from directory	
+	if (!dcm_loader) {
+		dcm_loader = new DcmtkDcmLoader();
+		printf("Dcm Loader....\n");
+	}
+
+	dcm_loader->LoadDirectory(GetDicomPath().c_str());	// only once
+	
+	VolData* vol_data = dcm_loader->GetData();
+	if (vol_data == NULL) return false;
+	ImageDataSource::Get()->AddVolData(DataTransferController::GetInstance()->GetSeriesuid(), vol_data);	
+	
+	// 2.create image control  
+	static bool is_create_wnd = false;
+	if (is_create_wnd == false)
+	{
+		arr_image_control[JSON_VALUE_REQUEST_TYPE_VR] = RenderSource::Get()->CreateTwodImageControl(IMAGE_WINDOW_NAME_VR, RenderControlType::VR);
+		arr_image_control[JSON_VALUE_REQUEST_TYPE_MPR] = RenderSource::Get()->CreateTwodImageControl(IMAGE_WINDOW_NAME_MPR, RenderControlType::MPR);
+		arr_image_control[JSON_VALUE_REQUEST_TYPE_CPR] = RenderSource::Get()->CreateTwodImageControl(IMAGE_WINDOW_NAME_CPR, RenderControlType::STRETECHED_CPR);
+		is_create_wnd = true;
+	}
+	
 
 	return RET_STATUS_SUCCESS;
 }
 
 int DataTransferController::ParseSwitchSeries(const char* json_data)
 {
-	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
-	Json::Value root;
-	Json::Reader reader;
-
-	if (!reader.parse(json_data, root))
+	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。		
+	SeriesIds ids;
+	try
+	{
+		x2struct::X::loadjson(json_data, ids, false, true);
+	}catch(...)
 	{
 		printf("fail to parse switchserires's json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
 	}	
+	printf("switch series dicom path : %s\n", GetDicomPath().c_str());
+	SetSeriedIds(ids);
 	
-	printf("switch series dicom path : %s\n", series_process_paras.dicom_path.c_str());
-
-	DW::RenderFacade::Get()->ChangeSeries(series_process_paras.series_uid);
-	
+	// 3. change series 
+	// 在后端调用的“切换序列”命令里，已经执行了切换操作。此处可以去掉
+	RenderFacade::Get()->ChangeSeries(GetSeriesuid());
+		
 	return RET_STATUS_SUCCESS;
 }
 
 int DataTransferController::ParseUnloadSeries(const char* json_data)
 {
 	// 解析从浏览器发送过来的Json数据  //json字段解析要做保护判断。
-	Json::Value root;
-	Json::Reader reader;
-
-	if (!reader.parse(json_data, root))
+	SeriesIds ids;
+	try
+	{
+		x2struct::X::loadjson(json_data, ids, false, true);
+	}catch(...)
 	{
 		printf("fail to parse unloadserires's json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
-	}
+	}	
+	SetSeriedIds(ids);
 	
-	printf("unload series dicom path : %s\n", DataTransferController::series_process_paras.dicom_path.c_str());
+	printf("unload series dicom path : %s\n", GetDicomPath().c_str());
 
-	//卸载序列时，释放资源
-	if (series_info)
-	{
-		delete series_info;
-		series_info = nullptr;
-	}
-
-	DW::RenderFacade::Get()->UnloadSeries(series_process_paras.series_uid);
+	RenderFacade::Get()->UnloadSeries(GetSeriesuid());
 
 	return RET_STATUS_SUCCESS;
 }
@@ -160,4 +207,57 @@ int DataTransferController::ParseImageOperationData(const char* json_data)
 	}	
 
 	return true;
+}
+
+std::string DataTransferController::GetDicomPath()
+{
+	return series_process_paras.dicom_path;
+}
+
+std::string DataTransferController::GetMaskPath()
+{
+	return series_process_paras.mask_path;
+}
+
+std::string DataTransferController::GetCurvePath()
+{
+	return series_process_paras.curve_path;
+}
+
+std::string DataTransferController::GetPatientid()
+{
+	return series_process_paras.patient_id;
+}
+
+std::string DataTransferController::GetStudyuid()
+{
+	return series_process_paras.study_uid;
+}
+
+std::string DataTransferController::GetSeriesuid()
+{
+	return series_process_paras.series_uid;
+}
+
+void DataTransferController::SetSeriedIds(const struct SeriesIds& ids)
+{
+	SetPatientid(ids.patient_id);
+	SetStudyuid(ids.study_uid);
+	SetSeriesuid(ids.series_uid);
+}
+
+void DataTransferController::SetPatientid(const std::string& id)
+{
+	series_process_paras.patient_id = id;
+}
+
+void DataTransferController::SetStudyuid(const std::string& id)
+{
+	series_process_paras.study_uid = id;
+}
+
+
+void DataTransferController::SetSeriesuid(const std::string& id)
+{
+	series_process_paras.series_uid = id;
 }

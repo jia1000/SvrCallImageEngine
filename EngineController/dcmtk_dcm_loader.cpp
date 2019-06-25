@@ -2,6 +2,7 @@
 #include "dcmtk_dcm_loader.h"
 #include "series_data_info.h"
 #include "data_transfer_control.h"
+#include "series_data_info.h"
 
 using namespace DW::IMAGE;
 using namespace DW::IO;
@@ -19,23 +20,25 @@ DcmtkDcmLoader::~DcmtkDcmLoader()
         delete volume_data_;
         volume_data_ = NULL;
     }
+    
 }
 
 bool DcmtkDcmLoader::LoadDirectory(const char* dir) 
 {
-    // SeriesDataInfo series_info(dir , true);
-    SeriesDataInfo *series_data_info = DataTransferController::series_info;
-    if (!series_data_info)
-    {
-        return false;
-    }
+    
     
     DicomParas paras;
     memset(&paras, 0, sizeof(DicomParas));
 
-    series_data_info->GetDicomDicomParas(paras); 
+    SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
+    if (!series_info)
+    {
+        return false;
+    }
     
-    unsigned char* buffer = series_data_info->GetPixelDataBuffer();        
+    series_info->GetDicomDicomParas(paras); 
+    
+    unsigned char* buffer = series_info->GetPixelDataBuffer();        
 
     if(volume_data_)
     {

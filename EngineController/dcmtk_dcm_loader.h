@@ -13,11 +13,13 @@
 ****************************************************************************************************/
 
 #pragma once
+// #include "series_data_info.h"
 
 #include "io/dcm_reader.h"
 #include "data/vol_data.h"
 
 #include <vector>
+
 
 using namespace DW::IMAGE;
 
@@ -35,6 +37,7 @@ namespace DW {
 			bool LoadVolumeMask(const char* file) override ;
 			VolData* GetData() override;
 			void Close() override;
+
 		private:
 			VolData* volume_data_;
 		};

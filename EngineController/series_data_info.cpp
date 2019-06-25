@@ -277,15 +277,18 @@ int SeriesDataInfo::GetDicomDicomParas(DicomParas& paras, const int slice_index)
     // 
     if(data_set.getTag(GKDCM_PatientID, tag))
     {
-        paras.patient_id = DataTransferController::series_process_paras.patient_id;
+        std::string id = DataTransferController::GetInstance()->GetPatientid();
+        paras.patient_id = id;
     }    
     if(data_set.getTag(GKDCM_StudyID, tag))
     {
-        paras.study_id = DataTransferController::series_process_paras.study_uid;
+        std::string id = DataTransferController::GetInstance()->GetStudyuid();
+        paras.study_id = id;
     }
     if(data_set.getTag(GKDCM_SeriesInstanceUID, tag))
     {
-        paras.series_iuid = DataTransferController::series_process_paras.series_uid;
+        std::string id = DataTransferController::GetInstance()->GetSeriesuid();
+        paras.series_iuid = id;
     }
     // if(data_set.getTag(GKDCM_ImageOrientationPatient, tag))
     // {

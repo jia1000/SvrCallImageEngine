@@ -22,7 +22,7 @@ int main(int argc, char** args)
 			"\"series_uid\":\"1\"",
 			"\"series_uid\":\"2\""
 		};
-	for (int i = 1; i < MAX_TEST - 0; i++)
+	for (int i = 0; i < MAX_TEST - 0; i++)
 	{
 		// 加载Series
 		if(opened)
