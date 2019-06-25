@@ -85,6 +85,7 @@ public:
 	
 	SeriesDataInfo* GerSeriresDataInfo() ;
 	DW::Control::IImageControl* GetImageControl(int control_type) ;
+private:
 	DataTransferController();
 	static DataTransferController* instance;
 	
