@@ -1,5 +1,6 @@
 
 #include "series_data_info.h"
+#include "data_transfer_control.h"
 
 #include "common_utils.h"
 #include "global_define.h"
@@ -273,14 +274,18 @@ int SeriesDataInfo::GetDicomDicomParas(DicomParas& paras, const int slice_index)
         std::stringstream ss(tag);
         ss >> paras.bits_stored;
     }
-
+    // 
+    if(data_set.getTag(GKDCM_PatientID, tag))
+    {
+        paras.patient_id = DataTransferController::series_process_paras.patient_id;
+    }    
     if(data_set.getTag(GKDCM_StudyID, tag))
     {
-        paras.study_id = tag;
+        paras.study_id = DataTransferController::series_process_paras.study_uid;
     }
     if(data_set.getTag(GKDCM_SeriesInstanceUID, tag))
     {
-        paras.series_iuid = tag;
+        paras.series_iuid = DataTransferController::series_process_paras.series_uid;
     }
     // if(data_set.getTag(GKDCM_ImageOrientationPatient, tag))
     // {

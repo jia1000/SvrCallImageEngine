@@ -16,93 +16,122 @@ public class SvrCallImageEngine {
 	public static void main(String args[]) {
 		System.out.println("begin...............................................");
 		boolean opened = true;
-        // 加载Series
-		if(opened)
-		{
-			String json_data = "{";
-			json_data += "\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
-			json_data += "\"mask_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
-			json_data += "\"curve_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
-			json_data += "\"patient_id\":\"zhangsan\",";
-			json_data += "\"study_uid\":\"111\",";
-			json_data += "\"series_uid\":\"222\"";
-			json_data += "}";
-			new SvrCallImageEngine().loadSeries(json_data);
-		}
-		// 切换Series
-		if(!opened)
-		{			
-			String json_data = "{";
-			json_data += "\"patient_id\":\"lilsi\",";
-			json_data += "\"study_uid\":\"333\",";
-			json_data += "\"series_uid\":\"444\"";
-			json_data += "}";
-			new SvrCallImageEngine().switchSeries(json_data);
-		}
-		// 卸载Series
-		if(!opened)
-		{
-			String json_data = "{";
-			json_data += "\"patient_id\":\"wangmazi\",";
-			json_data += "\"study_uid\":\"555\",";
-			json_data += "\"series_uid\":\"666\"";
-			json_data += "}";
-			new SvrCallImageEngine().unloadSeries(json_data);
-		}
+		int MAX_TEST = 2;
+		String[] series_uid = {
+			"\"series_uid\":\"1\"",
+			"\"series_uid\":\"2\""
+		};
 		
-		if(!opened)
-		{
-			// CPR 操作
-			String json_data = "{";
-			json_data += "\"image_type\":2,"; 			// 图像类型
-			json_data += "\"vessel_name\":\"R_ICA\","; 	// 血管名称
-			json_data += "\"init_orientation\":2,"; 	// 正位（起始位置）标识
-			json_data += "\"rotation_direction\":0,"; 	// 旋转方向
-			json_data += "\"rotation_angle\":45.0,"; 	// 旋转角度
-			json_data += "\"output_image_number\":4,"; 	// 输出图像数目
-			json_data += "\"output_path\":\"../build/cpr7/\","; // 输出图像目录
-			json_data += "\"window_width\":2000,"; 		// 窗宽
-			json_data += "\"window_level\":400,"; 		// 窗位
-			json_data += "\"last_variable\":777"; 		// 
-			json_data += "}";
-			new SvrCallImageEngine().processSeries(json_data);
+		for (int i = 0; i < MAX_TEST; i++) {	
+			// 加载Series
+			if(opened)
+			{
+				String[] dicom_path = {
+					"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",",
+					"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/\","
+				};
+				String json_data = "{";
+				json_data += dicom_path[i];//"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
+				json_data += "\"mask_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
+				json_data += "\"curve_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
+				json_data += "\"patient_id\":\"zhangsan\",";
+				json_data += "\"study_uid\":\"111\",";
+				json_data += series_uid[i];//"\"series_uid\":\"222\"";
+				json_data += "}";
+				new SvrCallImageEngine().loadSeries(json_data);
+			}
+			
+			
+			// 切换Series
+			if(opened)
+			{			
+				String json_data = "{";
+				json_data += "\"patient_id\":\"lilsi\",";
+				json_data += "\"study_uid\":\"333\",";
+				json_data += series_uid[i];//"\"series_uid\":\"444\"";
+				json_data += "}";
+				new SvrCallImageEngine().switchSeries(json_data);
+			}
+				
+			
+
+			if(!opened)
+			{
+				// CPR 操作
+				String json_data = "{";
+				json_data += "\"image_type\":2,"; 			// 图像类型
+				json_data += "\"vessel_name\":\"R_ICA\","; 	// 血管名称
+				json_data += "\"init_orientation\":2,"; 	// 正位（起始位置）标识
+				json_data += "\"rotation_direction\":0,"; 	// 旋转方向
+				json_data += "\"rotation_angle\":45.0,"; 	// 旋转角度
+				json_data += "\"output_image_number\":4,"; 	// 输出图像数目
+				json_data += "\"output_path\":\"../build/cpr7/\","; // 输出图像目录
+				json_data += "\"window_width\":2000,"; 		// 窗宽
+				json_data += "\"window_level\":400,"; 		// 窗位
+				json_data += "\"last_variable\":777"; 		// 
+				json_data += "}";
+				new SvrCallImageEngine().processSeries(json_data);
+			}
+
+			
+
+			if(opened)
+			{
+				String[] output_path = {
+					"\"output_path\":\"../build/vr1/\",",
+					"\"output_path\":\"../build/vr2/\","
+				};
+				String[] output_image_number = {
+					"\"output_image_number\":12,",
+					"\"output_image_number\":16,"
+				};
+				// VR 和 VRMIP 操作
+				String json_data = "{";
+				json_data += "\"image_type\":0,"; 			// 图像类型
+				json_data += "\"blend_mode\":0,"; 			// 绘制方式 : VR为0；  VRMIP为1
+				json_data += "\"init_orientation\":2,"; 	// 正位（起始位置）标识
+				json_data += "\"generate_rule\":0,"; 		// generate_rule
+				json_data += "\"clip_percent\":1.0,"; 		// 截取比例;  若为0.35，则表示颅内;其它为完整
+				json_data += "\"rotation_direction\":0,"; 	// 旋转方向
+				json_data += "\"rotation_angle\":30.0,"; 	// 旋转角度
+				json_data += output_image_number[i];//"\"output_image_number\":12,";	// 输出图像数目
+				json_data += output_path[i];//"\"output_path\":\"../build/vr8/\","; // 输出图像目录
+				json_data += "\"window_width\":2000,"; 		// 窗宽
+				json_data += "\"window_level\":400,"; 		// 窗位
+				json_data += "\"last_variable\":888"; 		// 
+				json_data += "}";
+				new SvrCallImageEngine().processSeries(json_data);
+			}
+
+
+			if(!opened)
+			{
+				// MPRMIP 操作
+				String json_data = "{";
+				json_data += "\"image_type\":1,"; 			// 图像类型
+				json_data += "\"blend_mode\":1,"; 			// 绘制方式 : VR为0；  VRMIP为1
+				json_data += "\"init_orientation\":0,"; 	// 正位（起始位置）标识
+				json_data += "\"clip_percent\":0.35,"; 		// 截取比例;  
+				json_data += "\"thickness\":25.0,"; 		// 层厚
+				json_data += "\"spacing_between_slices\":5.0,";// 层间距
+				json_data += "\"output_path\":\"../build/mprmip2/\","; // 输出图像目录
+				json_data += "\"window_width\":2000,"; 		// 窗宽
+				json_data += "\"window_level\":400,"; 		// 窗位
+				json_data += "\"last_variable\":999"; 		// 
+				json_data += "}";
+				new SvrCallImageEngine().processSeries(json_data);
+			}
+			// 卸载Series
+			if(opened)
+			{
+				String json_data = "{";
+				json_data += "\"patient_id\":\"wangmazi\",";
+				json_data += "\"study_uid\":\"333\",";
+				json_data += series_uid[i];//"\"series_uid\":\"666\"";
+				json_data += "}";
+				new SvrCallImageEngine().unloadSeries(json_data);
+			}
 		}
-		if(opened)
-		{
-			// VR 和 VRMIP 操作
-			String json_data = "{";
-			json_data += "\"image_type\":0,"; 			// 图像类型
-			json_data += "\"blend_mode\":0,"; 			// 绘制方式 : VR为0；  VRMIP为1
-			json_data += "\"init_orientation\":2,"; 	// 正位（起始位置）标识
-			json_data += "\"generate_rule\":0,"; 		// generate_rule
-			json_data += "\"clip_percent\":1.0,"; 		// 截取比例;  若为0.35，则表示颅内;其它为完整
-			json_data += "\"rotation_direction\":0,"; 	// 旋转方向
-			json_data += "\"rotation_angle\":30.0,"; 	// 旋转角度
-			json_data += "\"output_image_number\":12,";	// 输出图像数目
-			json_data += "\"output_path\":\"../build/vr8/\","; // 输出图像目录
-			json_data += "\"window_width\":2000,"; 		// 窗宽
-			json_data += "\"window_level\":400,"; 		// 窗位
-			json_data += "\"last_variable\":888"; 		// 
-			json_data += "}";
-			new SvrCallImageEngine().processSeries(json_data);
-		}
-		if(!opened)
-		{
-			// MPRMIP 操作
-			String json_data = "{";
-			json_data += "\"image_type\":1,"; 			// 图像类型
-			json_data += "\"blend_mode\":1,"; 			// 绘制方式 : VR为0；  VRMIP为1
-			json_data += "\"init_orientation\":0,"; 	// 正位（起始位置）标识
-			json_data += "\"clip_percent\":0.35,"; 		// 截取比例;  
-			json_data += "\"thickness\":25.0,"; 		// 层厚
-			json_data += "\"spacing_between_slices\":5.0,";// 层间距
-			json_data += "\"output_path\":\"../build/mprmip9/\","; // 输出图像目录
-			json_data += "\"window_width\":2000,"; 		// 窗宽
-			json_data += "\"window_level\":400,"; 		// 窗位
-			json_data += "\"last_variable\":999"; 		// 
-			json_data += "}";
-			new SvrCallImageEngine().processSeries(json_data);
-		}
-        System.out.println("end..................................................");
+		System.out.println("end..................................................");
 	}
 }

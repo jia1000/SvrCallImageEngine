@@ -104,13 +104,13 @@ int ImageMPRProcess::Excute(const char* json_data)
 		
 		VolData* vol_data = reader->GetData();
 		if (vol_data == NULL) return false;
-		ImageDataSource::Get()->AddVolData(series_name_mpr, vol_data);
+		ImageDataSource::Get()->AddVolData(DataTransferController::series_process_paras.series_uid, vol_data);
 	}
 
 	if (!is_create_mpr_render) {
 		// 2.create all image control
 		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::MPR);	// only once
-		RenderFacade::Get()->ChangeSeries(series_name_mpr);		
+		RenderFacade::Get()->ChangeSeries(DataTransferController::series_process_paras.series_uid);		
 
 		is_create_mpr_render = true;
 	}
@@ -169,17 +169,19 @@ int ImageVRProcess::Excute(const char* json_data)
 	if (!reader) {
 		reader = new DcmtkDcmLoader();
 		printf("Dcm Loader....\n");
-		reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
-
-		VolData* vol_data = reader->GetData();
-		if (vol_data == NULL) return false;
-		ImageDataSource::Get()->AddVolData(series_name_vr, vol_data);
 	}
+
+	reader->LoadDirectory(DataTransferController::series_process_paras.dicom_path.c_str());	// only once
+
+	VolData* vol_data = reader->GetData();
+	if (vol_data == NULL) return false;
+	ImageDataSource::Get()->AddVolData(DataTransferController::series_process_paras.series_uid, vol_data);
+	
 	
 	if (!is_create_vr_render) {
 		// 2.create image control
 		control_vr = RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::VR);	// only once
-		RenderFacade::Get()->ChangeSeries(series_name_vr);
+		RenderFacade::Get()->ChangeSeries(DataTransferController::series_process_paras.series_uid);
 		is_create_vr_render = true;
 	}	
 	
@@ -352,7 +354,7 @@ int ImageCPRProcess::Excute(const char* json_data)
 		VolData* vol_data = reader->GetData();
 		if (vol_data == NULL) return false;
 		vol_data->SetDefaultWindowWidthLevel(820, 250);
-		ImageDataSource::Get()->AddVolData(series_name_cpr, vol_data);
+		ImageDataSource::Get()->AddVolData(DataTransferController::series_process_paras.series_uid, vol_data);
 	}
 
 	if (!is_create_cpr_render) {
@@ -379,7 +381,7 @@ int ImageCPRProcess::Excute(const char* json_data)
 		// Vector3f vx, vy;
 		// float ix, iy, iz;
 		
-		// RenderFacade::Get()->ChangeSeries(series_name_cpr);
+		// RenderFacade::Get()->ChangeSeries(DataTransferController::series_process_paras.series_uid);
 		// RenderFacade::Get()->SetCPRCurveID(m_wnd_name, curve_id_);
 		// RenderFacade::Get()->RenderControl(m_wnd_name);
 

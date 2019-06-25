@@ -45,6 +45,7 @@ struct DicomParas
 	int bits_allocated;
 	double slice_location;
 
+	std::string patient_id;
 	std::string study_id;
 	std::string series_iuid; 
 };

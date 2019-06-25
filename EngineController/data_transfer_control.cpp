@@ -63,7 +63,12 @@ DataTransferController::~DataTransferController()
 int DataTransferController::ParseLoadSeries(const char* json_data)
 {
 	// initialize logger
-	CGLogger::InitGLog("", "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/");
+	static bool glog_loaded = false;
+	if(false == glog_loaded)
+	{
+		// CGLogger::InitGLog("", "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/");
+		glog_loaded = true;
+	}
 		
 	try
 	{
@@ -120,7 +125,7 @@ int DataTransferController::ParseUnloadSeries(const char* json_data)
 		series_info = nullptr;
 	}
 
-	DW::RenderFacade::Get()->ChangeSeries(series_process_paras.series_uid);
+	DW::RenderFacade::Get()->UnloadSeries(series_process_paras.series_uid);
 
 	return RET_STATUS_SUCCESS;
 }

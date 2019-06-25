@@ -7,13 +7,18 @@ using namespace DW::IMAGE;
 using namespace DW::IO;
 
 DcmtkDcmLoader::DcmtkDcmLoader()
+ : volume_data_(NULL)
 {
     
 }
 
 DcmtkDcmLoader::~DcmtkDcmLoader()
 {
-	
+	if(volume_data_)
+    {
+        delete volume_data_;
+        volume_data_ = NULL;
+    }
 }
 
 bool DcmtkDcmLoader::LoadDirectory(const char* dir) 
@@ -31,6 +36,12 @@ bool DcmtkDcmLoader::LoadDirectory(const char* dir)
     series_data_info->GetDicomDicomParas(paras); 
     
     unsigned char* buffer = series_data_info->GetPixelDataBuffer();        
+
+    if(volume_data_)
+    {
+        delete volume_data_;
+        volume_data_ = NULL;
+    }
 
     volume_data_ = new VolData();
 
