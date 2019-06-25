@@ -99,11 +99,12 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 		series_info = nullptr;
 	}	
 	
-	series_info = new SeriesDataInfo(DataTransferController::GetInstance()->GetDicomPath(), true);
+	series_info = new SeriesDataInfo(GetDicomPath(), true);
 
     if (!series_info)
     {
-        return false;
+		printf("fail to read dicom file.\n");
+        return RET_STATUS_FAILURE;
     }
 
 
@@ -116,7 +117,11 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 	dcm_loader->LoadDirectory(GetDicomPath().c_str());	// only once
 	
 	VolData* vol_data = dcm_loader->GetData();
-	if (vol_data == NULL) return false;
+	if (vol_data == NULL) 
+	{
+		printf("fail to get volume data .\n");
+		return RET_STATUS_FAILURE;
+	}
 	ImageDataSource::Get()->AddVolData(DataTransferController::GetInstance()->GetSeriesuid(), vol_data);	
 	
 	// 2.create image control  
@@ -206,7 +211,7 @@ int DataTransferController::ParseImageOperationData(const char* json_data)
 		}		
 	}	
 
-	return true;
+	return RET_STATUS_SUCCESS;
 }
 
 std::string DataTransferController::GetDicomPath()
@@ -260,4 +265,18 @@ void DataTransferController::SetStudyuid(const std::string& id)
 void DataTransferController::SetSeriesuid(const std::string& id)
 {
 	series_process_paras.series_uid = id;
+}
+
+SeriesDataInfo* DataTransferController::GerSeriresDataInfo() 
+{ 
+	return series_info; 
+}
+
+DW::Control::IImageControl* DataTransferController::GetImageControl(int control_type) 
+{ 
+	if (control_type >= 0 && control_type < JSON_VALUE_REQUEST_TYPE_MAX)
+	{
+		return arr_image_control[control_type]; 
+	}
+	return nullptr;
 }

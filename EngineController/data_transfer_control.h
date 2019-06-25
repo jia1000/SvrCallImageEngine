@@ -83,9 +83,8 @@ public:
 	void SetStudyuid(const std::string& id);
 	void SetSeriesuid(const std::string& id);
 	
-	SeriesDataInfo* GerSeriresDataInfo() { return series_info; }
-	DW::Control::IImageControl* GetImageControl(int control_type) { return arr_image_control[control_type]; }
-private:
+	SeriesDataInfo* GerSeriresDataInfo() ;
+	DW::Control::IImageControl* GetImageControl(int control_type) ;
 	DataTransferController();
 	static DataTransferController* instance;
 	
