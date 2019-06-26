@@ -54,7 +54,7 @@ VolumeRenderer::VolumeRenderer()
 	/// initialize vtk objects
 	vtk_render_window_ = vtkSmartPointer<vtkRenderWindow>::New();
 	vtk_renderer_ = vtkSmartPointer<vtkRenderer>::New();
-	vtk_volume_mapper_ = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
+	vtk_volume_mapper_ = vtkSmartPointer<vtkSmartVolumeMapper>::New();
 #if VTK_MAJOR_VERSION > 5
 #ifdef WIN32
 	//TODO Linux报错：没有InteractiveAdjustSampleDistancesOff成员函数
@@ -379,14 +379,14 @@ void VolumeRenderer::DoRender(vtkSmartPointer<vtkImageData> imagedata)
 
 	//////////////////////////////////////////////////////////////////////////
 	// Convert to Buffer object
-	long* data_ptr = reinterpret_cast<long *>( tmp_vtk_data->GetScalarPointer() );
+	int *data_ptr = reinterpret_cast<int *>( tmp_vtk_data->GetScalarPointer() );
 	int image_width = tmp_vtk_data->GetDimensions()[0];
 	int image_height = tmp_vtk_data->GetDimensions()[1];
 
 	int x, y;
 	int plane_size = image_width * image_height;
 	// 4通道RGBA位图
-	long *raw_data = new long [plane_size];
+	int *raw_data = new int [plane_size];
 	for (y=0; y<image_height; ++y){
 		for (x=0; x<image_width; ++x){
 			/*raw_data[y*image_width + x] = pdata[(image_height-1 - y) * image_width + x];*/
@@ -435,14 +435,14 @@ void VolumeRenderer::SetRenderingMode(RenderMode mode)
 	switch (mode)
 	{
 	case RenderMode::SMART_RAYCASTING:
-		//vtk_volume_mapper_->SetRequestedRenderModeToDefault(); 
+		vtk_volume_mapper_->SetRequestedRenderModeToDefault(); 
 		break;
 	case RenderMode::RAYCASTING: 
-		//vtk_volume_mapper_->SetRequestedRenderModeToRayCast(); 
+		vtk_volume_mapper_->SetRequestedRenderModeToRayCast(); 
 		break;
 	case RenderMode::RAYCASTING_GPU: 
 #if VTK_MAJOR_VERSION > 5
-		//vtk_volume_mapper_->SetRequestedRenderModeToGPU(); 
+		vtk_volume_mapper_->SetRequestedRenderModeToGPU(); 
 #else
 		// vtk 5以下需要DXD库支持GPU
 		vtk_volume_mapper_->SetRequestedRenderMode(vtkSmartVolumeMapper::RayCastRenderMode);
