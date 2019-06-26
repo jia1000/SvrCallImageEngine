@@ -45,6 +45,26 @@
         "tuple": "cpp",
         "typeinfo": "cpp",
         "utility": "cpp",
-        "algorithm": "cpp"
-    }
+        "algorithm": "cpp",
+        "bitset": "cpp",
+        "thread": "cpp"
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/bower_components": true,
+        "build/":true,
+        "dicom_source/":true,
+        "dicom_source2/":true,
+        ".git/":true
+    },
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
+        "**/.DS_Store": true,
+        "dicom_source/":true,
+        "dicom_source2/":true
+    },
+    "C_Cpp.dimInactiveRegions": false
 }

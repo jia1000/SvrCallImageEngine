@@ -70,6 +70,17 @@ DataTransferController::~DataTransferController()
 			arr_image_process[i] = nullptr;
 		}		
 	}	
+
+	for (size_t i = 0; i < JSON_VALUE_REQUEST_TYPE_MAX; i++)
+	{
+		arr_image_control[i] = nullptr;
+	}
+
+	if(dcm_loader)
+	{
+		delete dcm_loader;
+		dcm_loader = nullptr;
+	}
 }
 
 int DataTransferController::ParseLoadSeries(const char* json_data)
@@ -78,7 +89,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 	static bool glog_loaded = false;
 	if(false == glog_loaded)
 	{
-		CGLogger::InitGLog("", "/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/");
+		CGLogger::InitGLog("", "/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/");
 		glog_loaded = true;
 	}
 		
@@ -99,14 +110,14 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 		series_info = nullptr;
 	}	
 	
-	series_info = new SeriesDataInfo(GetDicomPath(), true);
+	series_info = new SeriesDataInfo(GetDicomPath());
 
     if (!series_info)
     {
 		printf("fail to read dicom file.\n");
         return RET_STATUS_FAILURE;
     }
-
+	series_info->ReadDicomFilesFromDir(true);
 
 	// 1.read dcm image from directory	
 	if (!dcm_loader) {

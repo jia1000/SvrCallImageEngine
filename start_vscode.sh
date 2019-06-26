@@ -1,1 +1,1 @@
-sudo code --user-data-dir="~/.vscode-root"
+sudo code --user-data-dir="~/.vscode-root" --disable-gpu

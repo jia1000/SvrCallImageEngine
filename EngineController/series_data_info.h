@@ -53,9 +53,11 @@ struct DicomParas
 class SeriesDataInfo
 {
 public:
-	SeriesDataInfo(const std::string path, bool is_folder);
+	SeriesDataInfo(const std::string path);
 	~SeriesDataInfo();
 	
+	int ReadDicomFilesFromDir(bool is_folder);
+
 	void GetTag(const std::string& tag, int& i);
 	void GetTag(const std::string& tag, double& d);
 	void GetTag(const std::string& tag, std::string& s);
@@ -67,7 +69,6 @@ public:
 
 	unsigned char* GetPixelDataBuffer();
 	unsigned int GetPixelDataLength();
-	static bool SaveDicomFile(const std::string src_path_file, const std::string dst_path_file);
 	
 private:
 	int ReadFolder(const std::string& path);

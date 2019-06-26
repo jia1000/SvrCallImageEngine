@@ -1,5 +1,4 @@
 
-// #include "dcmtk_dcm_loader.h"
 #include "series_data_info.h"
 #include "data_transfer_control.h"
 #include "series_data_info.h"
@@ -24,9 +23,7 @@ DcmtkDcmLoader::~DcmtkDcmLoader()
 }
 
 bool DcmtkDcmLoader::LoadDirectory(const char* dir) 
-{
-    
-    
+{   
     DicomParas paras;
     memset(&paras, 0, sizeof(DicomParas));
 

@@ -8,21 +8,12 @@
 #include <string.h>
 #include <limits>
 
-SeriesDataInfo::SeriesDataInfo(const std::string path, bool is_folder)
+SeriesDataInfo::SeriesDataInfo(const std::string path)
 : m_src_path(path)
 , m_pixel_data_buffer(nullptr)
 , m_pixel_data_length(0)
-{
-    m_bases.clear();
-    
-    if (is_folder)
-    {
-        ReadFolder(path);
-    }
-    else 
-    {
-        ReadFile(path);
-    }    
+{ 
+        
 }
 
 SeriesDataInfo::~SeriesDataInfo()
@@ -33,6 +24,20 @@ SeriesDataInfo::~SeriesDataInfo()
         m_pixel_data_buffer = nullptr;      
     }    
 }
+
+int SeriesDataInfo::ReadDicomFilesFromDir(bool is_folder)
+{
+    m_bases.clear();
+    if (is_folder)
+    {
+        ReadFolder(m_src_path);
+    }
+    else 
+    {
+        ReadFile(m_src_path);
+    }
+}
+
 unsigned char* SeriesDataInfo::GetPixelDataBuffer()
 {    
     m_pixel_data_length = GetPixelDataLength();
@@ -342,38 +347,6 @@ int SeriesDataInfo::GetPosition(GIL::DICOM::DicomDataset& base, double position[
     return 1;
 }
 
-bool SeriesDataInfo::SaveDicomFile(
-	const std::string src_path_file, const std::string dst_path_file)
-{
-	SeriesDataInfo data_info(src_path_file, false);
-
-	double thickeness = 1.1f;
-	data_info.GetTag(GKDCM_SliceThickness, thickeness);
-	//printf("thickness : %.5f\n", thickeness);
-
-	GIL::DICOM::DicomDataset base;
-	GIL::DICOM::IDICOMManager*	pDICOMManager = new GIL::DICOM::DICOMManager();
-	if(pDICOMManager) 
-	{
-		pDICOMManager->CargarFichero(src_path_file, base);
-		std::string str_tag("");
-		base.getTag(GKDCM_PatientName , str_tag);
-		//printf("patient name : %s(use DicomManager)\n", str_tag.c_str());
-
-		// modify one tag
-		GIL::DICOM::DicomDataset modify_base;		
-		modify_base.tags["0010|0010"] = "test 555";
-		pDICOMManager->ActualizarJerarquia(modify_base);
-		
-		// save dicom file
-		pDICOMManager->AlmacenarFichero(dst_path_file);
-	
-		delete pDICOMManager;
-		pDICOMManager = NULL;
-		return true;
-	}
-	return false;
-}
 
 bool SeriesDataInfo::GetSpacing(const int indice, 
     double& x, double& y, double& z, 

@@ -27,13 +27,13 @@ public class SvrCallImageEngine {
 			if(opened)
 			{
 				String[] dicom_path = {
-					"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",",
-					"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/\","
+					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",",
+					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/\","
 				};
 				String json_data = "{";
-				json_data += dicom_path[i];//"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
-				json_data += "\"mask_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
-				json_data += "\"curve_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
+				json_data += dicom_path[i];//"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
+				json_data += "\"mask_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
+				json_data += "\"curve_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
 				json_data += "\"patient_id\":\"zhangsan\",";
 				json_data += "\"study_uid\":\"111\",";
 				json_data += series_uid[i];//"\"series_uid\":\"222\"";
@@ -78,8 +78,8 @@ public class SvrCallImageEngine {
 			if(opened)
 			{
 				String[] output_path = {
-					"\"output_path\":\"../build/vr1/\",",
-					"\"output_path\":\"../build/vr2/\","
+					"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/vr1/\",",
+					"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/vr2/\","
 				};
 				String[] output_image_number = {
 					"\"output_image_number\":12,",

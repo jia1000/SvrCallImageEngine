@@ -14,8 +14,6 @@
 #include "DicomEngine/io/secondary_capture_image_generator.h"
 #include "img_source.h"
 
-// #include "dcmtk_dcm_loader.h"
-
 #include "data_source.h"
 #include "render_source.h"
 #include "render_facade.h"
@@ -40,10 +38,6 @@ static DW::IO::IDicomReader* reader = NULL;
 static bool is_create_mpr_render = false;
 static bool is_create_vr_render  = false;
 static bool is_create_cpr_render = false;
-
-const std::string series_name_mpr("series1");
-const std::string series_name_vr("series1");
-const std::string series_name_cpr("series1");
 
 using namespace DW;
 using namespace DW::IMAGE;

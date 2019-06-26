@@ -28,13 +28,13 @@ int main(int argc, char** args)
 		if(opened)
 		{
 			std::string dicom_path[MAX_TEST] = {
-					"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",",
-					"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/\","
+					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",",
+					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/\","
 				};
 			std::string json_data = "{";
-			json_data += dicom_path[i];//"\"dicom_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
-			json_data += "\"mask_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
-			json_data += "\"curve_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
+			json_data += dicom_path[i];//"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
+			json_data += "\"mask_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
+			json_data += "\"curve_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
 			json_data += "\"patient_id\":\"zhangsan\",";
 			json_data += "\"study_uid\":\"111\",";
 			json_data += series_uid[i];//"\"series_uid\":\"222\"";
@@ -54,8 +54,8 @@ int main(int argc, char** args)
 		if(opened)
 		{
 			std::string output_path[MAX_TEST] = {
-				"\"output_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/vr1/\",",
-				"\"output_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/vr2/\","
+				"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/vr1/\",",
+				"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/vr2/\","
 			};
 			std::string output_image_number[MAX_TEST] = {
 				"\"output_image_number\":12,",
@@ -72,7 +72,7 @@ int main(int argc, char** args)
 			json_data += "\"rotation_direction\":0,"; 	// 旋转方向
 			json_data += "\"rotation_angle\":30.0,"; 	// 旋转角度
 			json_data += output_image_number[i];//"\"output_image_number\":12,";	// 输出图像数目c
-			json_data += output_path[i];//"\"output_path\":\"/home/My_Demo_Test/SvrCallImageEngineGit/SvrCallImageEngine/build/vr8/\","; // 输出图像目录
+			json_data += output_path[i];//"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/vr8/\","; // 输出图像目录
 			json_data += "\"window_width\":2000,"; 		// 窗宽
 			json_data += "\"window_level\":400,"; 		// 窗位
 			json_data += "\"last_variable\":888"; 		// 
