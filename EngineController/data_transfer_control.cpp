@@ -11,6 +11,9 @@
 #include "render_source.h"
 #include "render_facade.h"
 #include "tools/logger.h"
+#include "io/txt_reader.h"
+#include "tools/string_util.h"
+#include "curve_source.h"
 
 #include <algorithm>
 
@@ -119,7 +122,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
     }
 	series_info->ReadDicomFilesFromDir(true);
 
-	// 1.read dcm image from directory	
+	// 1.1 read dcm image from directory	
 	if (!dcm_loader) {
 		dcm_loader = new DcmtkDcmLoader();
 		printf("Dcm Loader....\n");
@@ -135,6 +138,44 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 	}
 	ImageDataSource::Get()->AddVolData(DataTransferController::GetInstance()->GetSeriesuid(), vol_data);	
 	
+	// 1.2 load mask file
+	std::string mask_file_path = GetMaskPath();
+	if (!mask_file_path.empty())
+	{
+		mask_file_path += "/maks_data.nii";
+		dcm_loader->LoadVolumeMask(mask_file_path.c_str());
+	}
+	
+	// 1.3 load curve file
+	// move mpr to specified locations
+	std::string curve_file_path = GetCurvePath();
+	if (!curve_file_path.empty())
+	{
+		curve_file_path += "/vesselpoint.txt";
+		vector<string> curve_data = ReadTxt(curve_file_path.c_str());
+		vector<Point3f> points;
+		auto it = curve_data.begin();
+		while (it != curve_data.end()){
+
+			vector<string> arr_data = Split(*it, " ");
+			if (arr_data.size() >= 3){
+				Point3f pnt;
+				pnt.x = atof(arr_data[0].c_str());
+				pnt.y = 511-atof(arr_data[1].c_str());
+				pnt.z = atof(arr_data[2].c_str());
+
+				points.push_back(pnt);
+			}
+			++it;
+		}	
+		// 1.4 create curve
+		double spacings[3];
+		vol_data->GetPixelData()->GetSpacing(spacings);
+		// found exception
+		curve_id = CurveSource::Get()->CreateCurve(GetSeriesuid(), "Vessel name", points, spacings);
+		VolCurve *curve = CurveSource::Get()->GetCurveById(GetSeriesuid(), curve_id);
+	}
+
 	// 2.create image control  
 	static bool is_create_wnd = false;
 	if (is_create_wnd == false)
@@ -146,6 +187,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 		is_create_wnd = true;
 	}
 	
+	RenderFacade::Get()->SetCPRCurveID(IMAGE_WINDOW_NAME_CPR, curve_id);
 
 	return RET_STATUS_SUCCESS;
 }
@@ -161,7 +203,7 @@ int DataTransferController::ParseSwitchSeries(const char* json_data)
 	{
 		printf("fail to parse switchserires's json.\n");
 		return RET_STATUS_JSON_PARSE_FAIL;
-	}	
+	}	 
 	printf("switch series dicom path : %s\n", GetDicomPath().c_str());
 	SetSeriedIds(ids);
 	
@@ -225,6 +267,11 @@ int DataTransferController::ParseImageOperationData(const char* json_data)
 	return RET_STATUS_SUCCESS;
 }
 
+std::string DataTransferController::GetCurveId()
+{
+	return curve_id;
+}
+
 std::string DataTransferController::GetDicomPath()
 {
 	return series_process_paras.dicom_path;
@@ -253,6 +300,11 @@ std::string DataTransferController::GetStudyuid()
 std::string DataTransferController::GetSeriesuid()
 {
 	return series_process_paras.series_uid;
+}
+
+void DataTransferController::SetCurveId(const std::string& id)
+{
+	curve_id = id;
 }
 
 void DataTransferController::SetSeriedIds(const struct SeriesIds& ids)

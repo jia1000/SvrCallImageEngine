@@ -27,13 +27,21 @@ public class SvrCallImageEngine {
 			if(opened)
 			{
 				String[] dicom_path = {
-					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",",
-					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/\","
+					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/dicom_file/\",",
+					"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/dicom_file/\","
+				};
+				String[] mask_path = {
+					"\"mask_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/mask_source/\",",
+					"\"mask_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/mask_source/\","
+				};
+				String[] curve_path = {
+					"\"curve_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/curve_source/\",",
+					"\"curve_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source2/curve_source/\","
 				};
 				String json_data = "{";
 				json_data += dicom_path[i];//"\"dicom_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_source/\",";
-				json_data += "\"mask_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/mask_source/\",";
-				json_data += "\"curve_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
+				json_data += mask_path[i];//"\"mask_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/dicom_sourcemask_source/\",";
+				json_data += curve_path[i];//"\"curve_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/curve_source/\",";
 				json_data += "\"patient_id\":\"zhangsan\",";
 				json_data += "\"study_uid\":\"111\",";
 				json_data += series_uid[i];//"\"series_uid\":\"222\"";
@@ -51,29 +59,7 @@ public class SvrCallImageEngine {
 				json_data += series_uid[i];//"\"series_uid\":\"444\"";
 				json_data += "}";
 				new SvrCallImageEngine().switchSeries(json_data);
-			}
-				
-			
-
-			if(!opened)
-			{
-				// CPR 操作
-				String json_data = "{";
-				json_data += "\"image_type\":2,"; 			// 图像类型
-				json_data += "\"vessel_name\":\"R_ICA\","; 	// 血管名称
-				json_data += "\"init_orientation\":2,"; 	// 正位（起始位置）标识
-				json_data += "\"rotation_direction\":0,"; 	// 旋转方向
-				json_data += "\"rotation_angle\":45.0,"; 	// 旋转角度
-				json_data += "\"output_image_number\":4,"; 	// 输出图像数目
-				json_data += "\"output_path\":\"../build/cpr7/\","; // 输出图像目录
-				json_data += "\"window_width\":2000,"; 		// 窗宽
-				json_data += "\"window_level\":400,"; 		// 窗位
-				json_data += "\"last_variable\":777"; 		// 
-				json_data += "}";
-				new SvrCallImageEngine().processSeries(json_data);
-			}
-
-			
+			}			
 
 			if(opened)
 			{
@@ -104,8 +90,12 @@ public class SvrCallImageEngine {
 			}
 
 
-			if(!opened)
+			if(opened)
 			{
+				String[] output_path = {
+					"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/mpr1/\",",
+					"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/mpr2/\","
+				};
 				// MPRMIP 操作
 				String json_data = "{";
 				json_data += "\"image_type\":1,"; 			// 图像类型
@@ -114,13 +104,40 @@ public class SvrCallImageEngine {
 				json_data += "\"clip_percent\":0.35,"; 		// 截取比例;  
 				json_data += "\"thickness\":25.0,"; 		// 层厚
 				json_data += "\"spacing_between_slices\":5.0,";// 层间距
-				json_data += "\"output_path\":\"../build/mprmip2/\","; // 输出图像目录
+				json_data += output_path[i];//"\"output_path\":\"../build/mprmip2/\","; // 输出图像目录
 				json_data += "\"window_width\":2000,"; 		// 窗宽
 				json_data += "\"window_level\":400,"; 		// 窗位
 				json_data += "\"last_variable\":999"; 		// 
 				json_data += "}";
 				new SvrCallImageEngine().processSeries(json_data);
 			}
+
+			if(opened)
+			{
+				String[] output_path = {
+					"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/cpr1/\",",
+					"\"output_path\":\"/home/clientdemo/SvrCallImageEngineGit/SvrCallImageEngine/build/cpr2/\","
+				};
+				String[] output_image_number = {
+					"\"output_image_number\":12,",
+					"\"output_image_number\":16,"
+				};
+				// CPR 操作
+				String json_data = "{";
+				json_data += "\"image_type\":2,"; 			// 图像类型
+				json_data += "\"vessel_name\":\"R_ICA\","; 	// 血管名称
+				json_data += "\"init_orientation\":2,"; 	// 正位（起始位置）标识
+				json_data += "\"rotation_direction\":0,"; 	// 旋转方向
+				json_data += "\"rotation_angle\":45.0,"; 	// 旋转角度
+				json_data += output_image_number[i];//"\"output_image_number\":4,"; 	// 输出图像数目
+				json_data += output_path[i];//"\"output_path\":\"../build/cpr7/\","; // 输出图像目录
+				json_data += "\"window_width\":2000,"; 		// 窗宽
+				json_data += "\"window_level\":400,"; 		// 窗位
+				json_data += "\"last_variable\":777"; 		// 
+				json_data += "}";
+				new SvrCallImageEngine().processSeries(json_data);
+			}
+
 			// 卸载Series
 			if(opened)
 			{

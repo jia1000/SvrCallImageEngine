@@ -70,6 +70,7 @@ public:
 	int ParseUnloadSeries(const char* json_data);	
 	int ParseImageOperationData(const char* json_data);
 
+	std::string GetCurveId();
 	std::string GetDicomPath();
 	std::string GetMaskPath();
 	std::string GetCurvePath();
@@ -78,6 +79,7 @@ public:
 	std::string GetStudyuid();
 	std::string GetSeriesuid();
 
+	void SetCurveId(const std::string& id);
 	void SetSeriedIds(const struct SeriesIds& ids);
 	void SetPatientid(const std::string& id);
 	void SetStudyuid(const std::string& id);
@@ -95,4 +97,6 @@ private:
 	SeriesProcessParas series_process_paras;
 	DW::IO::DcmtkDcmLoader* dcm_loader;
 	SeriesDataInfo *series_info;
+	
+	std::string curve_id;
 };

@@ -18,7 +18,7 @@
 #include "render_source.h"
 #include "render_facade.h"
 #include "io/nii_loader.h"
-
+#include "io/ct_image_generator.h"
 
 #include <algorithm>
 #include <fstream> // ifstream, ifstream::in
@@ -45,6 +45,7 @@ using namespace DW::IO;
 
 //////////////////////////////////////////////////////////////////////////
 ImageProcessBase::ImageProcessBase()
+: control_vr(nullptr)
 {
 }
 
@@ -89,42 +90,128 @@ int ImageMPRProcess::Excute(const char* json_data)
 	// 创建文件夹
 	std::string dst_dir_path(params.output_path);
 	printf("Save Image to  : %s\n", dst_dir_path.c_str());
-	TryCreateDir(dst_dir_path);
-
-	// 1.read dcm image from directory
-	if (!reader) {
-		printf("Dcm Loader....\n");
-		reader = new DW::IO::DcmtkDcmLoader();
-		reader->LoadDirectory(DataTransferController::GetInstance()->GetDicomPath().c_str());	// only once
-		
-		VolData* vol_data = reader->GetData();
-		if (vol_data == NULL) return false;
-		ImageDataSource::Get()->AddVolData(DataTransferController::GetInstance()->GetSeriesuid(), vol_data);
-	}
-
-	if (!is_create_mpr_render) {
-		// 2.create all image control
-		RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::MPR);	// only once
-		// 在后端调用的“切换序列”命令里，已经执行了切换操作。此处可以去掉
-		// RenderFacade::Get()->ChangeSeries(DataTransferController::GetInstance()->GetSeriesuid());		
-
-		is_create_mpr_render = true;
-	}
+	TryCreateDir(dst_dir_path);	
 
 	printf("params.output_path : %s------------------------\n", params.output_path.c_str());	
 	RenderFacade::Get()->CreateMPRSlabBatch (m_wnd_name, 
-		params.output_path + "mpr/",
-		BlendMode::MaximumIntensity,
-		OrientationType::AXIAL,
-		0.35f, 25.0f, 5.0f,	2000, 400
+		params.output_path,// + "mpr/",
+		(BlendMode)params.blend_mode,//BlendMode::MaximumIntensity,
+		(OrientationType)params.init_orientatioin,//OrientationType::AXIAL,
+		params.clip_percent,
+		params.thickness,
+		params.spacing_between_slices,
+		params.window_width,
+		params.window_level
 		);
 
+	DoTest();
 	return true;
+}
+void ImageMPRProcess::DoTest()//GIL::DICOM::DicomDataset *dataset, IBitmap *bmp, IBitmapDcmInfo *bmpInfo, string file_path, bool is_mpr)
+{
+	control_vr = DataTransferController::GetInstance()->GetImageControl(JSON_VALUE_REQUEST_TYPE_MPR);
+	if (!control_vr)
+	{
+		return;
+	}
+	int output_number = control_vr->GetOutputNumber();
+	for(int i = 0; i < output_number; ++i)
+	{
+		IBitmap *bmp = control_vr->GetOutput(i);
+		if(!bmp)
+		{
+			printf("get bitmap %d error\n", i);
+			continue;
+		}
+		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
+		if(!bmpInfo)
+		{
+			printf("get bitmap dcm info %d error\n", i);
+			continue;
+		}
+
+		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
+		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
+		if (!series_info)
+		{
+			return ;
+		}
+		
+		series_info->GetDicomDataSet(*dataset, 0);
+
+		GIL::DICOM::CTImageDcmGenerator *generator = new GIL::DICOM::CTImageDcmGenerator(dataset);
+		generator->SetTag(DCM_PatientID, "test_patient_id");
+		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
+		double spacings[2];
+		double origins[3];
+		double row_v[3], col_v[3];
+		bmpInfo->GetOrientation(row_v, col_v);
+		bmpInfo->GetOrigin(origins);
+		bmpInfo->GetPixelSpacings(spacings);
+		string str_spacing = to_string(spacings[0]) + "\\" + to_string(spacings[1]);
+		string str_ori = to_string(row_v[0]) + "\\" + to_string(row_v[1]) + "\\" + to_string(row_v[2])
+			+ "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[2]);
+		string str_origin = to_string(origins[0]) + "\\" + to_string(origins[1]) + "\\" + to_string(origins[2]);
+		
+		int instance_number = bmpInfo->GetInstanceNumber();
+		generator->SetTag(DCM_ImageOrientationPatient, str_ori);
+		generator->SetTag(DCM_ImagePositionPatient, str_origin);
+		generator->SetTag(DCM_PixelSpacing, str_spacing);
+		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
+
+		int series_counter = series_info->GetSeriesDicomFileCount();
+		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter));
+		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter) + "." + to_string(instance_number));
+		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
+		// Series Description
+		if (true){//is_mpr){
+			generator->SetTag(DCM_SeriesDescription, "Position: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)) + "mm");
+		}
+		else{
+			char deg[] = {0};
+			deg[0] = 0xa1;
+			deg[1] = 0xe3;
+			char str[30] = {0};
+			sprintf(str,"%s", deg);
+			generator->SetTag(DCM_SeriesDescription, "Angle: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)));
+		}
+
+		int ww, wl;
+		bmpInfo->GetWindowLevel(ww, wl);
+		generator->SetTag(DCM_WindowWidth, to_string(ww));
+		generator->SetTag(DCM_WindowCenter, to_string(wl));
+
+		PixelDataSource *source = new PixelDataSource(bmp);
+		generator->SetPixelData(source);
+
+		std::string dst_file_path = GeneraterDicomFileName(i);
+		generator->Write(dst_file_path);
+	}
+}
+
+std::string ImageMPRProcess::GeneraterDicomFileName(const int iamge_index)
+{
+	//
+	std::string dst_file_path = params.output_path;
+	
+	std::stringstream ss_orientation;
+	ss_orientation << params.init_orientatioin;
+	std::string str_rule = ss_orientation.str();
+
+	std::stringstream ss_index;
+	ss_index << iamge_index + 1;
+	std::string str_index = ss_index.str();	
+
+	dst_file_path += str_rule;
+	dst_file_path += "_";
+	dst_file_path += str_index;
+	dst_file_path += ".dcm";
+	
+	return dst_file_path;
 }
 //////////////////////////////////////////////////////////////////////////
 ImageVRProcess::ImageVRProcess()
 	: ImageProcessBase()
-	, control_vr(nullptr)
 {
 	m_wnd_name = IMAGE_WINDOW_NAME_VR;
 }
@@ -167,7 +254,7 @@ int ImageVRProcess::Excute(const char* json_data)
 	RenderFacade::Get()->CreateVRRotationBatch(m_wnd_name, 
 		params.output_path,
 		(BlendMode)params.blend_mode,
-		OrientationType::CORONAL,
+		(OrientationType)params.init_orientatioin,//OrientationType::CORONAL,
 		(RotationDirection)params.rotation_direction,		
 		params.rotation_angle,
 		params.clip_percent,
@@ -176,11 +263,11 @@ int ImageVRProcess::Excute(const char* json_data)
 		params.window_level
 		);
 
-	DoTestSC();
+	DoTest();
 	return true;
 }
 
-void ImageVRProcess::DoTestSC()//std::string output_path)
+void ImageVRProcess::DoTest()//std::string output_path)
 {
 	control_vr = DataTransferController::GetInstance()->GetImageControl(JSON_VALUE_REQUEST_TYPE_VR);
 	if (!control_vr)
@@ -325,54 +412,121 @@ int ImageCPRProcess::Excute(const char* json_data)
 	// 创建文件夹
 	std::string dst_dir_path(params.output_path);
 	printf("Save Image to  : %s\n", dst_dir_path.c_str());
-	TryCreateDir(dst_dir_path);
+	TryCreateDir(dst_dir_path);	
+
+
+	RenderFacade::Get()->CreateCPRRotationBatch(m_wnd_name, 
+		params.output_path,//output_dir + "cpr/",
+		DataTransferController::GetInstance()->GetCurveId(),
+		(OrientationType)params.init_orientatioin,// OrientationType::CORONAL,
+		(RotationDirection)params.rotation_direction,// RotationDirection::LEFT_TO_RIGHT,
+		params.rotation_angle,
+		params.output_image_number,
+		params.window_width,
+		params.window_level
+		);
 	
-	// 1.read dcm image from directory
-	if (!reader) {
-		printf("Dcm Loader....\n");
-		reader = new NiiImageLoader();
-		std::vector<const char*> files;
-		files.push_back(DataTransferController::GetInstance()->GetCurvePath().c_str());
-		reader->LoadFiles(files);	// only once
-		reader->LoadVolumeMask(DataTransferController::GetInstance()->GetMaskPath().c_str());
-
-		VolData* vol_data = reader->GetData();
-		if (vol_data == NULL) return false;
-		vol_data->SetDefaultWindowWidthLevel(820, 250);
-		ImageDataSource::Get()->AddVolData(DataTransferController::GetInstance()->GetSeriesuid(), vol_data);
-	}
-
-	if (!is_create_cpr_render) {
-		// 2.create all image control
-		// RenderSource::Get()->CreateTwodImageControl(m_wnd_name, RenderControlType::STRETECHED_CPR);	// only once
-		// // move mpr to specified locations
-		// vector<string> curve_data = ReadTxt(DataTransferController::GetInstance()->GetCurvePath().c_str());
-		// vector<Point3f> points;
-		// auto it = curve_data.begin();
-		// while (it != curve_data.end()){
-		// 	vector<string> arr_data = Split(*it, ",");
-		// 	if (arr_data.size() >= 3){
-		// 		Point3f pnt;
-		// 		pnt.x = atoi(arr_data[0].c_str());
-		// 		pnt.y = atoi(arr_data[1].c_str());
-		// 		pnt.z = atoi(arr_data[2].c_str()) - 1;
-
-		// 		points.push_back(pnt);
-		// 	}
-		// 	++it;
-		// }
-		// curve_id_ = CurveSource::Get()->CreateCurve(series_name_cpr, points);
-
-		// Vector3f vx, vy;
-		// float ix, iy, iz;
-		
-		// 在后端调用的“切换序列”命令里，已经执行了切换操作。此处可以去掉
-		// // RenderFacade::Get()->ChangeSeries(DataTransferController::GetInstance()->GetSeriesuid);
-		// RenderFacade::Get()->SetCPRCurveID(m_wnd_name, curve_id_);
-		// RenderFacade::Get()->RenderControl(m_wnd_name);
-
-		is_create_cpr_render = true;
-	}
+	DoTest();
 
 	return true;
+}
+
+void ImageCPRProcess::DoTest()
+{
+	control_vr = DataTransferController::GetInstance()->GetImageControl(JSON_VALUE_REQUEST_TYPE_CPR);
+	if (!control_vr)
+	{
+		return;
+	}
+	int output_number = control_vr->GetOutputNumber();
+	for(int i = 0; i < output_number; ++i)
+	{
+		IBitmap *bmp = control_vr->GetOutput(i);
+		if(!bmp)
+		{
+			printf("get bitmap %d error\n", i);
+			continue;
+		}
+		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
+		if(!bmpInfo)
+		{
+			printf("get bitmap dcm info %d error\n", i);
+			continue;
+		}
+
+		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
+		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
+		if (!series_info)
+		{
+			return ;
+		}
+		
+		series_info->GetDicomDataSet(*dataset, 0);
+
+		GIL::DICOM::CTImageDcmGenerator *generator = new GIL::DICOM::CTImageDcmGenerator(dataset);
+		generator->SetTag(DCM_PatientID, "test_patient_id");
+		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
+		double spacings[2];
+		double origins[3];
+		double row_v[3], col_v[3];
+		bmpInfo->GetOrientation(row_v, col_v);
+		bmpInfo->GetOrigin(origins);
+		bmpInfo->GetPixelSpacings(spacings);
+		string str_spacing = to_string(spacings[0]) + "\\" + to_string(spacings[1]);
+		string str_ori = to_string(row_v[0]) + "\\" + to_string(row_v[1]) + "\\" + to_string(row_v[2])
+			+ "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[2]);
+		string str_origin = to_string(origins[0]) + "\\" + to_string(origins[1]) + "\\" + to_string(origins[2]);
+		
+		int instance_number = bmpInfo->GetInstanceNumber();
+		generator->SetTag(DCM_ImageOrientationPatient, str_ori);
+		generator->SetTag(DCM_ImagePositionPatient, str_origin);
+		generator->SetTag(DCM_PixelSpacing, str_spacing);
+		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
+
+		int series_counter = series_info->GetSeriesDicomFileCount();
+		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter));
+		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter) + "." + to_string(instance_number));
+		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
+		// Series Description
+		if (false){//is_mpr){
+			generator->SetTag(DCM_SeriesDescription, "Position: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)) + "mm");
+		}
+		else{
+			char deg[] = {0};
+			deg[0] = 0xa1;
+			deg[1] = 0xe3;
+			char str[30] = {0};
+			sprintf(str,"%s", deg);
+			generator->SetTag(DCM_SeriesDescription, "Angle: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)));
+		}
+
+		int ww, wl;
+		bmpInfo->GetWindowLevel(ww, wl);
+		generator->SetTag(DCM_WindowWidth, to_string(ww));
+		generator->SetTag(DCM_WindowCenter, to_string(wl));
+
+		PixelDataSource *source = new PixelDataSource(bmp);
+		generator->SetPixelData(source);
+
+		std::string dst_file_path = GeneraterDicomFileName(i);
+		generator->Write(dst_file_path);
+	}
+}
+
+std::string ImageCPRProcess::GeneraterDicomFileName(const int iamge_index)
+{
+	std::string dst_file_path = params.output_path;
+	int angle = (int)params.rotation_angle;
+
+	std::stringstream ss_angle;
+	ss_angle << iamge_index * angle;
+	std::string str_angle = ss_angle.str();
+
+
+	dst_file_path += params.vessel_name;
+	dst_file_path += "_";
+	dst_file_path += str_angle;
+	dst_file_path += ".dcm";
+
+	return dst_file_path;
 }
