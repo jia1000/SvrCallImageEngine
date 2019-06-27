@@ -32,13 +32,6 @@
 #include "dcmtk/dcmdata/dcdeftag.h"
 #include "dcmtk/dcmdata/dcdict.h"
 
-// only once
-static DW::IO::IDicomReader* reader = NULL;
-// static DcmtkDcmLoader* reader = nullptr;
-static bool is_create_mpr_render = false;
-static bool is_create_vr_render  = false;
-static bool is_create_cpr_render = false;
-
 using namespace DW;
 using namespace DW::IMAGE;
 using namespace DW::IO;
@@ -53,6 +46,95 @@ ImageProcessBase::~ImageProcessBase()
 {	
 }
 
+void ImageProcessBase::DoTest(int control_type, bool is_mpr)
+{
+	if (control_type < 0 || control_type >= JSON_VALUE_REQUEST_TYPE_MAX)
+	{
+		printf("the paras 'control_type' is error.\n");
+		return;
+	}
+	
+	control_vr = DataTransferController::GetInstance()->GetImageControl(control_type);
+	if (!control_vr)
+	{
+		return;
+	}
+	int output_number = control_vr->GetOutputNumber();
+	for(int i = 0; i < output_number; ++i)
+	{
+		IBitmap *bmp = control_vr->GetOutput(i);
+		if(!bmp)
+		{
+			printf("get bitmap %d error\n", i);
+			continue;
+		}
+		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
+		if(!bmpInfo)
+		{
+			printf("get bitmap dcm info %d error\n", i);
+			continue;
+		}
+
+		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
+		if (!series_info)
+		{
+			return ;
+		}
+		
+		GIL::DICOM::DicomDataset dataset;
+		series_info->GetDicomDataSet(dataset, 0);
+
+		GIL::DICOM::CTImageDcmGenerator *generator = new GIL::DICOM::CTImageDcmGenerator(&dataset);
+		generator->SetTag(DCM_PatientID, "test_patient_id");
+		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
+		double spacings[2];
+		double origins[3];
+		double row_v[3], col_v[3];
+		bmpInfo->GetOrientation(row_v, col_v);
+		bmpInfo->GetOrigin(origins);
+		bmpInfo->GetPixelSpacings(spacings);
+		string str_spacing = to_string(spacings[0]) + "\\" + to_string(spacings[1]);
+		string str_ori = to_string(row_v[0]) + "\\" + to_string(row_v[1]) + "\\" + to_string(row_v[2])
+			+ "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[2]);
+		string str_origin = to_string(origins[0]) + "\\" + to_string(origins[1]) + "\\" + to_string(origins[2]);
+		
+		int instance_number = bmpInfo->GetInstanceNumber();
+		generator->SetTag(DCM_ImageOrientationPatient, str_ori);
+		generator->SetTag(DCM_ImagePositionPatient, str_origin);
+		generator->SetTag(DCM_PixelSpacing, str_spacing);
+		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
+
+		int series_counter = series_info->GetSeriesDicomFileCount();
+		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter));
+		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter) + "." + to_string(instance_number));
+		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
+		// Series Description
+		if (is_mpr){
+			generator->SetTag(DCM_SeriesDescription, "Position: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)) + "mm");
+		}
+		else{
+			char deg[3] = {0};
+			deg[0] = 0xa1;
+			deg[1] = 0xe3;
+			char str[30] = {0};
+			sprintf(str,"%s", deg);
+			generator->SetTag(DCM_SeriesDescription, "Angle: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)));
+		}
+
+		int ww, wl;
+		bmpInfo->GetWindowLevel(ww, wl);
+		generator->SetTag(DCM_WindowWidth, to_string(ww));
+		generator->SetTag(DCM_WindowCenter, to_string(wl));
+
+		PixelDataSource *source = new PixelDataSource(bmp);
+		generator->SetPixelData(source);
+
+		std::string dst_file_path = GeneraterDicomFileName(i);
+		generator->Write(dst_file_path);
+		
+		delete generator;
+	}
+}
 //////////////////////////////////////////////////////////////////////////
 ImageMPRProcess::ImageMPRProcess()
 	: ImageProcessBase()
@@ -94,9 +176,9 @@ int ImageMPRProcess::Excute(const char* json_data)
 
 	printf("params.output_path : %s------------------------\n", params.output_path.c_str());	
 	RenderFacade::Get()->CreateMPRSlabBatch (m_wnd_name, 
-		params.output_path,// + "mpr/",
-		(BlendMode)params.blend_mode,//BlendMode::MaximumIntensity,
-		(OrientationType)params.init_orientatioin,//OrientationType::AXIAL,
+		params.output_path,
+		(BlendMode)params.blend_mode,
+		(OrientationType)params.init_orientatioin,
 		params.clip_percent,
 		params.thickness,
 		params.spacing_between_slices,
@@ -104,89 +186,8 @@ int ImageMPRProcess::Excute(const char* json_data)
 		params.window_level
 		);
 
-	DoTest();
+	DoTest(JSON_VALUE_REQUEST_TYPE_MPR, true);
 	return true;
-}
-void ImageMPRProcess::DoTest()//GIL::DICOM::DicomDataset *dataset, IBitmap *bmp, IBitmapDcmInfo *bmpInfo, string file_path, bool is_mpr)
-{
-	control_vr = DataTransferController::GetInstance()->GetImageControl(JSON_VALUE_REQUEST_TYPE_MPR);
-	if (!control_vr)
-	{
-		return;
-	}
-	int output_number = control_vr->GetOutputNumber();
-	for(int i = 0; i < output_number; ++i)
-	{
-		IBitmap *bmp = control_vr->GetOutput(i);
-		if(!bmp)
-		{
-			printf("get bitmap %d error\n", i);
-			continue;
-		}
-		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
-		if(!bmpInfo)
-		{
-			printf("get bitmap dcm info %d error\n", i);
-			continue;
-		}
-
-		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
-		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
-		if (!series_info)
-		{
-			return ;
-		}
-		
-		series_info->GetDicomDataSet(*dataset, 0);
-
-		GIL::DICOM::CTImageDcmGenerator *generator = new GIL::DICOM::CTImageDcmGenerator(dataset);
-		generator->SetTag(DCM_PatientID, "test_patient_id");
-		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
-		double spacings[2];
-		double origins[3];
-		double row_v[3], col_v[3];
-		bmpInfo->GetOrientation(row_v, col_v);
-		bmpInfo->GetOrigin(origins);
-		bmpInfo->GetPixelSpacings(spacings);
-		string str_spacing = to_string(spacings[0]) + "\\" + to_string(spacings[1]);
-		string str_ori = to_string(row_v[0]) + "\\" + to_string(row_v[1]) + "\\" + to_string(row_v[2])
-			+ "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[2]);
-		string str_origin = to_string(origins[0]) + "\\" + to_string(origins[1]) + "\\" + to_string(origins[2]);
-		
-		int instance_number = bmpInfo->GetInstanceNumber();
-		generator->SetTag(DCM_ImageOrientationPatient, str_ori);
-		generator->SetTag(DCM_ImagePositionPatient, str_origin);
-		generator->SetTag(DCM_PixelSpacing, str_spacing);
-		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
-
-		int series_counter = series_info->GetSeriesDicomFileCount();
-		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter));
-		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter) + "." + to_string(instance_number));
-		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
-		// Series Description
-		if (true){//is_mpr){
-			generator->SetTag(DCM_SeriesDescription, "Position: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)) + "mm");
-		}
-		else{
-			char deg[] = {0};
-			deg[0] = 0xa1;
-			deg[1] = 0xe3;
-			char str[30] = {0};
-			sprintf(str,"%s", deg);
-			generator->SetTag(DCM_SeriesDescription, "Angle: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)));
-		}
-
-		int ww, wl;
-		bmpInfo->GetWindowLevel(ww, wl);
-		generator->SetTag(DCM_WindowWidth, to_string(ww));
-		generator->SetTag(DCM_WindowCenter, to_string(wl));
-
-		PixelDataSource *source = new PixelDataSource(bmp);
-		generator->SetPixelData(source);
-
-		std::string dst_file_path = GeneraterDicomFileName(i);
-		generator->Write(dst_file_path);
-	}
 }
 
 std::string ImageMPRProcess::GeneraterDicomFileName(const int iamge_index)
@@ -263,80 +264,8 @@ int ImageVRProcess::Excute(const char* json_data)
 		params.window_level
 		);
 
-	DoTest();
+	DoTest(JSON_VALUE_REQUEST_TYPE_VR, false);
 	return true;
-}
-
-void ImageVRProcess::DoTest()//std::string output_path)
-{
-	control_vr = DataTransferController::GetInstance()->GetImageControl(JSON_VALUE_REQUEST_TYPE_VR);
-	if (!control_vr)
-	{
-		return;
-	}
-	
-	for(int i = 0; i < params.output_image_number; ++i)
-	{
-		IBitmap *bmp = control_vr->GetOutput(i);
-		if(!bmp)
-		{
-			printf("get bitmap %d error\n", i);
-			continue;
-		}
-		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
-		if(!bmpInfo)
-		{
-			printf("get bitmap dcm info %d error\n", i);
-			continue;
-		}
-		
-		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
-		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
-		if (!series_info)
-		{
-			return ;
-		}
-		
-		series_info->GetDicomDataSet(*dataset, 0);
-
-		auto *generator = new GIL::DICOM::SecondaryCaptureImageDcmGenerator(dataset);	
-	
-		generator->SetTag(DCM_PatientID, "test_patient_id");
-		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
-		double spacings[2];
-		double origins[3];
-		double row_v[3], col_v[3];
-		bmpInfo->GetOrientation(row_v, col_v);
-		bmpInfo->GetOrigin(origins);
-		bmpInfo->GetPixelSpacings(spacings);
-		string str_spacing = to_string(spacings[0]) + "\\" + to_string(spacings[1]);
-		string str_ori = to_string(row_v[0]) + "\\" + to_string(row_v[1]) + "\\" + to_string(row_v[2])
-			+ "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[2]);
-		string str_origin = to_string(origins[0]) + "\\" + to_string(origins[1]) + "\\" + to_string(origins[2]);
-
-		int instance_number = bmpInfo->GetInstanceNumber();
-		generator->SetTag(DCM_ImageOrientationPatient, str_ori);
-		generator->SetTag(DCM_ImagePositionPatient, str_origin);
-		generator->SetTag(DCM_PixelSpacing, str_spacing);
-		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
-		int slice_count = series_info->GetSeriesDicomFileCount();
-		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(slice_count));
-		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(slice_count) + "." + to_string(instance_number));
-		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
-		// Series Description
-		char deg[3] = {0};
-		deg[0] = 0xa1;
-		deg[1] = 0xe3;
-		char str[30] = {0};
-		sprintf(str,"%s", deg);
-		generator->SetTag(DCM_SeriesDescription, "Angle: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)));
-		
-		PixelDataSource *source = new PixelDataSource(bmp);
-		generator->SetPixelData(source);
-
-		std::string dst_file_path = GeneraterDicomFileName(i);
-		generator->Write(dst_file_path);
-	}
 }
 
 std::string ImageVRProcess::GeneraterDicomFileName(const int iamge_index)
@@ -426,91 +355,9 @@ int ImageCPRProcess::Excute(const char* json_data)
 		params.window_level
 		);
 	
-	DoTest();
+	DoTest(JSON_VALUE_REQUEST_TYPE_CPR, false);
 
 	return true;
-}
-
-void ImageCPRProcess::DoTest()
-{
-	control_vr = DataTransferController::GetInstance()->GetImageControl(JSON_VALUE_REQUEST_TYPE_CPR);
-	if (!control_vr)
-	{
-		return;
-	}
-	int output_number = control_vr->GetOutputNumber();
-	for(int i = 0; i < output_number; ++i)
-	{
-		IBitmap *bmp = control_vr->GetOutput(i);
-		if(!bmp)
-		{
-			printf("get bitmap %d error\n", i);
-			continue;
-		}
-		IBitmapDcmInfo *bmpInfo  =  control_vr->GetOutputInfo(i);
-		if(!bmpInfo)
-		{
-			printf("get bitmap dcm info %d error\n", i);
-			continue;
-		}
-
-		GIL::DICOM::DicomDataset *dataset = new GIL::DICOM::DicomDataset();
-		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
-		if (!series_info)
-		{
-			return ;
-		}
-		
-		series_info->GetDicomDataSet(*dataset, 0);
-
-		GIL::DICOM::CTImageDcmGenerator *generator = new GIL::DICOM::CTImageDcmGenerator(dataset);
-		generator->SetTag(DCM_PatientID, "test_patient_id");
-		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
-		double spacings[2];
-		double origins[3];
-		double row_v[3], col_v[3];
-		bmpInfo->GetOrientation(row_v, col_v);
-		bmpInfo->GetOrigin(origins);
-		bmpInfo->GetPixelSpacings(spacings);
-		string str_spacing = to_string(spacings[0]) + "\\" + to_string(spacings[1]);
-		string str_ori = to_string(row_v[0]) + "\\" + to_string(row_v[1]) + "\\" + to_string(row_v[2])
-			+ "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[0]) + "\\" + to_string(col_v[2]);
-		string str_origin = to_string(origins[0]) + "\\" + to_string(origins[1]) + "\\" + to_string(origins[2]);
-		
-		int instance_number = bmpInfo->GetInstanceNumber();
-		generator->SetTag(DCM_ImageOrientationPatient, str_ori);
-		generator->SetTag(DCM_ImagePositionPatient, str_origin);
-		generator->SetTag(DCM_PixelSpacing, str_spacing);
-		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
-
-		int series_counter = series_info->GetSeriesDicomFileCount();
-		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter));
-		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter) + "." + to_string(instance_number));
-		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
-		// Series Description
-		if (false){//is_mpr){
-			generator->SetTag(DCM_SeriesDescription, "Position: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)) + "mm");
-		}
-		else{
-			char deg[] = {0};
-			deg[0] = 0xa1;
-			deg[1] = 0xe3;
-			char str[30] = {0};
-			sprintf(str,"%s", deg);
-			generator->SetTag(DCM_SeriesDescription, "Angle: " + to_string((int)bmpInfo->GetStepValue() * (instance_number - 1)));
-		}
-
-		int ww, wl;
-		bmpInfo->GetWindowLevel(ww, wl);
-		generator->SetTag(DCM_WindowWidth, to_string(ww));
-		generator->SetTag(DCM_WindowCenter, to_string(wl));
-
-		PixelDataSource *source = new PixelDataSource(bmp);
-		generator->SetPixelData(source);
-
-		std::string dst_file_path = GeneraterDicomFileName(i);
-		generator->Write(dst_file_path);
-	}
 }
 
 std::string ImageCPRProcess::GeneraterDicomFileName(const int iamge_index)

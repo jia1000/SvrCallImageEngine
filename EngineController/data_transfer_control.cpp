@@ -63,8 +63,6 @@ DataTransferController::DataTransferController()
 
 DataTransferController::~DataTransferController()
 {
-	instance = nullptr;
-
 	for (size_t i = 0; i < JSON_VALUE_REQUEST_TYPE_MAX; i++)
 	{
 		if (arr_image_process[i])
@@ -83,6 +81,13 @@ DataTransferController::~DataTransferController()
 	{
 		delete dcm_loader;
 		dcm_loader = nullptr;
+	}
+
+	//卸载序列时，释放资源
+	if (series_info)
+	{
+		delete series_info;
+		series_info = nullptr;
 	}
 }
 
@@ -173,7 +178,7 @@ int DataTransferController::ParseLoadSeries(const char* json_data)
 		vol_data->GetPixelData()->GetSpacing(spacings);
 		// found exception
 		curve_id = CurveSource::Get()->CreateCurve(GetSeriesuid(), "Vessel name", points, spacings);
-		VolCurve *curve = CurveSource::Get()->GetCurveById(GetSeriesuid(), curve_id);
+		CurveSource::Get()->GetCurveById(GetSeriesuid(), curve_id);
 	}
 
 	// 2.create image control  

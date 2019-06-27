@@ -29,7 +29,7 @@ namespace DW {
 		{
 		public:
 			DcmtkDcmLoader();
-			~DcmtkDcmLoader();
+			virtual ~DcmtkDcmLoader();
 
 			bool LoadDirectory(const char* dir) override;
 			bool LoadFiles(std::vector<const char*> files) override;

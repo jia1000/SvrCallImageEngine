@@ -41,7 +41,8 @@ public:
 		return RET_STATUS_SUCCESS;
 	}
 	virtual std::string GeneraterDicomFileName(const int iamge_index) { return ""; }
-	virtual void DoTest() {}
+	virtual void DoTest(int control_type, bool is_mpr);
+	
 protected:
 	// ´°¿ÚÃû³Æ
 	std::string m_wnd_name;
@@ -63,7 +64,6 @@ public:
 private:
 	virtual int ParseJsonData(const char* json_data);	
 	virtual std::string GeneraterDicomFileName(const int iamge_index);
-	void DoTest();
 	
 	struct stMPRMIPImageParams
 	{
@@ -110,7 +110,7 @@ public:
 private:
 	virtual int ParseJsonData(const char* json_data);
 	virtual std::string GeneraterDicomFileName(const int iamge_index);
-	virtual void DoTest();
+	
 	struct stVRImageParams
 	{
 		stVRImageParams()
@@ -161,7 +161,6 @@ public:
 private:
 	virtual int ParseJsonData(const char* json_data);
 	virtual std::string GeneraterDicomFileName(const int iamge_index);
-	virtual void DoTest();
 	
 	std::string curve_id_;
 	struct stCPRImageParams
