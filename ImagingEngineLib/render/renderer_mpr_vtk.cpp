@@ -193,6 +193,8 @@ void MPRRendererVtk::DoRender()
 		}
 	}
 	show_buffer_->SetBufferData(reinterpret_cast<char *>(raw_data), width, height, 16);
+
+	delete [] raw_data;
 	//////////////////////////////////////////////////////////////////////////
 
 

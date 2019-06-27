@@ -134,7 +134,7 @@ void VolCurve::Update()
 	spline->Update();
 
 	unsigned int rows = spline->GetOutput()->GetNumberOfPoints();
-	unsigned int row = 0;
+	unsigned int row;
 	for (row = 0; row < rows; row++)
 	{
 		// 由患者坐标系转换到三维图像坐标系
@@ -154,17 +154,16 @@ void VolCurve::Update()
 		sample_points_.push_back(pnt);
 	}
 
-	// 按照头上脚下的顺序排序
-	//std::sort(sample_points_.begin(), sample_points_.end(), CurvePointCompare);
-	if (rows > 0)
-	{
+	if (rows > 0){
+		// 按照头上脚下的顺序排序
+		//std::sort(sample_points_.begin(), sample_points_.end(), CurvePointCompare);
 		if (sample_points_[0].z > sample_points_[rows - 1].z){
 			head_to_feet_ = false;
 		}
 		else{
 			head_to_feet_ = true;
 		}
-	}	
+	}
 
 	// CPR行列间距都为voxel_spacing_[0]
 	curve_length_in_mm_ = rows * voxel_spacing_[0];
@@ -354,7 +353,7 @@ void VolCurve::ComputeSampleVectors()
 		tangent_vectors_.push_back(tangent);
 	}
 	// compute normal and binormal vectors
-	for( int i = 0 ; i<sample_count; ++i)
+	for(i = 0 ; i<sample_count; ++i)
 	{
 		Vector3f normal;
 		if( !this->using_consistent_normal_ || i == 0){

@@ -25,6 +25,8 @@ namespace DW {
 		class IPixelData
 		{
 		public:
+			virtual ~IPixelData() {}
+
 			virtual vtkImageData* GetVtkImageData() = 0;
 			/// 从数据指针中获取指定坐标位置的值
 			virtual void *GetDataPointer(int x, int y, int z) = 0;

@@ -76,6 +76,17 @@ namespace DW {
 		///
 		struct BufferResult
 		{
+			~BufferResult()
+			{
+				if (buffer_data) {
+					delete buffer_data;
+					buffer_data = NULL;
+				}
+				if (image_plane) {
+					delete image_plane;
+					image_plane = NULL;
+				}
+			}
 			ShowBuffer *buffer_data;
 			ImagePlane *image_plane;
 			string file_name;
@@ -83,6 +94,7 @@ namespace DW {
 			int instance_number;
 			int window_width;
 			int window_level;
+
 		};
 
 	}

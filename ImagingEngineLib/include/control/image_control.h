@@ -80,6 +80,8 @@ namespace DW {
 			virtual void SaveAsBitmap(string output_dir) = 0;
 			/// 将当前数据源图像存储为dicom图像
 			virtual void SaveAsDicom(string output_dir) = 0;
+			/// 清空数据
+			virtual void Clear() = 0;
 			
 		};
 

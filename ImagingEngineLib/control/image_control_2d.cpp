@@ -229,3 +229,8 @@ void TwodImageControl::SaveAsDicom(string output_dir)
 {
 
 }
+
+void TwodImageControl::Clear()
+{
+	image_source_->Destroy();
+}

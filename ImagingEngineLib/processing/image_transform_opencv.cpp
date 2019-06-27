@@ -95,7 +95,7 @@ void ImageTranformOpenCV::Update()
 			show_buffer_->GetHeight(),
 			4);
 
-		delete output;
+		delete [] output;
 		output = NULL;
 	}
 	else if (bits_per_pixel == 32){

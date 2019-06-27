@@ -118,6 +118,8 @@ namespace DW {
 
 		/// Get updated image buffer
 		IBitmap *GetImageBuffer(string control_id);
+		/// Clear data in control
+		void ClearContorl(string control_id);
 
 	private:
 		RenderFacade() {}

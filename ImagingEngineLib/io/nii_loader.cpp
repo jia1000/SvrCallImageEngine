@@ -190,7 +190,7 @@ bool NiiImageLoader::LoadFiles(vector<const char*> files)
 
 
 	// 3. Convert to VolData object
-	volume_data_ = new VolData();
+	//volume_data_ = new VolData();
 	volume_data_->SetBitsPerPixel(16);
 	volume_data_->SetBitsStored(16);
 	//volume_data_->SetPixelData(new VtkPixelData(image));

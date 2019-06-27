@@ -78,6 +78,8 @@ namespace DW {
 			void SaveAsBitmap(string output_dir) override;
 			/// 将当前数据源图像存储为dicom图像
 			void SaveAsDicom(string output_dir) override;
+			/// 清空数据
+			void Clear() override;
 			
 		private:
 			int port_;

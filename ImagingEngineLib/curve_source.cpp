@@ -89,7 +89,18 @@ void CurveSource::Destroy(string series_uid, string id)
 
 void CurveSource::DestroyAll(string series_uid)
 {
-	//TODO
+	if (curve_list_.count(series_uid) == 0){
+		return;
+	}
+	vector<VolCurve *> curves_in_series = curve_list_[series_uid];
+	auto it = curves_in_series.begin();
+	while (it != curves_in_series.end()){	
+
+		delete (*it);
+		++it;
+	}
+	curves_in_series.clear();
+	curve_list_.erase(series_uid);
 }
 
 void CurveSource::DestroyAll()

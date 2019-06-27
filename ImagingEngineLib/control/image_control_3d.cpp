@@ -170,3 +170,8 @@ void ThreedImageControl::SaveAsDicom(string output_dir)
 {
 
 }
+
+void ThreedImageControl::Clear()
+{
+
+}

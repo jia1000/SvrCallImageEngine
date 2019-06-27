@@ -17,7 +17,10 @@ ShowBuffer::ShowBuffer()
 
 ShowBuffer::~ShowBuffer()
 {
-
+	if (buffer_data_){
+		delete [] buffer_data_;
+		buffer_data_ = NULL;
+	}
 }
 
 void ShowBuffer::InitBufferData(int width, int height, BYTE bits_per_pixel)

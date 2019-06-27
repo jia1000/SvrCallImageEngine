@@ -41,18 +41,20 @@ using namespace DW::IMAGE;
 RawPixelData::RawPixelData(char* data)
 {
 	series_data_ = data;
-	modality_lut_applied_ = false;
+	modality_lut_applied_ = true;
 }
 
 RawPixelData::~RawPixelData()
 {
 	if (series_data_){
-		delete series_data_;
+		delete [] series_data_;
 		series_data_ = NULL;
 	}
-	if (vtk_series_data_){
-		vtk_series_data_->Delete();
-	}
+	//TODO 以vtkSmartPointer<T> obj... = vtkSmartPointer<T>::New()的形式创建的vtk对象，不用手动调用Delete
+	// 参考：https://blog.csdn.net/zhc_24/article/details/78664410
+	//if (vtk_series_data_){
+	//	vtk_series_data_->Delete();
+	//}
 }
 
 char* RawPixelData::GetPixelData()
@@ -92,7 +94,7 @@ vtkImageData* RawPixelData::GetVtkImageData()
 		imageDataCreator.SetNumberOfComponents(1);	//bytes_per_pixel_
 		vtk_series_data_ = imageDataCreator.Create(raw_data_for_vtk);
 
-		delete raw_data_for_vtk;
+		delete [] raw_data_for_vtk;
 	}
 		
 	return vtk_series_data_;

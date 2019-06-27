@@ -183,6 +183,11 @@ IThreedRenderer *RenderSource::CreateRenderer(RenderControlType type)
 
 				CGLogger::Info("Create vr renderer with RAYCASTING");
 			}
+			else if (render_mode == "TEXTURE"){
+				vol_renderer->SetRenderingMode(RenderMode::RAYCASTING);
+
+				CGLogger::Info("Create vr renderer with RAYCASTING");
+			}
 			else{
 				vol_renderer->SetRenderingMode(RenderMode::SMART_RAYCASTING);
 

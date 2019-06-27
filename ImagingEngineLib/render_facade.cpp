@@ -327,9 +327,8 @@ void RenderFacade::ChangeSeries(string series_uid)
 
 void RenderFacade::UnloadSeries(string series_uid)
 {
-	if (current_series_uid_ == series_uid){
-		current_series_uid_ = "";
-		ImageDataSource::Get()->Destroy(series_uid);
+	//if (current_series_uid_ == series_uid){
+		//current_series_uid_ = "";
 
 		vector<IThreedImaging *> imaging_list = RenderSource::Get()->GetRenderControls();
 		auto it = imaging_list.begin();
@@ -337,7 +336,18 @@ void RenderFacade::UnloadSeries(string series_uid)
 			(*it)->SetData(NULL);
 			(*it)->GetRenderer()->SetData(NULL);
 		}
-	}
+
+		ImageDataSource::Get()->Destroy(series_uid);
+		CurveSource::Get()->DestroyAll(series_uid);
+	//}
+}
+
+void RenderFacade::ClearContorl(string control_id)
+{
+	IImageControl *control = GetControl(control_id);
+	if (control == NULL) return;
+
+	control->Clear();
 }
 
 void RenderFacade::SetImageSize(string control_id, int width, int height)
@@ -494,8 +504,8 @@ int RenderFacade::CreateCPRRotationBatch(string control_id,
 		args.SetWWWL(ww, wl);
 		args.SetCurveId(curve_id);
 		args.SetImaging(imaging);
+		//TODO Set Curve to render param object
 		SetCPRCurveID(control_id, curve_id);
-
 		generator.Execute(&args);
 
 		Timer::begin("CreateCPRRotationBatch::SaveAsBitmap");

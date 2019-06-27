@@ -16,7 +16,22 @@ VolData::VolData()
 
 VolData::~VolData()
 {
-	Destroy();
+	if (pixel_data_){
+		delete pixel_data_;
+		pixel_data_ = NULL;
+	}
+	if (series_mark_){
+		delete [] series_mark_;
+		series_mark_ = NULL;
+	}
+	if (bounding_box_){
+		delete bounding_box_;
+		bounding_box_ = NULL;
+	}
+	if (mark_bounding_box_){
+		delete mark_bounding_box_;
+		mark_bounding_box_ = NULL;
+	}
 }
 
 IPixelData* VolData::GetPixelData()
@@ -89,22 +104,8 @@ void *VolData::GetDataPointer(int x, int y, int z)
 }
 
 void VolData::Destroy() {
-	if (pixel_data_){
-		delete pixel_data_;
-		pixel_data_ = NULL;
-	}
-	if (series_mark_){
-		delete series_mark_;
-		series_mark_ = NULL;
-	}
-	if (bounding_box_){
-		delete bounding_box_;
-		bounding_box_ = NULL;
-	}
-	if (mark_bounding_box_){
-		delete mark_bounding_box_;
-		mark_bounding_box_ = NULL;
-	}
+	
+	delete this;
 }
 
 void VolData::GetDefaultWindowWidthLevel(int &width, int &level)

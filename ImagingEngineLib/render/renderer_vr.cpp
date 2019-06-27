@@ -64,7 +64,7 @@ VolumeRenderer::VolumeRenderer()
 #endif
 	vtk_volume_property_ = vtkSmartPointer<vtkVolumeProperty>::New();
 	vtk_volume_property_->SetInterpolationTypeToLinear();
-	vtk_volume_ = vtkVolume::New();
+	vtk_volume_ = vtkSmartPointer<vtkVolume>::New();
 	vtk_volume_->SetProperty(vtk_volume_property_);
 	vtk_volume_->SetMapper(vtk_volume_mapper_);
 
@@ -130,7 +130,7 @@ VolumeRenderer::VolumeRenderer()
 
 	orientation_marker_ = new OrientationMarker(vtk_renderer_);
 	orientation_marker_->SetEnabled(true);
-	vtk_mask_filter_ = vtkSmartPointer<vtkImageMask>::New();
+	//vtk_mask_filter_ = vtkSmartPointer<vtkImageMask>::New();
 
 	SetOffScreenRendering(true);
 }
@@ -149,11 +149,6 @@ VolumeRenderer::~VolumeRenderer()
 		delete image_plane_;
 		image_plane_ = NULL;
 	}
-	vtk_volume_->Delete();
-	vtk_volume_mapper_->Delete();
-	vtk_volume_property_->Delete();
-	vtk_renderer_->Delete();
-	vtk_render_window_->Delete();
 }
 
 void VolumeRenderer::SetRenderParam(RenderParam* param)
@@ -178,22 +173,25 @@ void VolumeRenderer::SetData(VolData* data)
 	volume_data_ = data;
 	if (NULL == volume_data_){
 		// 卸载数据
-		vtk_volume_mapper_->RemoveAllInputs();
+		//vtk_volume_mapper_->RemoveAllInputs();
 		vtk_volume_mapper_->RemoveAllClippingPlanes();
-		vtk_mask_filter_->RemoveAllInputs();
 
 		CGLogger::Info("VolumeRenderer::SetData null");
 		return;
 	}
 
 	// Workaround for vtkSmartVolumeMapper bug (https://gitlab.kitware.com/vtk/vtk/issues/17328)
-	volume_data_->GetPixelData()->GetVtkImageData()->Modified();
-	vtkImageData *image_data = volume_data_->GetPixelData()->GetVtkImageData();
+	IPixelData *pixel_data = volume_data_->GetPixelData();
+	if (pixel_data == NULL){
+		return;
+	}
+	vtkImageData *image_data = pixel_data->GetVtkImageData();
+	image_data->Modified();
 	// 在此处将mask转换为vtkImageData格式
 	UNITMARK3D *mark = volume_data_->GetMark();
 
 	// 输入到Mapper里的vtkImageData
-	vtkImageData *mapper_input_data = vtkImageData::New();
+	vtkSmartPointer<vtkImageData> mapper_input_data = vtkSmartPointer<vtkImageData>::New();
 	if (mark){
 
 		//if (vtk_mask_filter_){
@@ -245,12 +243,13 @@ void VolumeRenderer::SetData(VolData* data)
 		int extent[6];
 		input_mark_data_->GetExtent(extent);
 		
-		vtk_mask_filter_->SetInputData(0, image_data);
-		vtk_mask_filter_->SetInputData(1, input_mark_data_);
-		vtk_mask_filter_->SetMaskedOutputValue(-1024, -1024, -1024);
-		vtk_mask_filter_->Update();
+		vtkSmartPointer<vtkImageMask> mask_filter = vtkSmartPointer<vtkImageMask>::New();
+		mask_filter->SetInputData(0, image_data);
+		mask_filter->SetInputData(1, input_mark_data_);
+		mask_filter->SetMaskedOutputValue(-1024, -1024, -1024);
+		mask_filter->Update();
 
-		mapper_input_data->ShallowCopy(vtk_mask_filter_->GetOutput());
+		mapper_input_data->ShallowCopy(mask_filter->GetOutput());
 		//////////////////////////////////////////////////////////////////////////
 	}
 	else{
@@ -398,6 +397,7 @@ void VolumeRenderer::DoRender(vtkSmartPointer<vtkImageData> imagedata)
 	CGLogger::Info("VolumeRenderer::DoRender 6");
 
 	show_buffer_->SetBufferData(reinterpret_cast<char *>(raw_data), image_width, image_height, 32);
+	delete [] raw_data;
 	//////////////////////////////////////////////////////////////////////////
 
 	CGLogger::Info("VolumeRenderer::DoRender 7");
@@ -439,6 +439,9 @@ void VolumeRenderer::SetRenderingMode(RenderMode mode)
 		break;
 	case RenderMode::RAYCASTING: 
 		vtk_volume_mapper_->SetRequestedRenderModeToRayCast(); 
+		break;
+	case RenderMode::TEXTURE_3D_GPU:
+		vtk_volume_mapper_->SetRequestedRenderModeToDefault(); 
 		break;
 	case RenderMode::RAYCASTING_GPU: 
 #if VTK_MAJOR_VERSION > 5
