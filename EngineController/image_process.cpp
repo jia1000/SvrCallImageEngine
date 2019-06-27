@@ -5,6 +5,7 @@
 #include "global_define.h"
 #include "series_data_info.h"
 #include "data_transfer_control.h"
+#include "ginkgouid.h"
 
 #include "api/studycontextmy.h"
 #include "api/studycontextmy.h"
@@ -78,6 +79,8 @@ void ImageProcessBase::DoTest(int control_type, bool is_mpr)
 		SeriesDataInfo* series_info = DataTransferController::GetInstance()->GerSeriresDataInfo();
 		if (!series_info)
 		{
+			delete bmp;
+			delete bmpInfo;
 			return ;
 		}
 		
@@ -85,7 +88,7 @@ void ImageProcessBase::DoTest(int control_type, bool is_mpr)
 		series_info->GetDicomDataSet(dataset, 0);
 
 		GIL::DICOM::CTImageDcmGenerator *generator = new GIL::DICOM::CTImageDcmGenerator(&dataset);
-		generator->SetTag(DCM_PatientID, "test_patient_id");
+		//generator->SetTag(DCM_PatientID, "test_patient_id");
 		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
 		double spacings[2];
 		double origins[3];
@@ -105,8 +108,9 @@ void ImageProcessBase::DoTest(int control_type, bool is_mpr)
 		generator->SetTag(DCM_SliceThickness, bmpInfo->GetThickness());
 
 		int series_counter = series_info->GetSeriesDicomFileCount();
-		generator->SetTag(DCM_SeriesInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter));
-		generator->SetTag(DCM_SOPInstanceUID, "1.0.0.0.1.2.3.3.1." + to_string(series_counter) + "." + to_string(instance_number));
+		std::string generate_series_uid = GIL::DICOM::MakeUID(GIL::DICOM::GUID_SeriesRoot, series_counter);
+		generator->SetTag(DCM_SeriesInstanceUID, generate_series_uid);
+		generator->SetTag(DCM_SOPInstanceUID, generate_series_uid + "." + to_string(instance_number));
 		generator->SetTag(DCM_InstanceNumber, to_string(instance_number));
 		// Series Description
 		if (is_mpr){
@@ -133,6 +137,8 @@ void ImageProcessBase::DoTest(int control_type, bool is_mpr)
 		generator->Write(dst_file_path);
 		
 		delete generator;
+		delete bmp;
+		delete bmpInfo;			
 	}
 }
 //////////////////////////////////////////////////////////////////////////
