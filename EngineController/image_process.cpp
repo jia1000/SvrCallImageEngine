@@ -88,6 +88,7 @@ void ImageProcessBase::DoTest(int control_type, bool is_mpr)
 		series_info->GetDicomDataSet(dataset, 0);
 
 		GIL::DICOM::CTImageDcmGenerator *generator = new GIL::DICOM::CTImageDcmGenerator(&dataset);
+		// test git
 		//generator->SetTag(DCM_PatientID, "test_patient_id");
 		generator->SetTag(DCM_InstanceNumber, bmpInfo->GetInstanceNumber());
 		double spacings[2];
