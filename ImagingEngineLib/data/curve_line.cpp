@@ -134,7 +134,7 @@ void VolCurve::Update()
 	spline->Update();
 
 	unsigned int rows = spline->GetOutput()->GetNumberOfPoints();
-	unsigned int row;
+	unsigned int row = 0;
 	for (row = 0; row < rows; row++)
 	{
 		// 由患者坐标系转换到三维图像坐标系
@@ -156,12 +156,15 @@ void VolCurve::Update()
 
 	// 按照头上脚下的顺序排序
 	//std::sort(sample_points_.begin(), sample_points_.end(), CurvePointCompare);
-	if (sample_points_[0].z > sample_points_[rows - 1].z){
-		head_to_feet_ = false;
-	}
-	else{
-		head_to_feet_ = true;
-	}
+	if (rows > 0)
+	{
+		if (sample_points_[0].z > sample_points_[rows - 1].z){
+			head_to_feet_ = false;
+		}
+		else{
+			head_to_feet_ = true;
+		}
+	}	
 
 	// CPR行列间距都为voxel_spacing_[0]
 	curve_length_in_mm_ = rows * voxel_spacing_[0];

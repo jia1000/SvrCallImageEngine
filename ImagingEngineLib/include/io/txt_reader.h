@@ -20,7 +20,7 @@ inline vector<string> ReadTxt(const char *path)
 	{
 		while (getline(in, line)) // line中不包括每行的换行符
 		{
-			cout << line << endl;
+			// cout << line << endl;
 			result.push_back(line);
 		}
 	}

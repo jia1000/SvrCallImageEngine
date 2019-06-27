@@ -494,6 +494,8 @@ int RenderFacade::CreateCPRRotationBatch(string control_id,
 		args.SetWWWL(ww, wl);
 		args.SetCurveId(curve_id);
 		args.SetImaging(imaging);
+		SetCPRCurveID(control_id, curve_id);
+
 		generator.Execute(&args);
 
 		Timer::begin("CreateCPRRotationBatch::SaveAsBitmap");
