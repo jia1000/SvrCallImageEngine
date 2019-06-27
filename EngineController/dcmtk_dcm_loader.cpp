@@ -16,12 +16,7 @@ DcmtkDcmLoader::DcmtkDcmLoader()
 
 DcmtkDcmLoader::~DcmtkDcmLoader()
 {
-	if(volume_data_)
-    {
-        delete volume_data_;
-        volume_data_ = NULL;
-    }
-    
+	    
 }
 
 bool DcmtkDcmLoader::LoadDirectory(const char* dir) 
@@ -38,12 +33,6 @@ bool DcmtkDcmLoader::LoadDirectory(const char* dir)
     series_info->GetDicomDicomParas(paras); 
     
     unsigned char* buffer = series_info->GetPixelDataBuffer();        
-
-    if(volume_data_)
-    {
-        delete volume_data_;
-        volume_data_ = NULL;
-    }
 
     volume_data_ = new VolData();
 

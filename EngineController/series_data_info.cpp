@@ -12,17 +12,11 @@ SeriesDataInfo::SeriesDataInfo(const std::string path)
 : m_src_path(path)
 , m_pixel_data_buffer(nullptr)
 , m_pixel_data_length(0)
-{ 
-        
+{        
 }
 
 SeriesDataInfo::~SeriesDataInfo()
-{
-    if (m_pixel_data_buffer)
-    {
-        delete m_pixel_data_buffer;  
-        m_pixel_data_buffer = nullptr;      
-    }    
+{      
 }
 
 int SeriesDataInfo::ReadDicomFilesFromDir(bool is_folder)
@@ -41,12 +35,6 @@ int SeriesDataInfo::ReadDicomFilesFromDir(bool is_folder)
 unsigned char* SeriesDataInfo::GetPixelDataBuffer()
 {    
     m_pixel_data_length = GetPixelDataLength();
-
-    if (m_pixel_data_buffer)
-    {
-        delete m_pixel_data_buffer;  
-        m_pixel_data_buffer = nullptr;      
-    }
 
     m_pixel_data_buffer = new unsigned char[m_pixel_data_length];
     if (!m_pixel_data_buffer)
